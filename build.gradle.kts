@@ -1,5 +1,4 @@
 // A standalone project
-
 // Configures this project and each of its sub-projects.
 allprojects {
     repositories {
@@ -10,13 +9,22 @@ allprojects {
         }
 //        mavenLocal() // only for testing
     }
+
+    tasks.withType(JavaCompile::class.java) {
+        options.encoding = "UTF-8"
+    }
+
+    tasks.withType(Javadoc::class.java) {
+        options.encoding = "UTF-8"
+    }
+
 }
 
 subprojects {
     group = "io.github.linguaphylo"
     // TODO 3 versions: here, LPhyBEAST, version.xml
     // version has to be manually adjusted to keep same between version.xml and here
-    version = "0.4.0"
+    version = "0.4.0-SNAPSHOT"
     val webSteam = "github.com/LinguaPhylo/LPhyBeast"
     val web = "https://${webSteam}"
 
