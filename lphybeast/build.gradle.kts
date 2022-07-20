@@ -160,6 +160,7 @@ publishing {
         create<MavenPublication>(project.name) {
             artifactId = project.base.archivesName.get()
             artifact(tasks.distZip.get())
+            artifact(tasks["testFixturesJar"])
             // Configures the version mapping strategy
             versionMapping {
                 usage("java-api") {
