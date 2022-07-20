@@ -1,8 +1,9 @@
-package lphybeast;
+package lphybeast.tobeast.operators;
 
 import beast.core.Operator;
 import beast.evolution.operators.*;
 import beast.evolution.tree.Tree;
+import lphybeast.BEASTContext;
 
 /**
  * @author Walter Xie

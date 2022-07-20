@@ -28,6 +28,9 @@ import lphy.util.LoggerUtils;
 import lphy.util.Symbols;
 import lphybeast.tobeast.loggers.LoggerFactory;
 import lphybeast.tobeast.loggers.LoggerHelper;
+import lphybeast.tobeast.operators.DefaultTreeOperatorStrategy;
+import lphybeast.tobeast.operators.OperatorFactory;
+import lphybeast.tobeast.operators.TreeOperatorStrategy;
 import lphybeast.tobeast.values.ValueToParameter;
 import org.xml.sax.SAXException;
 
@@ -37,6 +40,11 @@ import java.util.*;
 
 import static java.lang.Math.toIntExact;
 
+/**
+ * The central class to keep the configurations,
+ * objects mapping between LPhy and BEAST2,
+ * and methods to process them and create BEAST2 objects for generating XML.
+ */
 public class BEASTContext {
 
     public static final String POSTERIOR_ID = "posterior";

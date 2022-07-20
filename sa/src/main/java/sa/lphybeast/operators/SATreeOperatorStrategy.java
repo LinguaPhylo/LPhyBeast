@@ -12,7 +12,7 @@ import lphy.evolution.tree.TimeTree;
 import lphy.graphicalModel.GraphicalModelNode;
 import lphy.graphicalModel.Value;
 import lphybeast.BEASTContext;
-import lphybeast.TreeOperatorStrategy;
+import lphybeast.tobeast.operators.TreeOperatorStrategy;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -7,6 +7,8 @@ import lphy.graphicalModel.Generator;
 import lphy.graphicalModel.Value;
 import lphy.util.LoggerUtils;
 import lphybeast.spi.LPhyBEASTExt;
+import lphybeast.tobeast.operators.DefaultTreeOperatorStrategy;
+import lphybeast.tobeast.operators.TreeOperatorStrategy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;

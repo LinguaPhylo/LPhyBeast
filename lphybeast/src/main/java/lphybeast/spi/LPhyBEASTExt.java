@@ -4,10 +4,10 @@ import beast.evolution.datatype.DataType;
 import jebl.evolution.sequences.SequenceType;
 import lphy.graphicalModel.Generator;
 import lphy.graphicalModel.Value;
-import lphybeast.DefaultTreeOperatorStrategy;
 import lphybeast.GeneratorToBEAST;
-import lphybeast.TreeOperatorStrategy;
 import lphybeast.ValueToBEAST;
+import lphybeast.tobeast.operators.DefaultTreeOperatorStrategy;
+import lphybeast.tobeast.operators.TreeOperatorStrategy;
 
 import java.util.List;
 import java.util.Map;

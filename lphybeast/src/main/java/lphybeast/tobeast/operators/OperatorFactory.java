@@ -1,4 +1,4 @@
-package lphybeast;
+package lphybeast.tobeast.operators;
 
 import beast.core.BEASTInterface;
 import beast.core.BEASTObject;
@@ -20,6 +20,7 @@ import lphy.graphicalModel.GenerativeDistribution;
 import lphy.graphicalModel.GraphicalModelNode;
 import lphy.graphicalModel.RandomVariable;
 import lphy.util.LoggerUtils;
+import lphybeast.BEASTContext;
 
 import java.util.*;
 

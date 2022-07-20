@@ -1,10 +1,11 @@
-package lphybeast;
+package lphybeast.tobeast.operators;
 
 import beast.core.BEASTInterface;
 import beast.core.Operator;
 import beast.evolution.tree.Tree;
 import com.google.common.collect.Multimap;
 import lphy.graphicalModel.GraphicalModelNode;
+import lphybeast.BEASTContext;
 
 import java.util.ArrayList;
 import java.util.List;
