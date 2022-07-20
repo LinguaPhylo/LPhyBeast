@@ -100,12 +100,12 @@ distributions {
                 // bdtree
                 from(notReleasedJars)
                 //TODO require to run distZip after build to copy mascot jar
-                from(project(":mascot").layout.buildDirectory.dir("libs")){
-                    exclude("*-sources.jar")
-                }
-                from(project(":mm").layout.buildDirectory.dir("libs")){
-                    exclude("*-sources.jar")
-                }
+//                from(project(":mascot").layout.buildDirectory.dir("libs")){
+//                    exclude("*-sources.jar")
+//                }
+//                from(project(":mm").layout.buildDirectory.dir("libs")){
+//                    exclude("*-sources.jar")
+//                }
             }
             into("."){
                 from("$rootDir") {
@@ -118,12 +118,12 @@ distributions {
             into("src") {
                 from(tasks.getByName<Jar>("sourcesJar"))
                 //TODO
-                from(project(":mascot").layout.buildDirectory.dir("libs")){
-                    include("*-sources.jar")
-                }
-                from(project(":mm").layout.buildDirectory.dir("libs")){
-                    include("*-sources.jar")
-                }
+//                from(project(":mascot").layout.buildDirectory.dir("libs")){
+//                    include("*-sources.jar")
+//                }
+//                from(project(":mm").layout.buildDirectory.dir("libs")){
+//                    include("*-sources.jar")
+//                }
             }
             // lphybeast script
             from("${layout.projectDirectory.dir("bin")}") {
