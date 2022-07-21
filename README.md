@@ -61,3 +61,8 @@ The details are in [version.xml](./version.xml). All released BEAST 2 packages a
 BEASTLabs `beast.util.Script` depends on `jdk.nashorn.api.scripting.ScriptObjectMirror`.
 If there is `NoClassDefFoundError` for it, you can add "-Xbootclasspath/a:${nashorn_path}" to your javac, 
 where `${nashorn_path}=/my/path/to/libext/nashorn.jar`.
+
+## Extensions
+
+- [LPhyBeastExt](https://github.com/LinguaPhylo/LPhyBeastExt)
+- [beast-phylonco](https://github.com/bioDS/beast-phylonco)
