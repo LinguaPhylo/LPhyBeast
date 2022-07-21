@@ -130,8 +130,13 @@ public class H5N1TutorialTest {
 
         assertTrue(xml.contains("chainLength=\"1000000\"") && xml.contains("logEvery=\"500\"") &&
                 xml.contains("fileName=\"" + fileStem + ".log\"") && xml.contains("fileName=\"" + fileStem + ".trees\"") &&
-                xml.contains("fileName=\"" + fileStem + "_with_trait.trees\"") &&  xml.contains("mode=\"tree\"") &&
-                xml.contains("spec=\"SVSGeneralSubstitutionModelLogger\""), "logger" );
+                xml.contains("fileName=\"" + fileStem + "_with_trait.trees\"") &&  xml.contains("mode=\"tree\""),
+                "logger" );
+
+        assertTrue(xml.contains("<log idref=\"D_trait.treeLikelihood\"/>") &&
+                xml.contains("<metadata idref=\"D_trait.treeLikelihood\"/>") && xml.contains("id=\"svs\"") &&
+                xml.contains("spec=\"SVSGeneralSubstitutionModelLogger\"") && xml.contains("dataType=\"@UserDataType\"") &&
+                xml.contains("model=\"@SVSGeneralSubstitutionModel\""), "trait log" );
     }
 
 }

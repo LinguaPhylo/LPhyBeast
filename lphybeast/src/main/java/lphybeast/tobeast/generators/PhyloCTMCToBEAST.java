@@ -68,7 +68,10 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
         treeLikelihood.initAndValidate();
         treeLikelihood.setID(traitAlignment.getID() + ".treeLikelihood");
-        // Extra Logger
+
+        // <log idref="D_trait.treeLikelihood"/> in parameters
+        context.addExtraLoggable(treeLikelihood);
+        // Extra Logger <logger id="TreeWithTraitLogger" fileName="h5n1_with_trait.trees"
         TraitTreeLogger traitTreeLogger = new TraitTreeLogger(treeLikelihood);
         context.addExtraLogger(traitTreeLogger);
 
