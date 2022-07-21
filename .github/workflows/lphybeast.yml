@@ -11,11 +11,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: LPhyBeast
-      - name: Checkout Lphy
-        uses: actions/checkout@v2
-        with:
-          repository: LinguaPhylo/linguaPhylo
-          path: linguaPhylo
+#      - name: Checkout Lphy
+#        uses: actions/checkout@v2
+#        with:
+#          repository: LinguaPhylo/linguaPhylo
+#          path: linguaPhylo
 
       - name: Set up JDK 17
         uses: actions/setup-java@v2
