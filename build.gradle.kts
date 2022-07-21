@@ -22,9 +22,6 @@ allprojects {
 
 subprojects {
     group = "io.github.linguaphylo"
-    // TODO 3 versions: here, LPhyBEAST, version.xml
-    // version has to be manually adjusted to keep same between version.xml and here
-    version = "0.4.0-SNAPSHOT"
     val webSteam = "github.com/LinguaPhylo/LPhyBeast"
     val web = "https://${webSteam}"
 
