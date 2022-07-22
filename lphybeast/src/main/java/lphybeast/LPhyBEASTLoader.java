@@ -74,9 +74,11 @@ public class LPhyBEASTLoader {
 
         //this is time-consuming, but can cache LPhyBEASTLoader to reduce time
         List<Class<?>> classList = PackageManager.find(LPhyBEASTExt.class, false);
+        //TODO PackageManager.find somehow add LPhyBEASTExtImpl twice
+        Set<Class<?>> uniqueCls = new HashSet<>(classList);
 
         List<LPhyBEASTExt> extensionList = new ArrayList<>();
-        for (Class<?> cls : classList) {
+        for (Class<?> cls : uniqueCls) {
             // https://docs.oracle.com/javase/9/docs/api/java/lang/Class.html#newInstance--
             try {
                 Object obj = cls.getDeclaredConstructor().newInstance();
