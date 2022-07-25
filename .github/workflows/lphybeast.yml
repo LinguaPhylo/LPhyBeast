@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # must under LPhyBeast folder, otherwise build will failed
+      # must under LPhyBeast folder, otherwise build will fail
       - name: Checkout main
         uses: actions/checkout@v2
         with:
