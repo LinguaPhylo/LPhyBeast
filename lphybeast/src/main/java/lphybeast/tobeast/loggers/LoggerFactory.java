@@ -20,8 +20,6 @@ import lphybeast.BEASTContext;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static lphybeast.BEASTContext.*;
-
 /**
  * A class to create all operators
  * @author Walter Xie
@@ -30,13 +28,13 @@ import static lphybeast.BEASTContext.*;
 public class LoggerFactory implements LoggerHelper {
 
     private final BEASTContext context;
-
-    private CompoundDistribution[] topDist = new CompoundDistribution[3];
+    private final CompoundDistribution[] topDist;
 
     String fileName = null;
 
-    public LoggerFactory(BEASTContext context) {
+    public LoggerFactory(BEASTContext context, CompoundDistribution[] topDist) {
         this.context = context;
+        this.topDist = topDist;
     }
 
     /**
@@ -47,7 +45,6 @@ public class LoggerFactory implements LoggerHelper {
      */
     public List<Logger> createLoggers(int logEvery, String logFileStem) {
         Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
-        topDist = getTopCompoundDist(elements);
 
         List<Logger> loggers = new ArrayList<>();
         // reduce screen logging
@@ -156,25 +153,6 @@ public class LoggerFactory implements LoggerHelper {
                 .map(stateNode -> (TreeInterface) stateNode)
                 .sorted(Comparator.comparing(TreeInterface::getID))
                 .collect(Collectors.toList());
-    }
-
-    // sorted by specific order
-    private CompoundDistribution[] getTopCompoundDist(Multimap<BEASTInterface, GraphicalModelNode<?>> elements) {
-        for (BEASTInterface bI : elements.keySet()) {
-            if (bI instanceof CompoundDistribution && bI.getID() != null) {
-                if (bI.getID().equals(POSTERIOR_ID))
-                    topDist[0] = (CompoundDistribution) bI;
-                else if (bI.getID().equals(LIKELIHOOD_ID))
-                    topDist[1] = (CompoundDistribution) bI;
-                else if (bI.getID().equals(PRIOR_ID))
-                    topDist[2] = (CompoundDistribution) bI;
-            }
-        }
-        return topDist;
-    }
-
-    private CompoundDistribution getPosteriorDist() {
-        return topDist[0];
     }
 
     //*** default tree loggers ***//

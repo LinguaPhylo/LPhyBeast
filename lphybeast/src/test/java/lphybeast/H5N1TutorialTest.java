@@ -134,7 +134,7 @@ public class H5N1TutorialTest {
                 "logger" );
 
         assertTrue(xml.contains("<log idref=\"D_trait.treeLikelihood\"/>") &&
-                xml.contains("<metadata idref=\"D_trait.treeLikelihood\"/>") && xml.contains("id=\"svs\"") &&
+                xml.contains("<metadata idref=\"posterior\"/>") && xml.contains("id=\"svs\"") &&
                 xml.contains("spec=\"SVSGeneralSubstitutionModelLogger\"") && xml.contains("dataType=\"@UserDataType\"") &&
                 xml.contains("model=\"@SVSGeneralSubstitutionModel\""), "trait log" );
     }

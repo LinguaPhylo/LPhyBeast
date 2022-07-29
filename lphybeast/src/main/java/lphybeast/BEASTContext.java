@@ -525,7 +525,9 @@ public class BEASTContext {
         addToContext(node, beastInterface);
     }
 
-
+    public CompoundDistribution getPosteriorDist() {
+        return Objects.requireNonNull(topDist)[0];
+    }
 
     /**
      * The main class to init BEAST 2 MCMC
@@ -552,7 +554,8 @@ public class BEASTContext {
 
         // TODO eventually all logging related code should go there
         // create XML logger section
-        LoggerFactory loggerFactory = new LoggerFactory(this);
+        topDist = createTopCompoundDist();
+        LoggerFactory loggerFactory = new LoggerFactory(this, topDist);
         // 3 default loggers: parameter logger, screen logger, tree logger.
         List<Logger> loggers = loggerFactory.createLoggers(logEvery, logFileStem);
         // extraLoggers processed in LoggerFactory
@@ -573,6 +576,25 @@ public class BEASTContext {
 
         mcmc.initAndValidate();
         return mcmc;
+    }
+
+    // posterior, likelihood, prior
+    private CompoundDistribution[] topDist;
+
+    // sorted by specific order
+    private CompoundDistribution[] createTopCompoundDist() {
+        CompoundDistribution[] topDist = new CompoundDistribution[3];
+        for (BEASTInterface bI : elements.keySet()) {
+            if (bI instanceof CompoundDistribution && bI.getID() != null) {
+                if (bI.getID().equals(POSTERIOR_ID))
+                    topDist[0] = (CompoundDistribution) bI;
+                else if (bI.getID().equals(LIKELIHOOD_ID))
+                    topDist[1] = (CompoundDistribution) bI;
+                else if (bI.getID().equals(PRIOR_ID))
+                    topDist[2] = (CompoundDistribution) bI;
+            }
+        }
+        return topDist;
     }
 
 
@@ -1067,6 +1089,5 @@ public class BEASTContext {
         }
         return outputValue[0];
     }
-
 
 }

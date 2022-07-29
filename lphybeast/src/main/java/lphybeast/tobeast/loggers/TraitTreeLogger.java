@@ -8,6 +8,7 @@ import beast.evolution.tree.TreeInterface;
 import beast.evolution.tree.TreeWithTraitLogger;
 import com.google.common.collect.Multimap;
 import lphy.graphicalModel.GraphicalModelNode;
+import lphybeast.BEASTContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +22,12 @@ import java.util.Objects;
 public class TraitTreeLogger implements TreeLoggerHelper {
     // add extra tree logger for AncestralStateTreeLikelihood
     final protected AncestralStateTreeLikelihood treeLikelihood;
+    final protected BEASTContext context;
     String fileName;
 
-    public TraitTreeLogger(AncestralStateTreeLikelihood treeLikelihood) {
+    public TraitTreeLogger(AncestralStateTreeLikelihood treeLikelihood, BEASTContext context) {
         this.treeLikelihood = Objects.requireNonNull(treeLikelihood);
+        this.context = context;
     }
 
     @Override
@@ -35,8 +38,8 @@ public class TraitTreeLogger implements TreeLoggerHelper {
         treeWithTraitLogger.setInputValue("tree", tree);
 
         List<BEASTObject> metadata = new ArrayList<>();
-        metadata.add(treeLikelihood);
-//        metadata.add(getPosteriorDist());
+        metadata.add(context.getPosteriorDist());
+//        metadata.add(treeLikelihood);
         treeWithTraitLogger.setInputValue("metadata", metadata);
 
         Logger logger = new Logger();
