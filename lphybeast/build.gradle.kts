@@ -16,6 +16,7 @@ java {
 
 val beast2Jars = fileTree("lib2") {
     exclude("**/starbeast2-*.jar")
+    exclude("**/*-sources.jar")
     exclude("**/*-javadoc.jar")
 }
 val notReleasedJars = fileTree("lib") {
