@@ -27,6 +27,22 @@ are published to [Maven linguaphylo group](https://search.maven.org/search?q=io.
 Using the predefined [Gradle function](https://github.com/LinguaPhylo/LPhyBeastExt/blob/a31263ef418c63596515eb2ee1b308046423184e/lphybeast-ext/build.gradle.kts#L21-L56), 
 the zip file can be downloaded and unzipped automatically, and then jars will be loaded into the library. 
 
+### Update dependencies in Intellij
+
+[//]: # (<a href="./GradleJVM.png"><img src="Reload.png" align="right" width=300></a>)
+<a href="./GradleJVM.png"><img src="RefreshGradleDep.png" align="right" width=300></a>
+
+<a href="./GradleJVM.png"><img src="LPhyBeastLibs.png" align="right" width=300></a>
+
+For the standard dependency configurations, it is simple as that, 
+you just change the version in the build file and click the "refresh" icon in the top right corner.
+But for the zip files (BEAST2 packages), you have to also click "Refresh Gradle Dependencies" and
+"Reload All Gradle Projects", 
+to [encourage IntelliJ IDEA to reload any changes](https://www.jetbrains.com/idea/guide/tutorials/working-with-gradle/syncing-and-reloading/) 
+from the Gradle configuration. Do not forget to rebuild the project after this.
+
+Tips: check the "External Libraries" to see if the updated version is successfully loaded. 
+
 ## Release procedure
 
 1. Check all versions, for snapshot, make sure they contain the postfix "SNAPSHOT".

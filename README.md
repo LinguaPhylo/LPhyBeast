@@ -66,3 +66,7 @@ where `${nashorn_path}=/my/path/to/libext/nashorn.jar`.
 
 - [LPhyBeastExt](https://github.com/LinguaPhylo/LPhyBeastExt)
 - [beast-phylonco](https://github.com/bioDS/beast-phylonco)
+
+[Developer note](DEV_NOTE.md)
+
+[Maven linguaphylo group](https://search.maven.org/search?q=io.github.linguaphylo)
