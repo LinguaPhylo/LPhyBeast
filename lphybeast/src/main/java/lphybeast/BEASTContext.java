@@ -144,9 +144,13 @@ public class BEASTContext {
         // Will throw an ArithmeticException in case of overflow.
         int logEvery = toIntExact(chainLength / NUM_OF_SAMPLES);
 
+        // this fills in List<StateNode> state
+        createBEASTObjects();
+        assert state.size() > 0;
+
         // if preBurnin < 0, then will be defined by all state nodes size
         if (preBurnin < 0)
-            preBurnin = getAllStatesSize(this.state) * 10;
+            preBurnin = getAllStatesSize(state) * 10;
 
         LoggerUtils.log.info("Set MCMC chain length = " + chainLength + ", log every = " +
                 logEvery + ", samples = " + NUM_OF_SAMPLES + ", preBurnin = " + preBurnin);
@@ -533,8 +537,6 @@ public class BEASTContext {
      * The main class to init BEAST 2 MCMC
      */
     private MCMC createMCMC(long chainLength, int logEvery, String logFileStem, int preBurnin) {
-
-        createBEASTObjects();
 
         CompoundDistribution posterior = createBEASTPosterior();
 
