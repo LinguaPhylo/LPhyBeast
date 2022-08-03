@@ -97,3 +97,14 @@ Two-stage tests are also recommended, the first stage tests the pre-released ver
 in order to find any bugs before the final release.
 This can be done programmatically by setting the customised BEAST2 package directory `-Dbeast.user.package.dir=...`.
 The second stage repeats the same process but tests the final release.
+
+## Useful Links
+
+- [LPhy developer note](https://github.com/LinguaPhylo/linguaPhylo/blob/master/DEV_NOTE.md)
+
+- [Maven linguaphylo group](https://search.maven.org/search?q=io.github.linguaphylo)
+
+- [LPhyBeastExt](https://github.com/LinguaPhylo/LPhyBeastExt)
+
+- [beast-phylonco](https://github.com/bioDS/beast-phylonco)
+

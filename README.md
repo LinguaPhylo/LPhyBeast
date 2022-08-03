@@ -62,11 +62,6 @@ BEASTLabs `beast.util.Script` depends on `jdk.nashorn.api.scripting.ScriptObject
 If there is `NoClassDefFoundError` for it, you can add "-Xbootclasspath/a:${nashorn_path}" to your javac, 
 where `${nashorn_path}=/my/path/to/libext/nashorn.jar`.
 
-## Extensions
+## Useful Links
 
-- [LPhyBeastExt](https://github.com/LinguaPhylo/LPhyBeastExt)
-- [beast-phylonco](https://github.com/bioDS/beast-phylonco)
-
-[Developer note](DEV_NOTE.md)
-
-[Maven linguaphylo group](https://search.maven.org/search?q=io.github.linguaphylo)
+- [Developer note](DEV_NOTE.md)
