@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 
+import static lphybeast.TestUtils.assertDPGLocations;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,7 +35,7 @@ public class H5N1TutorialTest {
                     L = D.nchar();
                     taxa = D.taxa();
                     D_trait = extractTrait(taxa=taxa, sep="_", i=2);
-                    K = D_trait.stateCount();
+                    K = D_trait.canonicalStateCount();
                     dim = K*(K-1)/2;
                   }
                   model {
@@ -62,9 +63,9 @@ public class H5N1TutorialTest {
                 xml.contains("id=\"pi_trait\"") && xml.contains("id=\"I\"") && xml.contains("id=\"R_trait\"") &&
                 xml.contains("id=\"mu_trait\""), "Check parameters ID" );
         // pi_trait, I, R_trait
-        assertTrue(xml.contains("spec=\"parameter.RealParameter\" dimension=\"6\"") &&
-                xml.contains("spec=\"parameter.BooleanParameter\" dimension=\"15\"") &&
-                xml.contains("spec=\"parameter.RealParameter\" dimension=\"15\""), "DPG rates dimension" );
+        assertTrue(xml.contains("spec=\"parameter.RealParameter\" dimension=\"5\"") &&
+                xml.contains("spec=\"parameter.BooleanParameter\" dimension=\"10\"") &&
+                xml.contains("spec=\"parameter.RealParameter\" dimension=\"10\""), "DPG rates dimension" );
 
         assertTrue(xml.contains("<trait") && xml.contains("id=\"TraitSet\"") &&
                 xml.contains("traitname=\"date-backward\""), "TraitSet" );
@@ -84,8 +85,16 @@ public class H5N1TutorialTest {
         assertTrue(xml.contains("frequencies=\"@pi\"") && xml.contains("frequencies=\"@pi_trait\""),  "frequencies" );
         assertTrue(xml.contains("x=\"@pi\"") && xml.contains("id=\"pi.prior\"") &&
                 xml.contains("name=\"alpha\">2.0 2.0 2.0 2.0</parameter>"),  "pi prior" );
+        // dimension="5"
         assertTrue(xml.contains("x=\"@pi_trait\"") && xml.contains("id=\"pi_trait.prior\"") &&
-                xml.contains("name=\"alpha\">3.0 3.0 3.0 3.0 3.0 3.0</parameter>"),  "pi_trait prior" );
+                xml.contains("name=\"alpha\">3.0 3.0 3.0 3.0 3.0</parameter>"),  "pi_trait prior" );
+        // dimension="10"
+        assertTrue(xml.contains("x=\"@R_trait\"") && xml.contains("id=\"R_trait.prior\"") &&
+                        xml.contains("name=\"alpha\">1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0</parameter>"),
+                "R_trait prior" );
+        assertTrue(xml.contains("parameter=\"@I\"") && xml.contains("id=\"BernoulliDistribution\"") &&
+                        xml.contains("name=\"p\">0.5</parameter>") && xml.contains("IntegerParameter\">8</minSuccesses>"),
+                "I prior" );
 
         // 2 site models
         assertEquals(2, xml.split("<siteModel", -1).length - 1, "2 site models" );
@@ -96,13 +105,6 @@ public class H5N1TutorialTest {
 
         assertTrue(xml.contains("name=\"clock.rate\">0.004</parameter>"),  "clock rate" );
 
-        assertTrue(xml.contains("x=\"@R_trait\"") && xml.contains("id=\"R_trait.prior\"") &&
-                xml.contains("name=\"alpha\">1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0</parameter>"),
-                "R_trait prior" );
-        assertTrue(xml.contains("parameter=\"@I\"") && xml.contains("id=\"BernoulliDistribution\"") &&
-                        xml.contains("name=\"p\">0.5</parameter>") && xml.contains("IntegerParameter\">13</minSuccesses>"),
-                "I prior" );
-
         assertTrue(xml.contains("x=\"@mu_trait\"") && xml.contains("name=\"M\">0.0</parameter>") &&
                 xml.contains("name=\"S\">1.25</parameter>"),  "mu_trait prior" );
 
@@ -110,8 +112,9 @@ public class H5N1TutorialTest {
                 xml.contains("tree=\"@psi\""),  "D_trait treeLikelihood" );
         assertTrue(xml.contains("spec=\"AlignmentFromTrait\"") && xml.contains("traitname=\"discrete\"") &&
                 xml.contains("value=\"A_chicken_Fujian_1042_2005=Fujian"),  "Trait Alignment" );
-        assertTrue(xml.contains("<userDataType") && xml.contains("codelength=\"-1\"") && xml.contains("states=\"5\"") &&
-                xml.contains("codeMap=\"Fujian=0,Guangdong=1,Guangxi=2,HongKong=3,Hunan=4,") , "UserDataType" );
+
+        assertDPGLocations(xml);
+
         assertTrue(xml.contains("id=\"SVSGeneralSubstitutionModel\"") && xml.contains("rateIndicator=\"@I\"") &&
                 xml.contains("rates=\"@R_trait\"") && xml.contains("clock.rate=\"@mu_trait\"") , "geo site model" );
 

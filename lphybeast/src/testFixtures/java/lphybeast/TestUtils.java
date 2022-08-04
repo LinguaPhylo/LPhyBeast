@@ -74,9 +74,22 @@ public class TestUtils {
         // <substModel id="JukesCantor" spec="JukesCantor"/>
         int jcId1 = xml.indexOf("<substModel");
         int jcId2 = xml.indexOf("spec=\"JukesCantor\"/>");
-        assertTrue(jcId1 > 1 && jcId2 > jcId1, "substModel");
+        assertTrue(jcId1 > 100 && jcId2 > jcId1, "substModel");
         // remove all spaces
         String jcId = xml.substring(jcId1, jcId2).replaceAll("\\s+","");
         assertEquals("<substModelid=\"JukesCantor\"", jcId, "JukesCantor");
+    }
+
+    public static void assertDPGLocations(String xml) {
+        // <userDataType id="UserDataType" spec="beast.evolution.datatype.UserDataType"
+        // codeMap="Fujian=0,Guangdong=1,Guangxi=2,HongKong=3,Hunan=4, ? = 0 1 2 3 4" codelength="-1" states="5"/>
+        assertTrue(xml.contains("<userDataType") && xml.contains("codelength=\"-1\"") &&
+                xml.contains("states=\"5\""), "UserDataType" );
+        int start = xml.indexOf("codeMap=\"");
+        int end = xml.indexOf("codelength=\"-1\"");
+        assertTrue(start > 100 && end > start, "codeMap");
+        // remove all spaces
+        String codeMap = xml.substring(start, end).replaceAll("\\s+","");
+        assertEquals("codeMap=\"Fujian=0,Guangdong=1,Guangxi=2,HongKong=3,Hunan=4,?=01234\"", codeMap, "codeMap");
     }
 }

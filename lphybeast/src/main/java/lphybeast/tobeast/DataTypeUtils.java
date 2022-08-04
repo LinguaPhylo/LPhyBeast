@@ -29,7 +29,7 @@ public class DataTypeUtils {
         // userDataType: non-standard, user specified data type, if specified 'dataType' is ignored
         UserDataType userDataType = new UserDataType();
 
-        //TODO fix List<State> states = getCanonicalStates();
+        // must use getCanonicalStates(), which exclude ambiguous states, e.g. "?"
         List<State> states = (List<State>) lphyDataType.getCanonicalStates();
         // State toString is stateCode
         String codeMap = IntStream.range(0, states.size())
