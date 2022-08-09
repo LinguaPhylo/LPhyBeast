@@ -44,7 +44,12 @@ version = "0.4.2-SNAPSHOT"
 dependencies {
 //    implementation(lblibs)
 
-    // io.github.linguaphylo
+    /**
+     * The behaviour of this default version declaration chooses any available highest version first.
+     * If the exact version is required, then use the "strictly version" declaration
+     * such as "io.github.linguaphylo:lphy:1.2.0!!".
+     * https://docs.gradle.org/current/userguide/rich_versions.html#sec:strict-version
+     */
     api("io.github.linguaphylo:lphy:1.3.1-SNAPSHOT")
     // all released beast 2 libs
     // TODO beast2 jar contains Apache math. Be aware of version conflict to LPhy dependency.
