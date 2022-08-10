@@ -1,4 +1,4 @@
-<addon name='lphybeast' version='0.4.1'>
+<addon name='lphybeast' version='0.4.2'>
     <depends on='beast2' atleast='2.6.7'/>
     <depends on='BEASTLabs' atleast='1.9.7'/>
     <depends on='feast' atleast='7.11.0'
