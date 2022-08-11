@@ -132,14 +132,16 @@ public class H5N1TutorialTest {
         assertEquals(3, xml.split("DeltaExchangeOperator", -1).length - 1, "DeltaExchangeOperator");
 
         assertTrue(xml.contains("chainLength=\"1000000\"") && xml.contains("logEvery=\"500\"") &&
-                xml.contains("fileName=\"" + fileStem + ".log\"") && xml.contains("fileName=\"" + fileStem + ".trees\"") &&
-                xml.contains("fileName=\"" + fileStem + "_with_trait.trees\"") &&  xml.contains("mode=\"tree\""),
+                xml.contains("fileName=\"" + fileStem + ".log\"") && xml.contains("fileName=\"" + fileStem + ".trees\""),
                 "logger" );
 
-        assertTrue(xml.contains("<log idref=\"D_trait.treeLikelihood\"/>") &&
-                xml.contains("<metadata idref=\"posterior\"/>") && xml.contains("id=\"svs\"") &&
+        assertTrue(xml.contains("<log idref=\"D_trait.treeLikelihood\"/>") && xml.contains("id=\"svs\"") &&
                 xml.contains("spec=\"SVSGeneralSubstitutionModelLogger\"") && xml.contains("dataType=\"@UserDataType\"") &&
                 xml.contains("model=\"@SVSGeneralSubstitutionModel\""), "trait log" );
+
+        TestUtils.assertTreeWithTraitLogger(xml);
+        assertTrue(xml.contains("<metadata idref=\"posterior\"/>") &&
+                xml.contains("fileName=\"" + fileStem + "_with_trait.trees\""), "TreeWithTraitLogger 2");
     }
 
 }

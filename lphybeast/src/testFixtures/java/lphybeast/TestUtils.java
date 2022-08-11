@@ -92,4 +92,16 @@ public class TestUtils {
         String codeMap = xml.substring(start, end).replaceAll("\\s+","");
         assertEquals("codeMap=\"Fujian=0,Guangdong=1,Guangxi=2,HongKong=3,Hunan=4,?=01234\"", codeMap, "codeMap");
     }
+
+    // DPG <metadata idref="D_trait.treeLikelihood"/> is compulsory
+    public static void assertTreeWithTraitLogger(String xml) {
+        int start = xml.indexOf("<logger id=\"TreeWithTraitLogger");
+        int end = xml.indexOf("</run>");
+        assertTrue(start > 100 && end > start, "TreeWithTraitLogger");
+
+        String traitLogger = xml.substring(start, end);
+        assertTrue(traitLogger.contains("idref=\"D_trait.treeLikelihood\"") &&
+                traitLogger.contains("tree=\"@psi\"") && xml.contains("mode=\"tree\"") &&
+                xml.contains("<metadata"), "TreeWithTraitLogger metadata : " + traitLogger );
+    }
 }

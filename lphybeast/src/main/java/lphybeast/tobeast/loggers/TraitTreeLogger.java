@@ -39,7 +39,9 @@ public class TraitTreeLogger implements TreeLoggerHelper {
 
         List<BEASTObject> metadata = new ArrayList<>();
         metadata.add(context.getPosteriorDist());
-//        metadata.add(treeLikelihood);
+        // <metadata idref="D_trait.treeLikelihood"/> is compulsory,
+        // otherwise location trait would not be logged.
+        metadata.add(treeLikelihood);
         treeWithTraitLogger.setInputValue("metadata", metadata);
 
         Logger logger = new Logger();
