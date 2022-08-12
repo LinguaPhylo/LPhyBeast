@@ -20,6 +20,14 @@ The Gradle project is using more restricted configuration between different proj
 which requires to read the source code from the released jars.
 Please read [the difference between libraries and applications](https://docs.gradle.org/current/userguide/library_vs_application.html).
 
+We use the default model ["require"](https://docs.gradle.org/current/userguide/rich_versions.html#sec:strict-version)
+declaring versions, such as `io.github.linguaphylo:lphy:1.3.1`.
+This implies that the selected version of lphy cannot be lower than 1.3.1
+but could be higher through conflict resolution, when there are multiple versions in the local dependency repository.
+When the exact version is required, the ["strictly"](https://docs.gradle.org/current/userguide/single_versions.html#simple_version_declaration_semantics)
+declaring versions can be used.
+For example, if only lphy 1.2.0 is required, you can use `io.github.linguaphylo:lphy:1.2.0!!`.
+
 ### Dependencies to zip files
 
 BEAST 2 packages are released as zip files. LPhyBeast and [LPhyBeastExt](https://github.com/LinguaPhylo/LPhyBeastExt)
@@ -80,10 +88,21 @@ For example https://github.com/LinguaPhylo/LPhyBeastExt/tree/master/lphybeast-ex
 Please note: if not snapshot, once it is published, you will not be able to remove/update/modify the release.
 
 4. For final release, follow the [instruction](https://central.sonatype.org/publish/release/) to manually
-   complete the releasing deployment.
+   complete the releasing deployment, otherwise skip this and move to the next step. 
+   In addition, the __CBAN__ needs to be updated so that it can appear in Package Manager.
 
-For snapshots, check https://s01.oss.sonatype.org/content/repositories/snapshots/io/github/linguaphylo/.
-For releases, check https://s01.oss.sonatype.org/content/repositories/releases/io/github/linguaphylo/.
+For snapshots, check files in https://s01.oss.sonatype.org/content/repositories/snapshots/io/github/linguaphylo/.
+For releases, check files in https://s01.oss.sonatype.org/content/repositories/releases/io/github/linguaphylo/.
+
+We recommend to use the URL available in Maven search engine, which looks like
+`https://repo.maven.apache.org/maven2/io/github/linguaphylo/...`.
+However, it will take about 1 day to synchronise from the releases repo to the search engine.
+If you want the release available immediately, the URL in the releases repo above can be used in CBAN for a temporary solution.
+Then, please remember to change the URL next day. 
+
+5. Run the [testing pipeline for tutorials](https://github.com/LinguaPhylo/LPhyBeastTest) using SNAPSHOT versions first (set `env.PRERELEASE=true`).
+   After all tests are passed, remove "-SNAPSHOT" from LPhyBeast version, and repeat these steps from 1 to make the final release.
+   Then run the testing pipeline again after setting `env.PRERELEASE=true` 
 
 ## Test
 
@@ -105,6 +124,8 @@ The second stage repeats the same process but tests the final release.
 - [Maven linguaphylo group](https://search.maven.org/search?q=io.github.linguaphylo)
 
 - [LPhyBeastExt](https://github.com/LinguaPhylo/LPhyBeastExt)
+
+- [Testing pipeline for tutorials](https://github.com/LinguaPhylo/LPhyBeastTest)
 
 - [beast-phylonco](https://github.com/bioDS/beast-phylonco)
 
