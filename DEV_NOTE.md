@@ -49,7 +49,9 @@ But for the zip files (BEAST2 packages), you have to also click "Refresh Gradle 
 to [encourage IntelliJ IDEA to reload any changes](https://www.jetbrains.com/idea/guide/tutorials/working-with-gradle/syncing-and-reloading/) 
 from the Gradle configuration. Do not forget to rebuild the project after this.
 
-Tips: check the "External Libraries" to see if the updated version is successfully loaded. 
+Tips: check the "External Libraries" to see if the updated version is successfully loaded.
+If the new veriosn of lphybeast still does not exist after "Refresh ..." and "Reload ...", 
+then running `./gradlew clean build` can trigger IntelliJ to update.
 
 ## Release procedure
 
