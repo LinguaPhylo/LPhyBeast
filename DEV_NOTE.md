@@ -44,14 +44,22 @@ the zip file can be downloaded and unzipped automatically, and then jars will be
 
 For the standard dependency configurations, it is simple as that, 
 you just change the version in the build file and click the "refresh" icon in the top right corner.
-But for the zip files (BEAST2 packages), you have to also click "Refresh Gradle Dependencies" and
-"Reload All Gradle Projects", 
-to [encourage IntelliJ IDEA to reload any changes](https://www.jetbrains.com/idea/guide/tutorials/working-with-gradle/syncing-and-reloading/) 
-from the Gradle configuration. Do not forget to rebuild the project after this.
+IntelliJ will complete updates by itself. 
 
-Tips: check the "External Libraries" to see if the updated version is successfully loaded.
-If the new veriosn of lphybeast still does not exist after "Refresh ..." and "Reload ...", 
-then running `./gradlew clean build` can trigger IntelliJ to update.
+But if the dependency is a zip file (a BEAST2 package), you have to use the manual process below:
+
+1. Click "Refresh Gradle Dependencies" to download the latest version (e.g. lphybeast-?-?-?.zip) from Maven repo.
+   This can also [force updating all the snapshot Gradle dependencies in intelliJ](https://stackoverflow.com/questions/32652738/how-can-i-force-update-all-the-snapshot-gradle-dependencies-in-intellij).
+
+2. Click the task `clean` and then `build` to rebuild the project from [Gradle tool window](https://www.jetbrains.com/help/idea/jetgradle-tool-window.html),
+   which unzips the zip file and loads all libraries.
+   Alternatively, run `./gradlew clean build` in the terminal.
+
+3. Click "Reload All Gradle Projects" to loads all libraries into IntelliJ. 
+   Check the "External Libraries" to see if the updated version is successfully loaded.
+   If the new version of lphybeast still does not exist, try to rebuild the project and "Reload ..." again.
+
+See also, [encourage IntelliJ to reload any changes](https://www.jetbrains.com/idea/guide/tutorials/working-with-gradle/syncing-and-reloading/). 
 
 ## Release procedure
 
