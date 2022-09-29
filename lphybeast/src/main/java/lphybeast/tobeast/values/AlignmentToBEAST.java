@@ -1,5 +1,6 @@
 package lphybeast.tobeast.values;
 
+import beast.evolution.alignment.FilteredAlignment;
 import beast.evolution.alignment.Sequence;
 import beast.evolution.alignment.Taxon;
 import beast.evolution.alignment.TaxonSet;
@@ -7,15 +8,19 @@ import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.UserDataType;
 import beast.evolution.tree.TraitSet;
 import jebl.evolution.sequences.SequenceType;
+import lphy.evolution.alignment.AlignmentUtils;
 import lphy.evolution.alignment.SimpleAlignment;
 import lphy.evolution.datatype.Standard;
 import lphy.graphicalModel.Value;
+import lphy.util.LoggerUtils;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 import lphybeast.tobeast.DataTypeUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.NavigableMap;
 
 public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evolution.alignment.Alignment> {
 
@@ -61,14 +66,31 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
             // 2. nucleotide, protein, ...
             // sequences
             List<Sequence> sequences = new ArrayList<>();
-            for (int i = 0; i < taxaNames.length; i++) {
-                context.addTaxon(taxaNames[i]);
-                // have to convert to string, cannot use integer state
-                // state = sequenceType.getState(alignment[taxonIndex][j]);
-                String s = alignment.getSequence(i);
-                sequences.add(createBEASTSequence(taxaNames[i], s));
+
+            // 2.1 trigger get mark[], and check if compress constant sites
+            if (context.isCompressConstantSites()) {
+                // index is site, value is state, -1 is variable site
+                int[] mark = alignment.getConstantSitesMark();
+                if (alignment.hasConstantSite()) {
+                    long consSiteNum =  Arrays.stream(mark).filter(m -> m != SimpleAlignment.VAR_SITE_STATE).count();
+                    LoggerUtils.log.info("Discover " + consSiteNum + " constant sites.");
+                    if (consSiteNum == alignment.nchar())
+                        throw new RuntimeException("The alignment sites cannot be all constant ! " +
+                                "constant sites " + consSiteNum + " == alignment sites " + alignment.nchar());
+                }
             }
 
+            for (int i = 0; i < taxaNames.length; i++) {
+                context.addTaxon(taxaNames[i]);
+                // 2.2 if not hasConstantSite(), this returns original sequence
+                // otherwise, constant sites are removed
+                String s = alignment.getSequenceVarSite(i);
+                if (s.length() < 1)
+                    throw new RuntimeException("The sequence length cannot < 1 ! Stop at taxon " + taxaNames[i]);
+                if ( alignment.hasConstantSite() && i==0 )
+                    LoggerUtils.log.info("Keep " + s.length() + " variable sites from the original " + alignment.nchar() + " sites.");
+                sequences.add(createBEASTSequence(taxaNames[i], s));
+            }
             // normal Alignment
             beastAlignment = new beast.evolution.alignment.Alignment();
             beastAlignment.setInputValue("sequence", sequences);
@@ -77,7 +99,7 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
             if (beastDataType instanceof UserDataType) {
                 // StandardData.getTypeDescription()
                 beastAlignment.setInputValue("dataType", "standard");
-                //TODO add FilteredAlignment ?
+                //TODO add FilteredAlignment for standard data ?
                 beastAlignment.setInputValue("userDataType", beastDataType);
 
             } else {
@@ -86,6 +108,27 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
             }
 
             beastAlignment.initAndValidate();
+
+            // 4 if isCompressConstantSites, then return FilteredAlignment
+            if (context.isCompressConstantSites() && alignment.hasConstantSite()) {
+                // https://www.beast2.org/2019/07/18/ascertainment-correction.html
+                FilteredAlignment filteredAlignment = new FilteredAlignment();
+
+                filteredAlignment.setInputValue("data", beastAlignment);
+                filteredAlignment.setInputValue("filter", "-");
+                // A, C, G, T
+                String weights = createConstantSiteWeights(alignment);
+                filteredAlignment.setInputValue("constantSiteWeights", weights);
+                filteredAlignment.initAndValidate();
+
+                // using LPhy var as ID allows multiple alignments
+                if (!alignmentValue.isAnonymous()) {
+                    beastAlignment.setID("original-" + alignmentValue.getCanonicalId());
+                    filteredAlignment.setID(alignmentValue.getCanonicalId());
+                }
+                // can only use single thread per ascertained alignment
+                return filteredAlignment;
+            }
 
         }
 
@@ -113,6 +156,29 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
         seq.setInputValue("value", sequence);
         seq.initAndValidate();
         return seq;
+    }
+
+    private String createConstantSiteWeights(SimpleAlignment alignment) {
+        // index is the state, value is the count
+        NavigableMap<Integer, Integer> counter = AlignmentUtils.countConstantSites(alignment);
+
+        int maxState = counter.lastKey();
+        if (maxState >= alignment.getCanonicalStateCount())
+            LoggerUtils.log.warning("Ambiguous state " + maxState + " is found, count = " + counter.get(maxState));
+
+        List<String> weights = new ArrayList<>();
+        // no ambiguous
+        for (int s = 0; s < alignment.getCanonicalStateCount(); s++) {
+            if (counter.containsKey(s))
+                weights.add(counter.get(s).toString());
+            else
+                weights.add("0");
+        }
+        // check ordering e.g. A, C, G, T
+        SequenceType sequenceType = alignment.getSequenceType();
+        LoggerUtils.log.info("Creating weights mapping to the canonical states in order : " + sequenceType.getCanonicalStates());
+
+        return String.join(" ", weights);
     }
 
 
