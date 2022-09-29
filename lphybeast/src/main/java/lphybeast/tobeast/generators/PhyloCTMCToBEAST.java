@@ -89,7 +89,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             throw new UnsupportedOperationException("Discrete traits will only have 1 site !");
         }
 
-        Generator qGenerator = phyloCTMC.getQ().getGenerator();
+        Generator qGenerator = phyloCTMC.getQValue().getGenerator();
         if (qGenerator == null || !(qGenerator instanceof RateMatrix)) {
             throw new RuntimeException("BEAST2 only supports Q matrices constructed by a RateMatrix function.");
         } else {
@@ -180,7 +180,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
                 Prior logNormalPrior = (Prior) context.getBEASTObject(generator);
 
-                RealParameter beastBranchRates = (RealParameter) context.getBEASTObject(branchRates);
+                RealParameter beastBranchRates = context.getAsRealParameter(branchRates);
 
                 relaxedClockModel.setInputValue("rates", beastBranchRates);
                 relaxedClockModel.setInputValue("tree", tree);
@@ -205,7 +205,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
             RealParameter clockRatePara;
             if (clockRate != null) {
-                clockRatePara = (RealParameter) context.getBEASTObject(clockRate);
+                clockRatePara = context.getAsRealParameter(clockRate);
 
             } else {
                 clockRatePara =  BEASTContext.createRealParameter(1.0);
@@ -258,7 +258,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         }
 
         // Scenario 2: siteRates = NULL
-        Generator qGenerator = phyloCTMC.getQ().getGenerator();
+        Generator qGenerator = phyloCTMC.getQValue().getGenerator();
         if (qGenerator == null || !(qGenerator instanceof RateMatrix)) {
             throw new IllegalArgumentException("BEAST2 only supports Q matrices constructed by a RateMatrix function (e.g. hky, gtr, jukeCantor et cetera).");
         } else {

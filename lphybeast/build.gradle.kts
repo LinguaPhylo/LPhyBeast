@@ -22,6 +22,7 @@ val beast2Jars = fileTree("lib2") {
 val notReleasedJars = fileTree("lib") {
     // not released, so must include in lphybeast release
     include("bdtree.jar")
+//    include("lphy-1.3.*.jar")
 }
 val lblibs by configurations.creating {
     // Add to defaultDependencies to get their all jars
@@ -50,7 +51,15 @@ dependencies {
      * such as "io.github.linguaphylo:lphy:1.2.0!!".
      * https://docs.gradle.org/current/userguide/rich_versions.html#sec:strict-version
      */
-    api("io.github.linguaphylo:lphy:1.3.2")
+    api("io.github.linguaphylo:lphy:1.3.3-SNAPSHOT")
+//    api("org.antlr:antlr4-runtime:4.9.3")
+//    api("org.apache.commons:commons-math3:3.6.1")
+//    api("org.apache.commons:commons-lang3:3.12.0")
+//    // in maven
+//    implementation("net.steppschuh.markdowngenerator:markdowngenerator:1.3.1.1")
+//    // io.github.linguaphylo
+//    api("io.github.linguaphylo:jebl:3.1.0")
+
     // all released beast 2 libs
     // TODO beast2 jar contains Apache math. Be aware of version conflict to LPhy dependency.
     api(beast2Jars)
