@@ -1,7 +1,11 @@
 package lphybeast;
 
-import lphy.core.*;
+import lphy.core.GraphicalLPhyParser;
+import lphy.core.LPhyParser;
+import lphy.core.Sampler;
 import lphy.graphicalModel.RandomValueLogger;
+import lphy.graphicalModel.logger.TreeFileLogger;
+import lphy.graphicalModel.logger.VarFileLogger;
 import lphy.parser.REPL;
 import lphy.system.UserDir;
 import lphy.util.LoggerUtils;
