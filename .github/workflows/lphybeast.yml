@@ -37,7 +37,7 @@ jobs:
         # change working dir, so gradle will work
         working-directory: ./LPhyBeast
         # only available in lphy at the moment
-        run: ./gradlew test --no-daemon
+        run: ./gradlew build --no-daemon
 
       - name: Publish unit test results
         uses: EnricoMi/publish-unit-test-result-action@v1
