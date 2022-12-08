@@ -32,7 +32,7 @@ public class LPhyBeast implements Runnable {
 
     private int rep = 1; // for multi-outputs
 
-    private boolean compressConstantSites;
+    private boolean addConstantSites;
 
     // register classes outside LPhyBeast, reduce loading time,
     // can be null, then initiate in BEASTContext.
@@ -106,8 +106,8 @@ public class LPhyBeast implements Runnable {
         loader = null;
     }
 
-    public void setCompressConstantSites(boolean compressConstantSites) {
-        this.compressConstantSites = compressConstantSites;
+    public void setAddConstantSites(boolean addConstantSites) {
+        this.addConstantSites = addConstantSites;
     }
 
     /**
@@ -219,7 +219,7 @@ public class LPhyBeast implements Runnable {
 
         // register parser, pass cached loader
         BEASTContext context = new BEASTContext(parser, loader);
-        context.setCompressConstantSites(compressConstantSites);
+        context.setAddConstantSites(addConstantSites);
 
         //*** Write BEAST 2 XML ***//
         // remove any dir in filePathNoExt here

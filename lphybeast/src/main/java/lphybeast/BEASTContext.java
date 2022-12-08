@@ -96,7 +96,7 @@ public class BEASTContext {
     // helper to create extra loggers from extensions
     private List<LoggerHelper> extraLoggers = new ArrayList<>();
 
-    private boolean compressConstantSites;
+    private boolean addConstantSites;
 
     @Deprecated
     public BEASTContext(LPhyParser parser) {
@@ -974,12 +974,12 @@ public class BEASTContext {
 
     //*** add, setter, getter ***//
 
-    public boolean isCompressConstantSites() {
-        return compressConstantSites;
+    public boolean isAddConstantSites() {
+        return addConstantSites;
     }
 
-    public void setCompressConstantSites(boolean compressConstantSites) {
-        this.compressConstantSites = compressConstantSites;
+    public void setAddConstantSites(boolean addConstantSites) {
+        this.addConstantSites = addConstantSites;
     }
 
     public void addSkipOperator(StateNode stateNode) {

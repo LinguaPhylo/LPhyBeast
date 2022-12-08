@@ -52,9 +52,9 @@ public class LPhyBeastCMD implements Callable<Integer> {
             "usually to create simulations for well-calibrated study.") int rep;
 
 
-    @CommandLine.Option(names = {"-ccs", "--compressConstantSites"},
-            description = "Specify constants sites in a filtered alignment to handle the ascertainment bias. These constants sites will be removed from the original alignment.")
-    boolean compressConstantSites = false;
+    @CommandLine.Option(names = {"-acs", "--addConstantSites"},
+            description = "Specify constants sites in another partition to add to the original alignment.")
+    boolean addConstantSites = false;
 
     public static void main(String[] args) {
 
@@ -81,7 +81,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
         try {
             LPhyBeast lphyBeast = new LPhyBeast(infile, outfile, wd, chainLength, preBurnin, loader);
             lphyBeast.setRep(rep);
-            lphyBeast.setCompressConstantSites(compressConstantSites);
+            lphyBeast.setAddConstantSites(addConstantSites);
             lphyBeast.run();
         } catch (FileNotFoundException e) {
             throw new CommandLine.PicocliException("Fail to read LPhy scripts from " +

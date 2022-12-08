@@ -1,6 +1,5 @@
 package lphybeast.tobeast.values;
 
-import beast.evolution.alignment.FilteredAlignment;
 import beast.evolution.alignment.Sequence;
 import beast.evolution.alignment.Taxon;
 import beast.evolution.alignment.TaxonSet;
@@ -68,7 +67,7 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
             List<Sequence> sequences = new ArrayList<>();
 
             // 2.1 trigger get mark[], and check if compress constant sites
-            if (context.isCompressConstantSites()) {
+            if (context.isAddConstantSites()) {
                 // index is site, value is state, -1 is variable site
                 int[] mark = alignment.getConstantSitesMark();
                 if (alignment.hasConstantSite()) {
@@ -110,24 +109,25 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
             beastAlignment.initAndValidate();
 
             // 4 if isCompressConstantSites, then return FilteredAlignment
-            if (context.isCompressConstantSites() && alignment.hasConstantSite()) {
-                // https://www.beast2.org/2019/07/18/ascertainment-correction.html
-                FilteredAlignment filteredAlignment = new FilteredAlignment();
-
-                filteredAlignment.setInputValue("data", beastAlignment);
-                filteredAlignment.setInputValue("filter", "-");
-                // A, C, G, T
-                String weights = createConstantSiteWeights(alignment);
-                filteredAlignment.setInputValue("constantSiteWeights", weights);
-                filteredAlignment.initAndValidate();
-
-                // using LPhy var as ID allows multiple alignments
-                if (!alignmentValue.isAnonymous()) {
-                    beastAlignment.setID("original-" + alignmentValue.getCanonicalId());
-                    filteredAlignment.setID(alignmentValue.getCanonicalId());
-                }
-                // can only use single thread per ascertained alignment
-                return filteredAlignment;
+            if (context.isAddConstantSites() && alignment.hasConstantSite()) {
+                throw new UnsupportedOperationException("in development");
+//                // https://www.beast2.org/2019/07/18/ascertainment-correction.html
+//                FilteredAlignment filteredAlignment = new FilteredAlignment();
+//
+//                filteredAlignment.setInputValue("data", beastAlignment);
+//                filteredAlignment.setInputValue("filter", "-");
+//                // A, C, G, T
+//                String weights = createConstantSiteWeights(alignment);
+//                filteredAlignment.setInputValue("constantSiteWeights", weights);
+//                filteredAlignment.initAndValidate();
+//
+//                // using LPhy var as ID allows multiple alignments
+//                if (!alignmentValue.isAnonymous()) {
+//                    beastAlignment.setID("original-" + alignmentValue.getCanonicalId());
+//                    filteredAlignment.setID(alignmentValue.getCanonicalId());
+//                }
+//                // can only use single thread per ascertained alignment
+//                return filteredAlignment;
             }
 
         }
