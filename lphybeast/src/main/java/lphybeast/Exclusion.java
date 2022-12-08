@@ -18,6 +18,8 @@ import lphy.core.functions.tree.MigrationCount;
 import lphy.core.functions.tree.NodeCount;
 import lphy.evolution.Taxa;
 import lphy.evolution.alignment.Alignment;
+import lphy.evolution.alignment.FilterMissingSites;
+import lphy.evolution.alignment.MissingSites;
 import lphy.evolution.tree.TimeTree;
 import lphy.graphicalModel.Generator;
 import lphy.graphicalModel.Value;
@@ -53,6 +55,7 @@ public class Exclusion {
                 generator instanceof TaxaFunction || generator instanceof NodeCount ||
                 generator instanceof CreateTaxa || generator instanceof Species ||
                 generator instanceof TaxaAgesFromFunction ||
+                generator instanceof MissingSites || generator instanceof FilterMissingSites ||
                 generator instanceof ReadNexus || generator instanceof ReadFasta ||
                 generator instanceof ExtractTrait || generator instanceof Unique ||
                 generator instanceof ARange || generator instanceof Range ||
