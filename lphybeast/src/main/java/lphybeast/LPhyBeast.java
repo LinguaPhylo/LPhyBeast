@@ -25,6 +25,7 @@ import java.util.Objects;
  */
 public class LPhyBeast implements Runnable {
 
+    //TODO add to LPhyBeastConfig to contain all settings
     private final Path inPath;
     private final Path outPath;
     private int preBurnin = -1; // auto estimate
@@ -32,7 +33,7 @@ public class LPhyBeast implements Runnable {
 
     private int rep = 1; // for multi-outputs
 
-    private boolean addConstantSites;
+    final private LPhyBeastConfig lPhyBeastConfig;
 
     // register classes outside LPhyBeast, reduce loading time,
     // can be null, then initiate in BEASTContext.
@@ -55,10 +56,11 @@ public class LPhyBeast implements Runnable {
      * @throws IOException
      */
     public LPhyBeast(Path infile, Path outfile, Path wd, long chainLength, int preBurnin,
-                     LPhyBEASTLoader loader) throws IOException {
+                     LPhyBEASTLoader loader, LPhyBeastConfig lPhyBeastConfig) throws IOException {
         this.chainLength = chainLength;
         this.preBurnin = preBurnin;
         this.loader = loader;
+        this.lPhyBeastConfig = lPhyBeastConfig;
 
         if (infile == null || !infile.toFile().exists())
             throw new IOException("Cannot find LPhy script file ! " + (infile != null ? infile.toAbsolutePath() : null));
@@ -89,25 +91,20 @@ public class LPhyBeast implements Runnable {
 
     /**
      * Initiate LPhyBEASTLoader every LPhyBeast instance.
-     * @see #LPhyBeast(Path, Path, Path, long, int, LPhyBEASTLoader)
      */
-    public LPhyBeast(Path infile, Path outfile, Path wd, long chainLength, int preBurnin) throws IOException {
-        this(infile, outfile, wd, chainLength,  preBurnin, null);
+    public LPhyBeast(Path infile, Path outfile, Path wd, long chainLength, int preBurnin, LPhyBeastConfig lPhyBeastConfig) throws IOException {
+        this(infile, outfile, wd, chainLength,  preBurnin, null, lPhyBeastConfig);
     }
 
     /**
      * For unit test, and then call {@link #lphyStrToXML(String, String)}.
-     * @see #LPhyBeast(Path, Path, Path, long, int)
      */
     public LPhyBeast() {
         inPath = null; // lphy script is in String
         outPath = null;
         preBurnin = 0;
         loader = null;
-    }
-
-    public void setAddConstantSites(boolean addConstantSites) {
-        this.addConstantSites = addConstantSites;
+        lPhyBeastConfig = new LPhyBeastConfig();
     }
 
     /**
@@ -218,8 +215,7 @@ public class LPhyBeast implements Runnable {
         sampler.sample(1, loggers);
 
         // register parser, pass cached loader
-        BEASTContext context = new BEASTContext(parser, loader);
-        context.setAddConstantSites(addConstantSites);
+        BEASTContext context = new BEASTContext(parser, loader, lPhyBeastConfig);
 
         //*** Write BEAST 2 XML ***//
         // remove any dir in filePathNoExt here

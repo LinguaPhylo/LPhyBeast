@@ -17,7 +17,6 @@ import lphybeast.ValueToBEAST;
 import lphybeast.tobeast.DataTypeUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NavigableMap;
 
@@ -67,16 +66,17 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
             List<Sequence> sequences = new ArrayList<>();
 
             // 2.1 trigger get mark[], and check if compress constant sites
-            if (context.isAddConstantSites()) {
+            if (context.getLPhyBeastConfig().compressConstantSites) {
+                throw new UnsupportedOperationException("in development");
                 // index is site, value is state, -1 is variable site
-                int[] mark = alignment.getConstantSitesMark();
-                if (alignment.hasConstantSite()) {
-                    long consSiteNum =  Arrays.stream(mark).filter(m -> m != SimpleAlignment.VAR_SITE_STATE).count();
-                    LoggerUtils.log.info("Discover " + consSiteNum + " constant sites.");
-                    if (consSiteNum == alignment.nchar())
-                        throw new RuntimeException("The alignment sites cannot be all constant ! " +
-                                "constant sites " + consSiteNum + " == alignment sites " + alignment.nchar());
-                }
+//TODO                int[] mark = alignment.getConstantSitesMark();
+//                if (alignment.hasConstantSite()) {
+//                    long consSiteNum =  Arrays.stream(mark).filter(m -> m != SimpleAlignment.VAR_SITE_STATE).count();
+//                    LoggerUtils.log.info("Discover " + consSiteNum + " constant sites.");
+//                    if (consSiteNum == alignment.nchar())
+//                        throw new RuntimeException("The alignment sites cannot be all constant ! " +
+//                                "constant sites " + consSiteNum + " == alignment sites " + alignment.nchar());
+//                }
             }
 
             for (int i = 0; i < taxaNames.length; i++) {
@@ -109,9 +109,8 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
             beastAlignment.initAndValidate();
 
             // 4 if isCompressConstantSites, then return FilteredAlignment
-            if (context.isAddConstantSites() && alignment.hasConstantSite()) {
-                throw new UnsupportedOperationException("in development");
-//                // https://www.beast2.org/2019/07/18/ascertainment-correction.html
+//            if (context.getLPhyBeastConfig().compressConstantSites && alignment.hasConstantSite()) {
+//TODO                // https://www.beast2.org/2019/07/18/ascertainment-correction.html
 //                FilteredAlignment filteredAlignment = new FilteredAlignment();
 //
 //                filteredAlignment.setInputValue("data", beastAlignment);
@@ -128,7 +127,7 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
 //                }
 //                // can only use single thread per ascertained alignment
 //                return filteredAlignment;
-            }
+//            }
 
         }
 

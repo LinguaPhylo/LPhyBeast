@@ -52,9 +52,15 @@ public class LPhyBeastCMD implements Callable<Integer> {
             "usually to create simulations for well-calibrated study.") int rep;
 
 
-    @CommandLine.Option(names = {"-acs", "--addConstantSites"},
-            description = "Specify constants sites in another partition to add to the original alignment.")
-    boolean addConstantSites = false;
+    @CommandLine.Option(names = {"-ccs", "--compressConstantSites"},
+            description = "Move constants sites from the original alignment into a FilterAlignment to compress the data size.")
+    boolean compressConstantSites = false;
+
+    @CommandLine.Option(names = {"-d", "--data"}, description = "Select the alignment given ID (e.g. random variable name) in the LPhy script.")
+    String alignmentId = null;
+
+    @CommandLine.Option(names = {"-lal", "--logAlignments"}, description = "Log all alignments including the intermediate process generated in the LPhy script.")
+    boolean logAllAlignments = false;
 
     public static void main(String[] args) {
 
@@ -79,9 +85,10 @@ public class LPhyBeastCMD implements Callable<Integer> {
             loader = LPhyBEASTLoader.getInstance();
 
         try {
-            LPhyBeast lphyBeast = new LPhyBeast(infile, outfile, wd, chainLength, preBurnin, loader);
+            LPhyBeastConfig lPhyBeastConfig = new LPhyBeastConfig(compressConstantSites, alignmentId, logAllAlignments);
+            LPhyBeast lphyBeast = new LPhyBeast(infile, outfile, wd, chainLength, preBurnin, loader, lPhyBeastConfig);
+            //TODO create a LPhyConfig to contain all settings
             lphyBeast.setRep(rep);
-            lphyBeast.setAddConstantSites(addConstantSites);
             lphyBeast.run();
         } catch (FileNotFoundException e) {
             throw new CommandLine.PicocliException("Fail to read LPhy scripts from " +

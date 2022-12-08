@@ -10,6 +10,7 @@ import beast.core.util.Slice;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.Taxon;
 import beast.evolution.datatype.DataType;
+import beast.evolution.likelihood.GenericTreeLikelihood;
 import beast.evolution.substitutionmodel.Frequencies;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
@@ -96,11 +97,11 @@ public class BEASTContext {
     // helper to create extra loggers from extensions
     private List<LoggerHelper> extraLoggers = new ArrayList<>();
 
-    private boolean addConstantSites;
+    final private LPhyBeastConfig lPhyBeastConfig;
 
     @Deprecated
-    public BEASTContext(LPhyParser parser) {
-        this(parser, null);
+    public BEASTContext(LPhyParser parser, LPhyBeastConfig lPhyBeastConfig) {
+        this(parser, null, lPhyBeastConfig);
     }
 
     /**
@@ -111,10 +112,11 @@ public class BEASTContext {
      * @param loader to load LPhyBEAST extensions.
      *               Can be null, then initiate here.
      */
-    public BEASTContext(LPhyParser parser, LPhyBEASTLoader loader) {
+    public BEASTContext(LPhyParser parser, LPhyBEASTLoader loader, LPhyBeastConfig lPhyBeastConfig) {
         this.parser = parser;
         if (loader == null)
             loader = LPhyBEASTLoader.getInstance();
+        this.lPhyBeastConfig = lPhyBeastConfig;
 
         valueToBEASTList = loader.valueToBEASTList;
         generatorToBEASTMap = loader.generatorToBEASTMap;
@@ -880,9 +882,31 @@ public class BEASTContext {
 
                 // Now allow function in the key, e.g. GTUnphaseToBEAST
                 Generator g = (Generator) entry.getKey();
-
                 Distribution dist = (Distribution) entry.getValue();
-                if (generatorOfSink(g))
+
+                //TODO not working for multiple alignments
+                // Allow to select alignment given ID
+                if (lPhyBeastConfig.alignmentId != null && dist instanceof GenericTreeLikelihood treeLikelihood) {
+                    if (parser.getModelSinks().size() > 1)
+                        throw new UnsupportedOperationException("Not support multiple alignments ! " + parser.getModelSinks());
+                    Alignment newAlg = null;
+                    for (Value<?> var : parser.getModelSinks()) {
+                        if (var.getGenerator() != g ) {
+                            // get data given ID
+                            newAlg = getAlignmentFromID(lPhyBeastConfig.alignmentId);
+                        }
+                    }
+                    if (newAlg == null)
+                        throw new IllegalArgumentException("Cannot ");
+                    // replace data in tree likelihood
+                    treeLikelihood.setInputValue("data", newAlg);
+                    treeLikelihood.setID(newAlg.getID() + ".treeLikelihood");
+                    treeLikelihood.initAndValidate();
+
+                    // add to likelihood
+                    likelihoodList.add(dist);
+
+                } else if (generatorOfSink(g))
                     likelihoodList.add(dist);
                 else
                     priorList.add(dist);
@@ -922,6 +946,16 @@ public class BEASTContext {
         elements.put(posterior, null);
 
         return posterior;
+    }
+
+    private Alignment getAlignmentFromID(String id) {
+        for (Map.Entry<GraphicalModelNode<?>, BEASTInterface> entry : beastObjects.entrySet()) {
+            if (entry.getKey().getUniqueId().equals(id)) {
+                if (entry.getValue() instanceof Alignment alignment)
+                    return alignment;
+            }
+        }
+        return null;
     }
 
     private boolean generatorOfSink(Generator g) {
@@ -974,12 +1008,8 @@ public class BEASTContext {
 
     //*** add, setter, getter ***//
 
-    public boolean isAddConstantSites() {
-        return addConstantSites;
-    }
-
-    public void setAddConstantSites(boolean addConstantSites) {
-        this.addConstantSites = addConstantSites;
+    public LPhyBeastConfig getLPhyBeastConfig() {
+        return lPhyBeastConfig;
     }
 
     public void addSkipOperator(StateNode stateNode) {
