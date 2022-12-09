@@ -60,7 +60,7 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
 
         } else {
             DataType beastDataType = DataTypeUtils.getBEASTDataType(lphyDataType, context.getDataTypeMap());
-
+            System.out.println("LPhy data type " + lphyDataType + " convert to BEAST data type " + beastDataType);
             // 2. nucleotide, protein, ...
             // sequences
             List<Sequence> sequences = new ArrayList<>();
