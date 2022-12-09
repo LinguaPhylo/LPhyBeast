@@ -36,7 +36,9 @@ import lphybeast.tobeast.values.ValueToParameter;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 import static java.lang.Math.toIntExact;
@@ -897,7 +899,15 @@ public class BEASTContext {
                         }
                     }
                     if (newAlg == null)
-                        throw new IllegalArgumentException("Cannot ");
+                        throw new IllegalArgumentException("Cannot find the alignment give ID = " +
+                                lPhyBeastConfig.alignmentId + ", model sinks = " + parser.getModelSinks());
+                    // TODO
+                    try {
+                        logOrignalAlignment(treeLikelihood);
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+
                     // replace data in tree likelihood
                     treeLikelihood.setInputValue("data", newAlg);
                     treeLikelihood.setID(newAlg.getID() + ".treeLikelihood");
@@ -948,13 +958,24 @@ public class BEASTContext {
         return posterior;
     }
 
-    private Alignment getAlignmentFromID(String id) {
-        for (Map.Entry<GraphicalModelNode<?>, BEASTInterface> entry : beastObjects.entrySet()) {
-            if (entry.getKey().getUniqueId().equals(id)) {
-                if (entry.getValue() instanceof Alignment alignment)
-                    return alignment;
-            }
+    private void logOrignalAlignment(GenericTreeLikelihood treeLikelihood) throws FileNotFoundException {
+        Alignment alignment = treeLikelihood.dataInput.get();
+        String algXML = new XMLProducer().toXML(alignment);
+        try (PrintWriter out = new PrintWriter(alignment.getID() + ".xml")) {
+            out.println(algXML);
         }
+    }
+
+    private Alignment getAlignmentFromID(String id) {
+//        for (Map.Entry<GraphicalModelNode<?>, BEASTInterface> entry : beastObjects.entrySet()) {
+//            if (entry.getKey().getUniqueId().equals(id)) {
+//                if (entry.getValue() instanceof Alignment alignment)
+//                    return alignment;
+//            }
+//        }
+        BEASTInterface beastInterface = getBEASTObject(id);
+        if (beastInterface instanceof Alignment alignment)
+            return alignment;
         return null;
     }
 
