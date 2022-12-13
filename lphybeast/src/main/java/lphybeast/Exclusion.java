@@ -9,6 +9,7 @@ import lphy.core.functions.*;
 import lphy.core.functions.alignment.NCharFunction;
 import lphy.core.functions.alignment.ReadFasta;
 import lphy.core.functions.alignment.ReadNexus;
+import lphy.core.functions.alignment.Simulate;
 import lphy.core.functions.datatype.BinaryDatatypeFunction;
 import lphy.core.functions.datatype.NucleotidesFunction;
 import lphy.core.functions.datatype.StandardDatatypeFunction;
@@ -56,6 +57,7 @@ public class Exclusion {
                 generator instanceof CreateTaxa || generator instanceof Species ||
                 generator instanceof TaxaAgesFromFunction ||
                 generator instanceof MissingSites || generator instanceof FilterMissingSites ||
+                generator instanceof Simulate ||
                 generator instanceof ReadNexus || generator instanceof ReadFasta ||
                 generator instanceof ExtractTrait || generator instanceof Unique ||
                 generator instanceof ARange || generator instanceof Range ||

@@ -525,7 +525,7 @@ public class BEASTContext {
     }
 
     /**
-     * The special method to to fill in context,
+     * The special method to fill in context,
      * use it as a caution.
      * @param node
      * @param beastInterface
@@ -902,11 +902,7 @@ public class BEASTContext {
                         throw new IllegalArgumentException("Cannot find the alignment give ID = " +
                                 lPhyBeastConfig.alignmentId + ", model sinks = " + parser.getModelSinks());
                     // TODO
-                    try {
-                        logOrignalAlignment(treeLikelihood);
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
+                    logOrignalAlignment(treeLikelihood);
 
                     // replace data in tree likelihood
                     treeLikelihood.setInputValue("data", newAlg);
@@ -958,11 +954,13 @@ public class BEASTContext {
         return posterior;
     }
 
-    private void logOrignalAlignment(GenericTreeLikelihood treeLikelihood) throws FileNotFoundException {
+    private void logOrignalAlignment(GenericTreeLikelihood treeLikelihood) {
         Alignment alignment = treeLikelihood.dataInput.get();
         String algXML = new XMLProducer().toXML(alignment);
         try (PrintWriter out = new PrintWriter(alignment.getID() + ".xml")) {
             out.println(algXML);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 

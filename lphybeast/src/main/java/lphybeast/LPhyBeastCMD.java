@@ -59,7 +59,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
     @CommandLine.Option(names = {"-d", "--data"}, description = "Select the alignment given ID (e.g. random variable name) in the LPhy script.")
     String alignmentId = null;
 
-    @CommandLine.Option(names = {"-lal", "--logAlignments"}, description = "Log all alignments including the intermediate process generated in the LPhy script.")
+//    @CommandLine.Option(names = {"-lal", "--logAlignments"}, description = "Log all alignments including the intermediate process generated in the LPhy script.")
     boolean logAllAlignments = false;
 
     public static void main(String[] args) {

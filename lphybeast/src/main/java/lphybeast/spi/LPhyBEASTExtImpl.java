@@ -71,6 +71,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 SerialCoalescentToBEAST.class,
 //                SimFBDAgeToBEAST.class,
                 SkylineToBSP.class,
+                SimulateToAlignments.class,
                 SliceDoubleArrayToBEAST.class,
 //                StructuredCoalescentToMascot.class,
                 TreeLengthToBEAST.class,
