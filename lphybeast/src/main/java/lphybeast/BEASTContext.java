@@ -99,6 +99,7 @@ public class BEASTContext {
     // helper to create extra loggers from extensions
     private List<LoggerHelper> extraLoggers = new ArrayList<>();
 
+    // required
     final private LPhyBeastConfig lPhyBeastConfig;
 
     @Deprecated
@@ -136,14 +137,11 @@ public class BEASTContext {
      * Main method to process configurations to create BEAST 2 XML from LPhy objects.
      *
      * @param logFileStem  log file stem
-     * @param chainLength  if <=0, then use default 1,000,000.
-     *                     logEvery = chainLength / numOfSamples,
-     *                     where numOfSamples = 2000 as default.
-     * @param preBurnin    preBurnin for BEAST MCMC, if preBurnin < 0,
-     *                     then will be automatically assigned to all state nodes size * 10.
      * @return BEAST 2 XML in String
      */
-    public String toBEASTXML(final String logFileStem, long chainLength, int preBurnin) {
+    public String toBEASTXML(final String logFileStem) {
+        long chainLength = lPhyBeastConfig.getChainLength();
+        int preBurnin = lPhyBeastConfig.getPreBurnin();
         // default to 1M if not specified
         if (chainLength < NUM_OF_SAMPLES)
             throw new IllegalArgumentException("Invalid length for MCMC chain, len = " + chainLength);

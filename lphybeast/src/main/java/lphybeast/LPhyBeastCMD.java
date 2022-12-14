@@ -85,11 +85,16 @@ public class LPhyBeastCMD implements Callable<Integer> {
             loader = LPhyBEASTLoader.getInstance();
 
         try {
-            LPhyBeastConfig lPhyBeastConfig = new LPhyBeastConfig(compressConstantSites, alignmentId, logAllAlignments);
-            LPhyBeast lphyBeast = new LPhyBeast(infile, outfile, wd, chainLength, preBurnin, loader, lPhyBeastConfig);
-            //TODO create a LPhyConfig to contain all settings
-            lphyBeast.setRep(rep);
+            // define config for the run
+            LPhyBeastConfig lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd,
+                    compressConstantSites, alignmentId, logAllAlignments);
+            lPhyBeastConfig.setPreBurnin(preBurnin);
+            lPhyBeastConfig.setChainLength(chainLength);
+            lPhyBeastConfig.setRep(rep);
+
+            LPhyBeast lphyBeast = new LPhyBeast(loader, lPhyBeastConfig);
             lphyBeast.run();
+
         } catch (FileNotFoundException e) {
             throw new CommandLine.PicocliException("Fail to read LPhy scripts from " +
                     infile + ", user.dir = " + System.getProperty(UserDir.USER_DIR), e);
