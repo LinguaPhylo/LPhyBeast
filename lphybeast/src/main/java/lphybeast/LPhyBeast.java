@@ -105,7 +105,7 @@ public class LPhyBeast implements Runnable {
         }
     }
 
-    private Path getOutPath() {
+    private Path getXMLFilePath() {
         int repId = lPhyBeastConfig.getRepId();
         if ( (repId >= 0 && repTot <= 1) || (repId < 0 && repTot > 1) ) {
             throw new IllegalArgumentException("The replicate index (" + repId +
@@ -114,7 +114,7 @@ public class LPhyBeast implements Runnable {
 
         if (repId >= 0) {
             // add _i after file stem
-            return lPhyBeastConfig.getOutPathWithReplicate();
+            return lPhyBeastConfig.getXMLFilePathWithRepId();
         } else {
             return lPhyBeastConfig.outPath;
         }
@@ -133,7 +133,7 @@ public class LPhyBeast implements Runnable {
         // create XML string from reader, given file name and MCMC setting
         String xml = toBEASTXML(Objects.requireNonNull(reader));
 
-        Path outPath = getOutPath();
+        Path outPath = getXMLFilePath();
         FileWriter fileWriter = new FileWriter(Objects.requireNonNull(outPath).toFile());
         PrintWriter writer = new PrintWriter(fileWriter);
         writer.println(xml);
@@ -156,7 +156,7 @@ public class LPhyBeast implements Runnable {
         LPhyParser parser = new REPL();
         parser.source(reader);
 
-        Path outPath = getOutPath();
+        Path outPath = getXMLFilePath();
         // outPath may be added i
         final String filePathNoExt = lPhyBeastConfig.getOutPathNoExtension(outPath);
 

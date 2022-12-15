@@ -99,12 +99,22 @@ public class LPhyBeastConfig {
     }
 
 
-    public Path getOutPathWithReplicate() {
+    /**
+     * @return   path/???.xml
+     */
+    public Path getXMLFilePathWithRepId() {
         if (repId < 0)
             throw new IllegalArgumentException("Invalid replicate index ! " + repId);
         final String outPathNoExt = getOutPathNoExtension(outPath);
         // update outPath to add i
-        return Paths.get(outPathNoExt + "_" + repId + ".xml");
+        return Paths.get(getXMLFilePath(outPathNoExt));
+    }
+
+    public String getXMLFilePath(String outPathNoExt) {
+        if (repId >= 0)
+            return outPathNoExt + "-" + getRepId() + ".xml";
+        else
+            return outPathNoExt + ".xml";
     }
 
     public String rmParentDir(String filePath) {
