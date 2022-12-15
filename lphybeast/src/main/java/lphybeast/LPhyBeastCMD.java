@@ -56,8 +56,8 @@ public class LPhyBeastCMD implements Callable<Integer> {
             description = "Move constants sites from the original alignment into a FilterAlignment to compress the data size.")
     boolean compressConstantSites = false;
 
-    @CommandLine.Option(names = {"-d", "--data"}, description = "Select the alignment given ID (e.g. random variable name) in the LPhy script.")
-    String alignmentId = null;
+//    @CommandLine.Option(names = {"-d", "--data"}, description = "Select the alignment given ID (e.g. random variable name) in the LPhy script.")
+//    String alignmentId = null;
 
 //    @CommandLine.Option(names = {"-lal", "--logAlignments"}, description = "Log all alignments including the intermediate process generated in the LPhy script.")
     boolean logAllAlignments = false;
@@ -87,7 +87,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
         try {
             // define config for the run
             LPhyBeastConfig lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd,
-                    compressConstantSites, alignmentId, logAllAlignments);
+                    compressConstantSites, null, logAllAlignments);
             lPhyBeastConfig.setPreBurnin(preBurnin);
             lPhyBeastConfig.setChainLength(chainLength);
 
