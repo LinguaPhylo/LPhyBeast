@@ -130,10 +130,13 @@ public class LPhyBeast implements Runnable {
     // out path without file extension for output file name,
     // and XML loggers after removing the parent dir.
     private void writeXMLFrom(BufferedReader reader) throws IOException {
-        // create XML string from reader, given file name and MCMC setting
-        String xml = toBEASTXML(Objects.requireNonNull(reader));
-
         Path outPath = getXMLFilePath();
+        // outPath may be added i
+        final String filePathNoExt = lPhyBeastConfig.getOutPathNoExtension(outPath);
+
+        // create XML string from reader, given file name and MCMC setting
+        String xml = toBEASTXML(Objects.requireNonNull(reader), filePathNoExt);
+
         FileWriter fileWriter = new FileWriter(Objects.requireNonNull(outPath).toFile());
         PrintWriter writer = new PrintWriter(fileWriter);
         writer.println(xml);
@@ -147,18 +150,15 @@ public class LPhyBeast implements Runnable {
     /**
      * Alternative method to give LPhy script (e.g. from String), not only from a file.
      * @param reader         BufferedReader
+     * @param filePathNoExt  file path but without extension
      * @return    BEAST 2 XML
      * @see BEASTContext#toBEASTXML(String)
      * @throws IOException
      */
-    private String toBEASTXML(BufferedReader reader) throws IOException {
+    private String toBEASTXML(BufferedReader reader, String filePathNoExt) throws IOException {
         //*** Parse LPhy file ***//
         LPhyParser parser = new REPL();
         parser.source(reader);
-
-        Path outPath = getXMLFilePath();
-        // outPath may be added i
-        final String filePathNoExt = lPhyBeastConfig.getOutPathNoExtension(outPath);
 
         // log true values and tree
         List<RandomValueLogger> loggers = new ArrayList<>();
@@ -191,7 +191,7 @@ public class LPhyBeast implements Runnable {
         Reader inputString = new StringReader(lphy);
         BufferedReader reader = new BufferedReader(inputString);
 
-        return toBEASTXML(Objects.requireNonNull(reader));
+        return toBEASTXML(Objects.requireNonNull(reader), fileNameStem);
     }
 
 
