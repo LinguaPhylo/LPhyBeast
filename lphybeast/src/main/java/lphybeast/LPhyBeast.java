@@ -11,7 +11,6 @@ import lphy.util.LoggerUtils;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +23,8 @@ import java.util.Objects;
  */
 public class LPhyBeast implements Runnable {
 
+    final int repTot;
+
     // LPhyBeastConfig to contain all settings
     final public LPhyBeastConfig lPhyBeastConfig;
 
@@ -31,28 +32,19 @@ public class LPhyBeast implements Runnable {
     // can be null, then initiate in BEASTContext.
     private final LPhyBEASTLoader loader;
 
-    public LPhyBeast(LPhyBEASTLoader loader, LPhyBeastConfig lPhyBeastConfig) {
+    public LPhyBeast(LPhyBEASTLoader loader, LPhyBeastConfig lPhyBeastConfig, int repTot) {
         this.loader = loader;
         this.lPhyBeastConfig = lPhyBeastConfig;
-    }
-
-    /**
-     * Initiate LPhyBEASTLoader every LPhyBeast instance.
-     * @param chainLength    if <=0, then use default 1,000,000.
-     *                       logEvery = chainLength / numOfSamples,
-     *                       where numOfSamples = 2000 as default.
-     * @param preBurnin      preBurnin for BEAST MCMC, default to 0.
-     */
-    public LPhyBeast(long chainLength, int preBurnin, LPhyBeastConfig lPhyBeastConfig) {
-        this(null, lPhyBeastConfig);
-        lPhyBeastConfig.setChainLength(chainLength);
-        lPhyBeastConfig.setPreBurnin(preBurnin);
+        this.repTot = repTot;
     }
 
     /**
      * For unit test, and then call {@link #lphyStrToXML(String, String)}.
+     * chainLength uses default 1,000,000. numOfSamples = 2,000.
+     * preBurnin for BEAST MCMC set to 0.
      */
     public LPhyBeast() {
+        repTot = 1;
         loader = null;
         try {
             lPhyBeastConfig = new LPhyBeastConfig();
@@ -61,57 +53,71 @@ public class LPhyBeast implements Runnable {
         }
     }
 
+    /**
+     * Create LPhyBeast instance from LPhyBeastLauncher in another subproject.
+     */
+    public LPhyBeast(Path infile, Path outfile, Path wd, long chainLength, int preBurnin) {
+        repTot = 1;
+        loader = null;
+        try {
+            lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd, false, null, false);
+            lPhyBeastConfig.setChainLength(chainLength);
+            lPhyBeastConfig.setPreBurnin(preBurnin);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void run() {
-        int rep = lPhyBeastConfig.getRep();
-        if (lPhyBeastConfig.inPath == null || lPhyBeastConfig.outPath == null || rep < 1 ||
+        if (lPhyBeastConfig.inPath == null || lPhyBeastConfig.outPath == null || repTot < 1 ||
                 lPhyBeastConfig.getChainLength() < BEASTContext.NUM_OF_SAMPLES)
             throw new IllegalArgumentException("Illegal inputs : inPath = " + lPhyBeastConfig.inPath +
-                    ", outPath = " + lPhyBeastConfig.outPath + ", rep = " + rep + ", chainLength = " +
+                    ", outPath = " + lPhyBeastConfig.outPath + ", rep = " + repTot + ", chainLength = " +
                     lPhyBeastConfig.getChainLength() + ", preBurnin = " + lPhyBeastConfig.getPreBurnin());
         try {
-            run(rep);
+            run(repTot);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void run(int rep) throws IOException {
+    /**
+     * run all replicates if repTot > 1
+     * @param repTot  number of replicates to run
+     * @throws IOException
+     */
+    public void run(int repTot) throws IOException {
         // e.g. well-calibrated validations
-        if (rep > 1) {
-            LoggerUtils.log.info("\nStart " + rep + " replicates : \n");
+        if (repTot > 1) {
+            LoggerUtils.log.info("\nStart " + repTot + " replicates : \n");
 
-            for (int i = 0; i < rep; i++) {
+            for (int i = 0; i < repTot; i++) {
                 // add _i after file stem
-                Path outPathPerRep = getOutPath(i);
+                lPhyBeastConfig.setRepId(i);
+                BufferedReader reader = lphyReader();
                 // need new reader
-                createXML(outPathPerRep);
+                writeXMLFrom(reader);
             }
         } else { // 1 simulation
-            createXML(lPhyBeastConfig.outPath);
+            BufferedReader reader = lphyReader();
+            writeXMLFrom(reader);
         }
     }
 
-    private Path getOutPath(int i) {
-        final String outPathNoExt = getPathNoExtension(lPhyBeastConfig.outPath);
-        // update outPath to add i
-        return Paths.get(outPathNoExt + "_" + i + ".xml");
-    }
+    private Path getOutPath() {
+        int repId = lPhyBeastConfig.getRepId();
+        if ( (repId >= 0 && repTot <= 1) || (repId < 0 && repTot > 1) ) {
+            throw new IllegalArgumentException("The replicate index (" + repId +
+                    ") does not match the total replicates (" + repTot + ") ! " );
+        }
 
-    private String getPathNoExtension(Path path) {
-        String str = Objects.requireNonNull(path).toString();
-        return str.substring(0, str.lastIndexOf("."));
-    }
-
-    // the relative path given in readNexus in a script always refers to user.dir
-    // fileNameStem for both outfile and XML loggers
-    private void createXML(Path outPath) throws IOException {
-        BufferedReader reader = lphyReader();
-
-        final String pathNoExt = getPathNoExtension(outPath);
-        // create XML string from reader, given file name and MCMC setting
-        String xml = toBEASTXML(Objects.requireNonNull(reader), pathNoExt);
-        writeXML(xml, outPath);
+        if (repId >= 0) {
+            // add _i after file stem
+            return lPhyBeastConfig.getOutPathWithReplicate();
+        } else {
+            return lPhyBeastConfig.outPath;
+        }
     }
 
     private BufferedReader lphyReader() throws FileNotFoundException {
@@ -120,7 +126,14 @@ public class LPhyBeast implements Runnable {
         return new BufferedReader(fileReader);
     }
 
-    private void writeXML(String xml, Path outPath) throws IOException {
+    // the relative path given in readNexus in a script always refers to user.dir
+    // out path without file extension for output file name,
+    // and XML loggers after removing the parent dir.
+    private void writeXMLFrom(BufferedReader reader) throws IOException {
+        // create XML string from reader, given file name and MCMC setting
+        String xml = toBEASTXML(Objects.requireNonNull(reader));
+
+        Path outPath = getOutPath();
         FileWriter fileWriter = new FileWriter(Objects.requireNonNull(outPath).toFile());
         PrintWriter writer = new PrintWriter(fileWriter);
         writer.println(xml);
@@ -134,15 +147,18 @@ public class LPhyBeast implements Runnable {
     /**
      * Alternative method to give LPhy script (e.g. from String), not only from a file.
      * @param reader         BufferedReader
-     * @param filePathNoExt  no file extension
      * @return    BEAST 2 XML
-     * @see BEASTContext#toBEASTXML(String, long, int)
+     * @see BEASTContext#toBEASTXML(String)
      * @throws IOException
      */
-    private String toBEASTXML(BufferedReader reader, String filePathNoExt) throws IOException {
+    private String toBEASTXML(BufferedReader reader) throws IOException {
         //*** Parse LPhy file ***//
         LPhyParser parser = new REPL();
         parser.source(reader);
+
+        Path outPath = getOutPath();
+        // outPath may be added i
+        final String filePathNoExt = lPhyBeastConfig.getOutPathNoExtension(outPath);
 
         // log true values and tree
         List<RandomValueLogger> loggers = new ArrayList<>();
@@ -159,12 +175,10 @@ public class LPhyBeast implements Runnable {
 
         //*** Write BEAST 2 XML ***//
         // remove any dir in filePathNoExt here
-        if (filePathNoExt.contains(File.separator))
-            filePathNoExt = filePathNoExt.substring(filePathNoExt.lastIndexOf(File.separator)+1);
-
+        final String logFileStem = lPhyBeastConfig.rmParentDir(filePathNoExt);
         // filePathNoExt here is file stem, which will be used in XML log file names.
         // Cannot handle any directories from other machines.
-        return context.toBEASTXML(filePathNoExt);
+        return context.toBEASTXML(logFileStem);
     }
 
     /**
@@ -177,7 +191,7 @@ public class LPhyBeast implements Runnable {
         Reader inputString = new StringReader(lphy);
         BufferedReader reader = new BufferedReader(inputString);
 
-        return toBEASTXML(Objects.requireNonNull(reader), fileNameStem);
+        return toBEASTXML(Objects.requireNonNull(reader));
     }
 
 

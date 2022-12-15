@@ -3,6 +3,7 @@ package lphybeast;
 import lphy.system.UserDir;
 import lphy.util.LoggerUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,10 +25,11 @@ public class LPhyBeastConfig {
      *               where numOfSamples = 2000 as default.
      * preBurnin     The number of burnin samples taken before entering the main loop of MCMC.
      *               If < 0, as default, then it will be automatically assigned to all state nodes size * 10.
+     * repId         if >= 0, then add it as postfix to the output file stem
      */
     private int preBurnin = -1; // auto estimate
     private long chainLength = 1000000; // 1M
-    private int rep = 1; // for multi-outputs
+    private int repId = -1; // >=0 for multi-outputs
 
     /**
      * The configuration to create a BEAST 2 XML.
@@ -97,6 +99,32 @@ public class LPhyBeastConfig {
     }
 
 
+    public Path getOutPathWithReplicate() {
+        if (repId < 0)
+            throw new IllegalArgumentException("Invalid replicate index ! " + repId);
+        final String outPathNoExt = getOutPathNoExtension(outPath);
+        // update outPath to add i
+        return Paths.get(outPathNoExt + "_" + repId + ".xml");
+    }
+
+    public String rmParentDir(String filePath) {
+        // remove any parent dir in filePath here
+        if (filePath.contains(File.separator))
+            filePath = filePath.substring(filePath.lastIndexOf(File.separator)+1);
+        return filePath;
+    }
+
+    /**
+     * @param outPath can be preprocessed, e.g. add i
+     * @return outPath without the file extension,
+     *         but it may not be only file name steam,
+     *         it could contain the parent dir.
+     */
+    public String getOutPathNoExtension(Path outPath) {
+        String str = Objects.requireNonNull(outPath).toString();
+        return str.substring(0, str.lastIndexOf("."));
+    }
+
     public int getPreBurnin() {
         return preBurnin;
     }
@@ -113,14 +141,14 @@ public class LPhyBeastConfig {
         this.chainLength = chainLength;
     }
 
-    public int getRep() {
-        return rep;
+    public int getRepId() {
+        return repId;
     }
 
     /**
-     * @param rep      replicates of simulations, >= 1.
+     * @param repId    the index of replicates of simulations, >= 0.
      */
-    public void setRep(int rep) {
-        if (rep > 1) this.rep = rep;
+    public void setRepId(int repId) {
+        if (repId >= 0) this.repId = repId;
     }
 }

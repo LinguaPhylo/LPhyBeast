@@ -37,8 +37,12 @@ public class SimulateToAlignments implements GeneratorToBEAST<Simulate, BEASTInt
                         beast.evolution.alignment.Alignment beastAlg =
                                 alignmentToBEAST.valueToBEAST(algValue, context);
                         String algXML = new XMLProducer().toXML(beastAlg);
-                        //TODO add replicate prefix
-                        try (PrintWriter out = new PrintWriter(entry.getKey() + ".xml")) {
+                        // add replicate prefix
+                        int rep = context.getLPhyBeastConfig().getRepId();
+                        String outFileSteam = entry.getKey();
+//                        if (rep > 1)TODO wrong, need another var to record rep id, not rep
+//                            outFileSteam += "-" + rep;
+                        try (PrintWriter out = new PrintWriter(outFileSteam + ".xml")) {
                             out.println(algXML);
                         } catch (FileNotFoundException e) {
                             throw new RuntimeException(e);

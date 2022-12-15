@@ -49,7 +49,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
 
     //well calibrated study
     @CommandLine.Option(names = {"-r", "--replicates"}, defaultValue = "1", description = "the number of replicates (XML) given one LPhy script, " +
-            "usually to create simulations for well-calibrated study.") int rep;
+            "usually to create simulations for well-calibrated study.") int repTot;
 
 
     @CommandLine.Option(names = {"-ccs", "--compressConstantSites"},
@@ -90,9 +90,8 @@ public class LPhyBeastCMD implements Callable<Integer> {
                     compressConstantSites, alignmentId, logAllAlignments);
             lPhyBeastConfig.setPreBurnin(preBurnin);
             lPhyBeastConfig.setChainLength(chainLength);
-            lPhyBeastConfig.setRep(rep);
 
-            LPhyBeast lphyBeast = new LPhyBeast(loader, lPhyBeastConfig);
+            LPhyBeast lphyBeast = new LPhyBeast(loader, lPhyBeastConfig, repTot);
             lphyBeast.run();
 
         } catch (FileNotFoundException e) {
