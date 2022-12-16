@@ -2,6 +2,7 @@ package lphybeast;
 
 import lphy.system.UserDir;
 import lphy.util.LoggerUtils;
+import lphy.util.RandomUtils;
 import picocli.CommandLine;
 
 import java.io.FileNotFoundException;
@@ -52,12 +53,21 @@ public class LPhyBeastCMD implements Callable<Integer> {
             "usually to create simulations for well-calibrated study.") int repTot;
 
 
-    @CommandLine.Option(names = {"-ccs", "--compressConstantSites"},
-            description = "Move constants sites from the original alignment into a FilterAlignment to compress the data size.")
-    boolean compressConstantSites = false;
+    @CommandLine.Option(names = {"-cca", "--compressConstantAlignments"},
+            description = "Compress the alignment only having constants sites into " +
+                    "a FilterAlignment with weights on each constant pattern.\n" +
+                          "If 0, as default, ignore this function;\n" +
+                          "If 1, then compress constants sites, where every state is compared;\n" +
+                          "If 2, then compress constants sites, but ignoring the unknown state or gap.\n")
+    int compressConstantAlignment;
 
-//    @CommandLine.Option(names = {"-d", "--data"}, description = "Select the alignment given ID (e.g. random variable name) in the LPhy script.")
-//    String alignmentId = null;
+    @CommandLine.Option(names = {"-seed"}, description = "the seed to run the LPhy script.")
+    int seed;
+
+//    @CommandLine.Option(names = {"-d", "--data"},
+//            description = "Select the alignment given ID (e.g. random variable name) to compress constant sites, " +
+//                    "but leave the rest unselected alignment(s) unchanged.")
+//    String compressAlgId = null;
 
 //    @CommandLine.Option(names = {"-lal", "--logAlignments"}, description = "Log all alignments including the intermediate process generated in the LPhy script.")
     boolean logAllAlignments = false;
@@ -87,9 +97,12 @@ public class LPhyBeastCMD implements Callable<Integer> {
         try {
             // define config for the run
             LPhyBeastConfig lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd,
-                    compressConstantSites, null, logAllAlignments);
+                    compressConstantAlignment, logAllAlignments);
             lPhyBeastConfig.setPreBurnin(preBurnin);
             lPhyBeastConfig.setChainLength(chainLength);
+
+            if (seed > 0)
+                RandomUtils.setSeed(seed);
 
             LPhyBeast lphyBeast = new LPhyBeast(loader, lPhyBeastConfig, repTot);
             lphyBeast.run();

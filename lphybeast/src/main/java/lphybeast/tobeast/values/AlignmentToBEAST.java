@@ -18,7 +18,7 @@ import lphybeast.tobeast.DataTypeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NavigableMap;
+import java.util.Map;
 
 public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evolution.alignment.Alignment> {
 
@@ -65,11 +65,15 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
             // sequences
             List<Sequence> sequences = new ArrayList<>();
 
+            int cca = context.getLPhyBeastConfig().compressConstantAlignment;
             // 2.1 trigger get mark[], and check if compress constant sites
-            if (context.getLPhyBeastConfig().compressConstantSites) {
-                throw new UnsupportedOperationException("in development");
+            if (cca > 0) {
+
+                Map<Integer, Integer> counter = AlignmentUtils.
+                        getConstantSiteWeights(alignment, cca == 2);
+
                 // index is site, value is state, -1 is variable site
-//TODO                int[] mark = alignment.getConstantSitesMark();
+//                int[] mark = alignment.getConstantSitesMark();
 //                if (alignment.hasConstantSite()) {
 //                    long consSiteNum =  Arrays.stream(mark).filter(m -> m != SimpleAlignment.VAR_SITE_STATE).count();
 //                    LoggerUtils.log.info("Discover " + consSiteNum + " constant sites.");
@@ -157,28 +161,32 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
         return seq;
     }
 
-    private String createConstantSiteWeights(SimpleAlignment alignment) {
-        // index is the state, value is the count
-        NavigableMap<Integer, Integer> counter = AlignmentUtils.countConstantSites(alignment);
-
-        int maxState = counter.lastKey();
-        if (maxState >= alignment.getCanonicalStateCount())
-            LoggerUtils.log.warning("Ambiguous state " + maxState + " is found, count = " + counter.get(maxState));
-
-        List<String> weights = new ArrayList<>();
-        // no ambiguous
-        for (int s = 0; s < alignment.getCanonicalStateCount(); s++) {
-            if (counter.containsKey(s))
-                weights.add(counter.get(s).toString());
-            else
-                weights.add("0");
-        }
-        // check ordering e.g. A, C, G, T
-        SequenceType sequenceType = alignment.getSequenceType();
-        LoggerUtils.log.info("Creating weights mapping to the canonical states in order : " + sequenceType.getCanonicalStates());
-
-        return String.join(" ", weights);
-    }
+//    private Map<String, Integer> getConstantSiteWeights(SimpleAlignment alignment) {
+//
+//        String s = alignment.getSequenceVarSite(i);
+//
+//
+//        // index is the state, value is the count
+//        NavigableMap<Integer, Integer> counter = AlignmentUtils.countConstantSites(alignment);
+//
+//        int maxState = counter.lastKey();
+//        if (maxState >= alignment.getCanonicalStateCount())
+//            LoggerUtils.log.warning("Ambiguous state " + maxState + " is found, count = " + counter.get(maxState));
+//
+//        List<String> weights = new ArrayList<>();
+//        // no ambiguous
+//        for (int s = 0; s < alignment.getCanonicalStateCount(); s++) {
+//            if (counter.containsKey(s))
+//                weights.add(counter.get(s).toString());
+//            else
+//                weights.add("0");
+//        }
+//        // check ordering e.g. A, C, G, T
+//        SequenceType sequenceType = alignment.getSequenceType();
+//        LoggerUtils.log.info("Creating weights mapping to the canonical states in order : " + sequenceType.getCanonicalStates());
+//
+//        return String.join(" ", weights);
+//    }
 
 
     @Override

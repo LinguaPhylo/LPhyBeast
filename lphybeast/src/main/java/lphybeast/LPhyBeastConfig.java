@@ -14,8 +14,13 @@ public class LPhyBeastConfig {
     public final Path inPath;
     public final Path outPath;
 //    public final Path wd;//TODO currently using UserDir.set/getUserDir
-    final public boolean compressConstantSites;
-    final public String alignmentId;
+
+//    Compress the alignment only having constants sites into
+//    a FilterAlignment with weights on each constant pattern.
+//    If 0, as default, ignore this function;
+//    If 1, then compress constants sites, where every state is compared;
+//    If 2, then compress constants sites, but ignoring the unknown state or gap.
+    final public int compressConstantAlignment;
     final public boolean logAllAlignments;
 
     /**
@@ -44,11 +49,10 @@ public class LPhyBeastConfig {
      *                 then set user.dir to the parent folder of lphy script.
      */
     public LPhyBeastConfig(Path infile, Path outfile, Path wd,
-                           boolean compressConstantSites, String alignmentId, boolean logAllAlignments)
+                           int compressConstantAlignment, boolean logAllAlignments)
             throws IOException {
 
-        this.compressConstantSites = compressConstantSites;
-        this.alignmentId = alignmentId;
+        this.compressConstantAlignment = compressConstantAlignment;
         this.logAllAlignments = logAllAlignments;
 
         if (infile == null || !infile.toFile().exists())
@@ -88,8 +92,7 @@ public class LPhyBeastConfig {
         inPath = null; // lphy script is in String
         outPath = null;
         preBurnin = 0;
-        this.compressConstantSites = false;
-        this.alignmentId = null;
+        this.compressConstantAlignment = 0;
         this.logAllAlignments = false;
     }
 

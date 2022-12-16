@@ -884,33 +884,32 @@ public class BEASTContext {
                 Generator g = (Generator) entry.getKey();
                 Distribution dist = (Distribution) entry.getValue();
 
-                //TODO not working for multiple alignments
-                // Allow to select alignment given ID
-                if (lPhyBeastConfig.alignmentId != null && dist instanceof GenericTreeLikelihood treeLikelihood) {
-                    if (parser.getModelSinks().size() > 1)
-                        throw new UnsupportedOperationException("Not support multiple alignments ! " + parser.getModelSinks());
-                    Alignment newAlg = null;
-                    for (Value<?> var : parser.getModelSinks()) {
-                        if (var.getGenerator() != g ) {
-                            // get data given ID
-                            newAlg = getAlignmentFromID(lPhyBeastConfig.alignmentId);
-                        }
-                    }
-                    if (newAlg == null)
-                        throw new IllegalArgumentException("Cannot find the alignment give ID = " +
-                                lPhyBeastConfig.alignmentId + ", model sinks = " + parser.getModelSinks());
-                    // TODO
-                    logOrignalAlignment(treeLikelihood);
+                //This is replaced by lphy script
+//                if (lPhyBeastConfig.compressAlgId != null && dist instanceof GenericTreeLikelihood treeLikelihood) {
+//                    if (parser.getModelSinks().size() > 1)
+//                        throw new UnsupportedOperationException("Not support multiple alignments ! " + parser.getModelSinks());
+//                    Alignment newAlg = null;
+//                    for (Value<?> var : parser.getModelSinks()) {
+//                        if (var.getGenerator() != g ) {
+//                            // get data given ID
+//                            newAlg = getAlignmentFromID(lPhyBeastConfig.compressAlgId);
+//                        }
+//                    }
+//                    if (newAlg == null)
+//                        throw new IllegalArgumentException("Cannot find the alignment give ID = " +
+//                                lPhyBeastConfig.compressAlgId + ", model sinks = " + parser.getModelSinks());
+//                    logOrignalAlignment(treeLikelihood);
+//                    // replace data in tree likelihood
+//                    treeLikelihood.setInputValue("data", newAlg);
+//                    treeLikelihood.setID(newAlg.getID() + ".treeLikelihood");
+//                    treeLikelihood.initAndValidate();
+//
+//                    // add to likelihood
+//                    likelihoodList.add(dist);
+//
+//                } else
 
-                    // replace data in tree likelihood
-                    treeLikelihood.setInputValue("data", newAlg);
-                    treeLikelihood.setID(newAlg.getID() + ".treeLikelihood");
-                    treeLikelihood.initAndValidate();
-
-                    // add to likelihood
-                    likelihoodList.add(dist);
-
-                } else if (generatorOfSink(g))
+                if (generatorOfSink(g))
                     likelihoodList.add(dist);
                 else
                     priorList.add(dist);
