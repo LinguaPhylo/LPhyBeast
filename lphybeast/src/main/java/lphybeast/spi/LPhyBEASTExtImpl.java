@@ -1,6 +1,6 @@
 package lphybeast.spi;
 
-import beast.evolution.datatype.DataType;
+import beast.base.evolution.datatype.DataType;
 import jebl.evolution.sequences.SequenceType;
 import lphy.evolution.datatype.Binary;
 import lphy.evolution.datatype.Continuous;
@@ -88,10 +88,10 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
     @Override
     public Map<SequenceType, DataType> getDataTypeMap() {
         Map<SequenceType, DataType> dataTypeMap = new ConcurrentHashMap<>();
-        dataTypeMap.put(SequenceType.NUCLEOTIDE, new beast.evolution.datatype.Nucleotide());
-        dataTypeMap.put(SequenceType.AMINO_ACID, new beast.evolution.datatype.Aminoacid());
-        dataTypeMap.put(Binary.getInstance(), new beast.evolution.datatype.Binary());
-        dataTypeMap.put(Continuous.getInstance(), new beast.evolution.datatype.ContinuousDataType());
+        dataTypeMap.put(SequenceType.NUCLEOTIDE, new beast.base.evolution.datatype.Nucleotide());
+        dataTypeMap.put(SequenceType.AMINO_ACID, new beast.base.evolution.datatype.Aminoacid());
+        dataTypeMap.put(Binary.getInstance(), new beast.base.evolution.datatype.Binary());
+        dataTypeMap.put(Continuous.getInstance(), new beastclassic.evolution.datatype.ContinuousDataType());
         return dataTypeMap;
     }
 

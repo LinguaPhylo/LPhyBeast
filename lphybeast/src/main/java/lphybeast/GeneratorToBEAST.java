@@ -1,6 +1,6 @@
 package lphybeast;
 
-import beast.core.BEASTInterface;
+import beast.base.core.BEASTInterface;
 import lphy.graphicalModel.Generator;
 
 import java.util.List;

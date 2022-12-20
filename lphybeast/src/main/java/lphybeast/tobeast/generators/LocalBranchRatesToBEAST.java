@@ -1,7 +1,7 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.evolution.branchratemodel.RandomLocalClockModel;
+import beast.base.core.BEASTInterface;
+import beast.base.evolution.branchratemodel.RandomLocalClockModel;
 import lphy.evolution.branchrates.LocalBranchRates;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;

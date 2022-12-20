@@ -1,6 +1,6 @@
 package lphybeast.tobeast.values;
 
-import beast.core.parameter.IntegerParameter;
+import beast.base.inference.parameter.IntegerParameter;
 import lphy.graphicalModel.GenerativeDistribution1D;
 import lphy.graphicalModel.Value;
 import lphybeast.BEASTContext;

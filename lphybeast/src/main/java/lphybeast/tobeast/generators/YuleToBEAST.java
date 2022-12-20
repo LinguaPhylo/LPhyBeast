@@ -1,7 +1,7 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.evolution.speciation.YuleModel;
+import beast.base.core.BEASTInterface;
+import beast.base.evolution.speciation.YuleModel;
 import lphy.evolution.birthdeath.Yule;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;

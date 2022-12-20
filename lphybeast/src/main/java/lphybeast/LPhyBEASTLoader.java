@@ -1,7 +1,7 @@
 package lphybeast;
 
-import beast.evolution.datatype.DataType;
-import beast.util.PackageManager;
+import beast.base.evolution.datatype.DataType;
+import beast.pkgmgmt.PackageManager;
 import jebl.evolution.sequences.SequenceType;
 import lphy.graphicalModel.Generator;
 import lphy.graphicalModel.Value;

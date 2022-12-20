@@ -1,13 +1,13 @@
 package lphybeast.tobeast.loggers;
 
-import beast.core.Loggable;
-import beast.evolution.tree.TreeInterface;
+import beast.base.core.Loggable;
+import beast.base.evolution.tree.TreeInterface;
 
 import java.util.List;
 
 /**
  * Helper to create a tree logger, may contain a simple tree,
- * or customised logger e.g. {@link beast.evolution.tree.TreeWithMetaDataLogger}.
+ * or customised logger e.g. {@link beast.base.evolution.TreeWithMetaDataLogger}.
  * Usually one tree one logger, which is different convention with logging parameters.
  * @author Walter Xie
  */

@@ -1,8 +1,8 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.parameter.RealParameter;
-import beast.math.distributions.Prior;
+import beast.base.core.BEASTInterface;
+import beast.base.inference.distribution.Prior;
+import beast.base.inference.parameter.RealParameter;
 import lphy.core.distributions.InverseGamma;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
@@ -10,7 +10,7 @@ import lphybeast.GeneratorToBEAST;
 public class InverseGammaToBEAST implements GeneratorToBEAST<InverseGamma, Prior> {
     @Override
     public Prior generatorToBEAST(InverseGamma generator, BEASTInterface value, BEASTContext context) {
-        beast.math.distributions.InverseGamma inverseGamma = new beast.math.distributions.InverseGamma();
+        beast.base.inference.distribution.InverseGamma inverseGamma = new beast.base.inference.distribution.InverseGamma();
         inverseGamma.setInputValue("alpha", context.getBEASTObject(generator.getAlpha()));
         inverseGamma.setInputValue("beta", context.getBEASTObject(generator.getBeta()));
         inverseGamma.initAndValidate();

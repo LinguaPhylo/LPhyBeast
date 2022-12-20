@@ -1,10 +1,10 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.parameter.BooleanParameter;
-import beast.core.parameter.RealParameter;
-import beast.evolution.substitutionmodel.Frequencies;
-import beast.evolution.substitutionmodel.SVSGeneralSubstitutionModel;
+import beast.base.core.BEASTInterface;
+import beast.base.evolution.substitutionmodel.Frequencies;
+import beast.base.inference.parameter.BooleanParameter;
+import beast.base.inference.parameter.RealParameter;
+import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModel;
 import lphy.core.functions.Select;
 import lphy.evolution.substitutionmodel.GeneralTimeReversible;
 import lphy.graphicalModel.Generator;

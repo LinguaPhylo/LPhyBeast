@@ -1,9 +1,9 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.BEASTObject;
-import beast.core.parameter.RealParameter;
-import beast.util.BEASTVector;
+import beast.base.core.BEASTInterface;
+import beast.base.core.BEASTObject;
+import beast.base.inference.parameter.RealParameter;
+import beastlabs.util.BEASTVector;
 import lphy.core.functions.VectorizedFunction;
 import lphy.graphicalModel.DeterministicFunction;
 import lphy.graphicalModel.GraphicalModelNode;

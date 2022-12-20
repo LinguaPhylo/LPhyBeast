@@ -1,9 +1,9 @@
 package lphybeast.tobeast.values;
 
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.TraitSet;
-import beast.util.TreeParser;
+import beast.base.evolution.alignment.Taxon;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.TraitSet;
+import beast.base.evolution.tree.TreeParser;
 import lphy.core.functions.ElementsAt;
 import lphy.evolution.alignment.SimpleAlignment;
 import lphy.evolution.tree.TimeTree;

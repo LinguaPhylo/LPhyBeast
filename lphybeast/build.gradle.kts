@@ -15,9 +15,9 @@ java {
 }
 
 val beast2Jars = fileTree("lib2") {
-    exclude("**/starbeast2-*.jar")
-    exclude("**/*-sources.jar")
-    exclude("**/*-javadoc.jar")
+//    exclude("**/starbeast2-*.jar")
+    exclude("**/*src.jar")
+    exclude("**/*javadoc.jar")
 }
 val notReleasedJars = fileTree("lib") {
     // not released, so must include in lphybeast release
@@ -35,7 +35,7 @@ val lblibs by configurations.creating {
 
 // TODO 3 versions: here, LPhyBEAST, version.xml
 // version has to be manually adjusted to keep same between version.xml and here
-version = "0.4.3-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 
 
 // if the project dependencies ues impl, then impl(proj(..)) will only have source code,

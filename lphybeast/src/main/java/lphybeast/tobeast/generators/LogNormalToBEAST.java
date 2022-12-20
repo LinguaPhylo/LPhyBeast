@@ -1,9 +1,9 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.parameter.RealParameter;
-import beast.math.distributions.LogNormalDistributionModel;
-import beast.math.distributions.Prior;
+import beast.base.core.BEASTInterface;
+import beast.base.inference.distribution.LogNormalDistributionModel;
+import beast.base.inference.distribution.Prior;
+import beast.base.inference.parameter.RealParameter;
 import lphy.core.distributions.LogNormal;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;

@@ -1,8 +1,8 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.parameter.Parameter;
-import beast.math.distributions.Prior;
+import beast.base.core.BEASTInterface;
+import beast.base.inference.distribution.Prior;
+import beast.base.inference.parameter.Parameter;
 import lphy.core.distributions.Poisson;
 import lphy.util.LoggerUtils;
 import lphybeast.BEASTContext;
@@ -31,7 +31,7 @@ public class PoissonToBEAST implements GeneratorToBEAST<Poisson, Prior> {
 //        }
 
         // BEAST Poisson : Input<RealParameter> lambdaInput
-        beast.math.distributions.Poisson poisson = new beast.math.distributions.Poisson();
+        beast.base.inference.distribution.Poisson poisson = new beast.base.inference.distribution.Poisson();
         poisson.setInputValue("lambda", context.getAsRealParameter(generator.getLambda()));
         if (offset != 0) {
             poisson.setInputValue("offset", offset);

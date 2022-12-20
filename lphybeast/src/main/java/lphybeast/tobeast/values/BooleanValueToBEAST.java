@@ -1,6 +1,6 @@
 package lphybeast.tobeast.values;
 
-import beast.core.parameter.BooleanParameter;
+import beast.base.inference.parameter.BooleanParameter;
 import lphy.graphicalModel.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;

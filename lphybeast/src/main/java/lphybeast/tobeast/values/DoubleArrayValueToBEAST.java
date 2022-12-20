@@ -1,12 +1,12 @@
 package lphybeast.tobeast.values;
 
-import beast.core.BEASTInterface;
-import beast.core.Function;
-import beast.core.Operator;
-import beast.core.parameter.IntegerParameter;
-import beast.core.parameter.Parameter;
-import beast.core.parameter.RealParameter;
-import beast.evolution.operators.DeltaExchangeOperator;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Function;
+import beast.base.inference.Operator;
+import beast.base.inference.operator.DeltaExchangeOperator;
+import beast.base.inference.parameter.IntegerParameter;
+import beast.base.inference.parameter.Parameter;
+import beast.base.inference.parameter.RealParameter;
 import feast.function.Concatenate;
 import lphy.core.distributions.Dirichlet;
 import lphy.core.distributions.WeightedDirichlet;

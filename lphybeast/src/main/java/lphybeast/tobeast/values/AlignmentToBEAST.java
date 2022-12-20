@@ -1,11 +1,12 @@
 package lphybeast.tobeast.values;
 
-import beast.evolution.alignment.Sequence;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.datatype.DataType;
-import beast.evolution.datatype.UserDataType;
-import beast.evolution.tree.TraitSet;
+import beast.base.evolution.alignment.Sequence;
+import beast.base.evolution.alignment.Taxon;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.datatype.UserDataType;
+import beast.base.evolution.tree.TraitSet;
+import beastclassic.evolution.alignment.AlignmentFromTrait;
 import jebl.evolution.sequences.SequenceType;
 import lphy.evolution.alignment.AlignmentUtils;
 import lphy.evolution.alignment.SimpleAlignment;
@@ -20,24 +21,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evolution.alignment.Alignment> {
+public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.base.evolution.alignment.Alignment> {
 
     private static final String DISCRETE = "discrete";
 
     @Override
-    public beast.evolution.alignment.Alignment valueToBEAST(Value<SimpleAlignment> alignmentValue, BEASTContext context) {
+    public beast.base.evolution.alignment.Alignment valueToBEAST(Value<SimpleAlignment> alignmentValue, BEASTContext context) {
 
         SimpleAlignment alignment = alignmentValue.value();
         SequenceType lphyDataType = alignment.getSequenceType();
         String[] taxaNames = alignment.getTaxaNames();
 
-        beast.evolution.alignment.Alignment beastAlignment;
+        beast.base.evolution.alignment.Alignment beastAlignment;
         // TODO BEAST special data types: StandardData, UserDataType, IntegerData
         // 1. Trait Alignment, always 1 site
         if (lphyDataType instanceof Standard standard && alignment.nchar()==1) {
             DataType beastDataType = DataTypeUtils.getUserDataType(standard, true);
             // AlignmentFromTrait
-            beastAlignment = new beast.evolution.alignment.AlignmentFromTrait();
+            beastAlignment = new AlignmentFromTrait();
             // Input<DataType.Base> userDataTypeInput
             beastAlignment.setInputValue("userDataType", beastDataType);
 
@@ -95,7 +96,7 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
                 sequences.add(createBEASTSequence(taxaNames[i], s));
             }
             // normal Alignment
-            beastAlignment = new beast.evolution.alignment.Alignment();
+            beastAlignment = new beast.base.evolution.alignment.Alignment();
             beastAlignment.setInputValue("sequence", sequences);
 
             // 3. morphological data, needs extra <userDataType section
@@ -195,7 +196,7 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.evo
     }
 
     @Override
-    public Class<beast.evolution.alignment.Alignment> getBEASTClass() {
-        return beast.evolution.alignment.Alignment.class;
+    public Class<beast.base.evolution.alignment.Alignment> getBEASTClass() {
+        return beast.base.evolution.alignment.Alignment.class;
     }
 }
