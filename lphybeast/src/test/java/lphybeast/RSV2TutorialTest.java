@@ -64,7 +64,7 @@ public class RSV2TutorialTest {
                 xml.contains("BE332s102=0.0") && xml.contains("USALongs56=46.0"), "Time" );
 
         assertTrue(xml.contains("<distribution") && xml.contains("id=\"Theta.prior\"") && xml.contains("x=\"@Theta\"") &&
-                xml.contains("spec=\"beast.math.distributions.LogNormalDistributionModel\"") &&
+                xml.contains("spec=\"beast.base.inference.distribution.LogNormalDistributionModel\"") &&
                 xml.contains("name=\"M\">3.0</parameter>") && xml.contains("name=\"S\">2.0</parameter>"), "Theta prior");
 
         assertTrue(xml.contains("x=\"@kappa\"") && xml.contains("id=\"kappa.prior\"") &&

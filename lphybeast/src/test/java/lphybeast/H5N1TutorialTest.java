@@ -74,7 +74,7 @@ public class H5N1TutorialTest {
                 xml.contains("A_bird_HongKong_542_1997=8.0"), "Time" );
 
         assertTrue(xml.contains("<distribution") && xml.contains("id=\"Theta.prior\"") &&
-                xml.contains("x=\"@Theta\"") && xml.contains("spec=\"beast.math.distributions.LogNormalDistributionModel\"") &&
+                xml.contains("x=\"@Theta\"") && xml.contains("spec=\"beast.base.inference.distribution.LogNormalDistributionModel\"") &&
                 xml.contains("name=\"M\">0.0</parameter>") && xml.contains("name=\"S\">1.0</parameter>"), "Theta prior");
 
         assertTrue(xml.contains("x=\"@kappa\"") && xml.contains("id=\"kappa.prior\"") &&

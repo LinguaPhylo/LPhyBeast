@@ -1,12 +1,8 @@
 package lphybeast.tobeast.values;
 
-import beast.core.parameter.Parameter;
-import beast.core.parameter.RealParameter;
+import beast.base.inference.parameter.RealParameter;
 import lphy.graphicalModel.Value;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * test unicode

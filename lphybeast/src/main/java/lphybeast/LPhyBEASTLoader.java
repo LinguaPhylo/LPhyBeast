@@ -94,7 +94,7 @@ public class LPhyBEASTLoader {
 
 
 //    private void registerExtensions(ServiceLoader<LPhyBEASTExt> loader, String clsName) {
-    private void registerExtensions(String clsName) {
+    private void registerExtensions(List<String> spiClsNames) {
         valueToBEASTList = new ArrayList<>();
         generatorToBEASTMap = new LinkedHashMap<>();
         dataTypeMap = new ConcurrentHashMap<>();
@@ -112,7 +112,7 @@ public class LPhyBEASTLoader {
                 //*** LPhyBEASTExtImpl must have a public no-args constructor ***//
 //                LPhyBEASTExt ext = extensions.next();
                 // clsName == null then register all
-                if (clsName == null || ext.getClass().getName().equalsIgnoreCase(clsName)) {
+                if (spiClsNames == null || spiClsNames.contains(ext.getClass().getName())) {
                     System.out.println("Registering extension from " + ext.getClass().getName());
 
                     final List<Class<? extends ValueToBEAST>> valuesToBEASTs = ext.getValuesToBEASTs();

@@ -17,7 +17,7 @@ public class TestUtils {
 
     private TestUtils() { }
 
-    public static LPhyBeast getLPhyBeast() {
+    public static LPhyBeast  getLPhyBeast() {
         if(lPhyBEAST == null) {
             lPhyBEAST = new LPhyBeast();
         }

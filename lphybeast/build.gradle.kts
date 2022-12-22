@@ -20,8 +20,6 @@ val beast2Jars = fileTree("lib2") {
     exclude("**/*javadoc.jar")
 }
 val notReleasedJars = fileTree("lib") {
-    // not released, so must include in lphybeast release
-    include("bdtree.jar")
 //    include("lphy-1.3.*.jar")
 }
 val lblibs by configurations.creating {

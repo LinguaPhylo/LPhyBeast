@@ -45,7 +45,7 @@ public class LPhyBeast implements Runnable {
      */
     public LPhyBeast() {
         repTot = 1;
-        loader = null;
+        loader = null;// LPhyBEASTLoader.getInstance();
         try {
             lPhyBeastConfig = new LPhyBeastConfig();
         } catch (IOException e) {
