@@ -97,12 +97,10 @@ public class LPhyBeastCMD implements Callable<Integer> {
      */
     @Override
     public Integer call() throws PicocliException {
+        // init loader
         if (loader == null) {
-            // register version.xml here when in IDE
-            if (versionFiles != null) { //TODO mv into LPhyBEASTLoader.getInstance()
-                for (String vf : versionFiles) // before LPhyBEASTLoader.getInstance()
-                    LPhyBEASTLoader.addBEAST2Services(vf);
-            }
+            // before LPhyBEASTLoader.getInstance()
+            LPhyBEASTLoader.addBEAST2Services(versionFiles);
 
             loader = LPhyBEASTLoader.getInstance();
         }

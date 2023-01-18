@@ -72,19 +72,24 @@ public class LPhyBEASTLoader {
 
 
     /**
-     * Add services before create instance of LPhyBEAST loader,
-     * if in IDE.
-     * @param versionFile  version.xml in each B2 package.
+     * register version.xml and add services when using IDE,
+     * before creating an instance of LPhyBEAST loader.
+     * @param versionFiles array of version.xml in each B2 package.
      */
-    public static void addBEAST2Services(String versionFile) {
-        try {
-            // this load all jars in B2 pkgs from local B2 repo folder
-            // e.g. ~/Library/Application\ Support/BEAST/2.7/
-            PackageManager.loadExternalJars();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public static void addBEAST2Services(String[] versionFiles) {
+        if (versionFiles != null) {
+            try {
+                // This line should only be called using IDE:
+                // this loads all jars in B2 pkgs from local B2 repo folder
+                // e.g. ~/Library/Application\ Support/BEAST/2.7/
+                PackageManager.loadExternalJars(); // TODO to improve: without involving local installed pkgs.
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            for (String vf : versionFiles)
+                addServices(vf);
         }
-        addServices(versionFile);
     }
 
     /**
