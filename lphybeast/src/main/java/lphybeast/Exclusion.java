@@ -57,7 +57,7 @@ public class Exclusion {
                 generator instanceof CreateTaxa || generator instanceof Species ||
                 generator instanceof TaxaAgesFromFunction ||
                 generator instanceof MissingSites || generator instanceof FilterMissingSites ||
-                generator instanceof Simulate ||
+                generator instanceof Simulate || generator instanceof Get<?> ||
                 generator instanceof ReadNexus || generator instanceof ReadFasta ||
                 generator instanceof ExtractTrait || generator instanceof Unique ||
                 generator instanceof ARange || generator instanceof Range ||

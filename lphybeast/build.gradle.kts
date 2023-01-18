@@ -49,7 +49,7 @@ dependencies {
      * such as "io.github.linguaphylo:lphy:1.2.0!!".
      * https://docs.gradle.org/current/userguide/rich_versions.html#sec:strict-version
      */
-    api("io.github.linguaphylo:lphy:1.3.3-SNAPSHOT")
+    api("io.github.linguaphylo:lphy:1.4.0-SNAPSHOT")
 //    api("org.antlr:antlr4-runtime:4.9.3")
 //    api("org.apache.commons:commons-math3:3.6.1")
 //    api("org.apache.commons:commons-lang3:3.12.0")

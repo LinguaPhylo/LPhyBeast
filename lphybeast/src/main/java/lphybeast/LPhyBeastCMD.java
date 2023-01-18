@@ -4,12 +4,13 @@ import lphy.system.UserDir;
 import lphy.util.LoggerUtils;
 import lphy.util.RandomUtils;
 import picocli.CommandLine;
+import picocli.CommandLine.*;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "lphybeast", footer = "Copyright(c) 2020",
+@Command(name = "lphybeast", footer = "Copyright(c) 2020",
         description = "LPhyBEAST takes an LPhy script, which contains a model specification and some data, " +
                 "to produce a BEAST 2 XML file. The installation and usage is available at " +
                 "https://linguaphylo.github.io/setup/",
@@ -18,42 +19,42 @@ import java.util.concurrent.Callable;
                 "OS: ${os.name} ${os.version} ${os.arch}"})
 public class LPhyBeastCMD implements Callable<Integer> {
 
-    public static final String VERSION = "0.4.3";
+    public static final String VERSION = "1.0.0";
 
-    @CommandLine.Parameters(paramLabel = "LPhy_scripts", description = "File of the LPhy model specification. " +
+    @Parameters(paramLabel = "LPhy_scripts", description = "File of the LPhy model specification. " +
             "If it is a relative path, then concatenate 'user.dir' to the front of the path. " +
             "If `-wd` is NOT given, the 'user.dir' will set to the path where the LPhy script is.")
     Path infile;
 
-    @CommandLine.Option(names = {"-V", "--version"}, versionHelp = true, description = "display version info")
+    @Option(names = {"-V", "--version"}, versionHelp = true, description = "display version info")
     boolean versionInfoRequested;
-    @CommandLine.Option(names = {"-h", "--help"}, usageHelp = true, description = "display this help message")
+    @Option(names = {"-h", "--help"}, usageHelp = true, description = "display this help message")
     boolean usageHelpRequested;
 
-    @CommandLine.Option(names = {"-o", "--out"},     description = "BEAST 2 XML. " +
+    @Option(names = {"-o", "--out"},     description = "BEAST 2 XML. " +
             "If it contains relative path, then concatenate 'user.dir' to the front of the path.")
     Path outfile;
     // 'user.dir' is default to the current directory
-    @CommandLine.Option(names = {"-wd", "--workdir"}, description = "Set 'user.dir' " +
+    @Option(names = {"-wd", "--workdir"}, description = "Set 'user.dir' " +
             "and concatenate it to the front of the input and output path " +
             "(if the relative path is provided), which can be used for batch processing.")
     Path wd;
 
     //MCMC
-    @CommandLine.Option(names = {"-l", "--chainLength"}, defaultValue = "1000000",
+    @Option(names = {"-l", "--chainLength"}, defaultValue = "1000000",
             description = "The total chain length of MCMC, default to 1 million.")
     long chainLength;
-    @CommandLine.Option(names = {"-b", "--preBurnin"}, defaultValue = "-1",
+    @Option(names = {"-b", "--preBurnin"}, defaultValue = "-1",
             description = "The number of burnin samples taken before entering the main loop of MCMC. " +
                     "If < 0, as default, then estimate it based on all state nodes size.")
     int preBurnin;
 
     //well calibrated study
-    @CommandLine.Option(names = {"-r", "--replicates"}, defaultValue = "1", description = "the number of replicates (XML) given one LPhy script, " +
+    @Option(names = {"-r", "--replicates"}, defaultValue = "1", description = "the number of replicates (XML) given one LPhy script, " +
             "usually to create simulations for well-calibrated study.") int repTot;
 
 
-    @CommandLine.Option(names = {"-cca", "--compressConstantAlignments"},
+    @Option(names = {"-cca", "--compressConstantAlignments"},
             description = "Compress the alignment only having constants sites into " +
                     "a FilterAlignment with weights on each constant pattern.\n" +
                           "If 0, as default, ignore this function;\n" +
@@ -61,15 +62,20 @@ public class LPhyBeastCMD implements Callable<Integer> {
                           "If 2, then compress constants sites, but ignoring the unknown state or gap.\n")
     int compressConstantAlignment;
 
-    @CommandLine.Option(names = {"-seed"}, description = "the seed to run the LPhy script.")
+    @Option(names = {"-seed"}, description = "the seed to run the LPhy script.")
     int seed;
 
-//    @CommandLine.Option(names = {"-d", "--data"},
+    @Option(names = {"-vf", "--version_file"}, split = ",",
+            description = "Provide a BEAST2 version file containing a list of services to explicitly allow. " +
+                    "(for package development, e.g. -vf /pkg1/version.xml,/pkg2/version.xml,/pkg3/version.xml)")
+    String[] versionFiles = null;
+
+//    @Option(names = {"-d", "--data"},
 //            description = "Select the alignment given ID (e.g. random variable name) to compress constant sites, " +
 //                    "but leave the rest unselected alignment(s) unchanged.")
 //    String compressAlgId = null;
 
-//    @CommandLine.Option(names = {"-lal", "--logAlignments"}, description = "Log all alignments including the intermediate process generated in the LPhy script.")
+//    @Option(names = {"-lal", "--logAlignments"}, description = "Log all alignments including the intermediate process generated in the LPhy script.")
     boolean logAllAlignments = false;
 
     public static void main(String[] args) {
@@ -90,9 +96,17 @@ public class LPhyBeastCMD implements Callable<Integer> {
      * the 'user.dir' will be set to the path where the LPhy script is.
      */
     @Override
-    public Integer call() throws CommandLine.PicocliException {
-        if (loader == null)
+    public Integer call() throws PicocliException {
+        if (loader == null) {
+            // register version.xml here when in IDE
+            if (versionFiles != null) { //TODO mv into LPhyBEASTLoader.getInstance()
+                for (String vf : versionFiles) // before LPhyBEASTLoader.getInstance()
+                    LPhyBEASTLoader.addBEAST2Services(vf);
+            }
+
             loader = LPhyBEASTLoader.getInstance();
+        }
+
 
         try {
             // define config for the run
@@ -108,16 +122,16 @@ public class LPhyBeastCMD implements Callable<Integer> {
             lphyBeast.run();
 
         } catch (FileNotFoundException e) {
-            throw new CommandLine.PicocliException("Fail to read LPhy scripts from " +
+            throw new PicocliException("Fail to read LPhy scripts from " +
                     infile + ", user.dir = " + System.getProperty(UserDir.USER_DIR), e);
         } catch (UnsupportedOperationException e) {
-            throw new CommandLine.PicocliException("\n\nCannot find the mapping for given LPhy code to BEAST2 classes! " +
+            throw new PicocliException("\n\nCannot find the mapping for given LPhy code to BEAST2 classes! " +
                     "\nInput file = " + infile +
                     "\nPlease ensure you have installed the required LPhyBEAST extensions and BEAST2 packages : " +
                     "\n\n" + e.getMessage(), e);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new CommandLine.PicocliException(e.toString());
+            throw new PicocliException(e.toString());
         }
         return 0;
     }
@@ -125,9 +139,9 @@ public class LPhyBeastCMD implements Callable<Integer> {
 
     /**TODO not working, use BEASTClassLoader ?
      * This function is modified from picocli demo {@code VersionProviderDemo2}.
-     * {@link CommandLine.IVersionProvider} implementation that returns version information
+     * {@link IVersionProvider} implementation that returns version information
      * from the lphybeast-x.x.x.jar file's {@code /META-INF/MANIFEST.MF} file.
-     static class ManifestVersionProvider implements CommandLine.IVersionProvider {
+     static class ManifestVersionProvider implements IVersionProvider {
      public String[] getVersion() throws Exception {
      Enumeration<URL> resources = LPhyBeastCMD.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
      while (resources.hasMoreElements()) {

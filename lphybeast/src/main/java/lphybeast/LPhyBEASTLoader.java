@@ -1,6 +1,7 @@
 package lphybeast;
 
 import beast.base.evolution.datatype.DataType;
+import beast.pkgmgmt.BEASTClassLoader;
 import beast.pkgmgmt.PackageManager;
 import jebl.evolution.sequences.SequenceType;
 import lphy.graphicalModel.Generator;
@@ -10,9 +11,12 @@ import lphybeast.spi.LPhyBEASTExt;
 import lphybeast.tobeast.operators.DefaultTreeOperatorStrategy;
 import lphybeast.tobeast.operators.TreeOperatorStrategy;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static beast.pkgmgmt.BEASTClassLoader.addServices;
 
 /**
  * The factory class to load LPhyBEAST extensions using {@link PackageManager}.
@@ -64,36 +68,59 @@ public class LPhyBEASTLoader {
      */
     public List<TreeOperatorStrategy> newTreeOperatorStrategies;
 
+    public static final String LPHY_BEAST_EXT = "lphybeast.spi.LPhyBEASTExt";
+
+
+    /**
+     * Add services before create instance of LPhyBEAST loader,
+     * if in IDE.
+     * @param versionFile  version.xml in each B2 package.
+     */
+    public static void addBEAST2Services(String versionFile) {
+        try {
+            // this load all jars in B2 pkgs from local B2 repo folder
+            // e.g. ~/Library/Application\ Support/BEAST/2.7/
+            PackageManager.loadExternalJars();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        addServices(versionFile);
+    }
 
     /**
      * Use {@link PackageManager} to load the container classes from LPhyBEAST extensions,
      * which include all extended classes.
      * @return  the list of container classes (one per extension).
      */
-    public List<LPhyBEASTExt> getExtClasses() {
+    public List<LPhyBEASTExt> getExtClasses() throws IOException, ClassNotFoundException,
+            InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
-        //this is time-consuming, but can cache LPhyBEASTLoader to reduce time
-        List<Class<?>> classList = PackageManager.find(LPhyBEASTExt.class, false);
-        //TODO PackageManager.find somehow add LPhyBEASTExtImpl twice
-        Set<Class<?>> uniqueCls = new HashSet<>(classList);
+        Map<String, Set<String>> providers = BEASTClassLoader.getServices();
+        Set<String> extStr = providers.get(LPHY_BEAST_EXT);
+
+        if (extStr==null || extStr.isEmpty())
+            throw new IllegalArgumentException("Cannot find the BEAST2 service implementing " + LPHY_BEAST_EXT + " !");
 
         List<LPhyBEASTExt> extensionList = new ArrayList<>();
-        for (Class<?> cls : uniqueCls) {
+        for (String clsStr : extStr) {
+            // get beast service
+            Class<?> cls = BEASTClassLoader.forName(clsStr, LPHY_BEAST_EXT);
             // https://docs.oracle.com/javase/9/docs/api/java/lang/Class.html#newInstance--
             try {
                 Object obj = cls.getDeclaredConstructor().newInstance();
                 extensionList.add((LPhyBEASTExt) obj);
             } catch (InvocationTargetException | InstantiationException |
-                    IllegalAccessException | NoSuchMethodException e) {
+                     IllegalAccessException | NoSuchMethodException e) {
                 // do nothing
             }
-//        catch (Throwable e) { e.printStackTrace(); }
         }
+//        catch (Throwable e) { e.printStackTrace(); }
+
         return extensionList;
     }
 
 
-//    private void registerExtensions(ServiceLoader<LPhyBEASTExt> loader, String clsName) {
+    //    private void registerExtensions(ServiceLoader<LPhyBEASTExt> loader, String clsName) {
     private void registerExtensions(List<String> spiClsNames) {
         valueToBEASTList = new ArrayList<>();
         generatorToBEASTMap = new LinkedHashMap<>();
@@ -108,7 +135,19 @@ public class LPhyBEASTLoader {
 //            Iterator<LPhyBEASTExt> extensions = loader.iterator();
 //            while (extensions.hasNext()) { // TODO validation if add same name
 
-            for (LPhyBEASTExt ext : getExtClasses()) {
+            List<LPhyBEASTExt> extList = null;
+            try {
+                try {
+                    extList = getExtClasses();
+                } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException |
+                         IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            for (LPhyBEASTExt ext : extList) {
                 //*** LPhyBEASTExtImpl must have a public no-args constructor ***//
 //                LPhyBEASTExt ext = extensions.next();
                 // clsName == null then register all
