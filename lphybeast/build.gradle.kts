@@ -14,14 +14,14 @@ java {
     withSourcesJar()
 }
 
-val beast2Jars = fileTree("lib2") {
+val beast2Jars = fileTree("lib") {
 //    exclude("**/starbeast2-*.jar")
     exclude("**/*src.jar")
     exclude("**/*javadoc.jar")
 }
-val notReleasedJars = fileTree("lib") {
+//val notReleasedJars = fileTree("lib") {
 //    include("lphy-1.3.*.jar")
-}
+//}
 val lblibs by configurations.creating {
     // Add to defaultDependencies to get their all jars
     defaultDependencies {
@@ -60,9 +60,10 @@ dependencies {
 
     // all released beast 2 libs
     // TODO beast2 jar contains Apache math. Be aware of version conflict to LPhy dependency.
+    // TODO better way to load version.xml?
     api(beast2Jars)
     // other jars must be included
-    implementation(notReleasedJars)
+//    implementation(notReleasedJars)
 //    if (project.hasProperty("isRuntime")) {
 //        runtimeOnly("io.github.linguaphylo:lphy:1.1.0")
 //        runtimeOnly(beast2Jars)
@@ -115,8 +116,6 @@ distributions {
                 from(lblibs.files)
                 // lphybeast core jar
                 from(tasks.jar)
-                // bdtree
-                from(notReleasedJars)
                 //TODO require to run distZip after build to copy mascot jar
 //                from(project(":mascot").layout.buildDirectory.dir("libs")){
 //                    exclude("*-sources.jar")
