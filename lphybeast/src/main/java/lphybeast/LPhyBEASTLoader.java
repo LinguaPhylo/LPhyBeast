@@ -13,6 +13,7 @@ import lphybeast.tobeast.operators.TreeOperatorStrategy;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -87,8 +88,12 @@ public class LPhyBEASTLoader {
                 throw new RuntimeException(e);
             }
 
-            for (String vf : versionFiles)
+            for (String vf : versionFiles) {
+                // check if it exists before add
+                if (! Paths.get(vf).toFile().exists())
+                    throw new IllegalArgumentException("Cannot find the provided " + Paths.get(vf).toAbsolutePath());
                 addServices(vf);
+            }
         }
     }
 

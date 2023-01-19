@@ -18,6 +18,10 @@ public class TestUtils {
     private TestUtils() { }
 
     public static LPhyBeast  getLPhyBeast() {
+        // TODO better way?
+        Path vfPath = Paths.get(UserDir.getUserDir().toAbsolutePath().toString(), "..", "version.xml");
+        LPhyBEASTLoader.addBEAST2Services(new String[]{vfPath.toAbsolutePath().toString()});
+
         if(lPhyBEAST == null) {
             lPhyBEAST = new LPhyBeast();
         }

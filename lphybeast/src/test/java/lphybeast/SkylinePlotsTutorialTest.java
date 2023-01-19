@@ -56,13 +56,15 @@ public class SkylinePlotsTutorialTest {
                 xml.contains("id=\"gamma\"") && xml.contains("id=\"Theta\"") && xml.contains("id=\"psi\"") &&
                 xml.contains("id=\"A\""), "Check parameters ID" );
         // pi_trait, I, R_trait
-        assertTrue(xml.contains("id=\"MarkovChainDistribution\"") && xml.contains("MarkovChainDistribution") &&
+        assertTrue(xml.contains("id=\"MarkovChainDistribution\"") &&
+                xml.contains("MarkovChainDistribution") &&
                 xml.contains("groupSizes=\"@A\"") && xml.contains("popSizes=\"@Theta\"") &&
                 xml.contains("spec=\"BayesianSkyline\""), "Bayesian Skyline" );
 
         assertTrue(xml.contains("<distribution") && xml.contains("id=\"theta1.prior\"") &&
-                xml.contains("arg=\"@Theta\"") && xml.contains("spec=\"util.Slice\"") && xml.contains("index=\"0\"") &&
-                xml.contains("name=\"M\">9.0</parameter>") && xml.contains("name=\"S\">2.0</parameter>"), "Theta1 prior");
+                xml.contains("arg=\"@Theta\"") && xml.contains("beastlabs.core.util.Slice") &&
+                xml.contains("index=\"0\"") && xml.contains("name=\"M\">9.0</parameter>") &&
+                xml.contains("name=\"S\">2.0</parameter>"), "Theta1 prior");
 
         assertTrue(xml.contains("x=\"@rates\"") && xml.contains("id=\"rates.prior\"") &&
                 xml.contains("name=\"alpha\">1.0 2.0 1.0 1.0 2.0 1.0</parameter>"),  "GTR prior" );
@@ -70,7 +72,7 @@ public class SkylinePlotsTutorialTest {
                 xml.contains("name=\"alpha\">3.0 3.0 3.0 3.0</parameter>"),  "pi prior" );
 
         assertTrue(xml.contains("<substModel") && xml.contains("rates=\"@rates\"") &&
-                xml.contains("spec=\"substmodels.nucleotide.GTR\""),  "GTR" );
+                xml.contains("substmodels.nucleotide.GTR"),  "GTR" );
         assertTrue(xml.contains("frequencies=\"@pi\"") && xml.contains("<frequencies"),  "frequencies" );
 
         assertTrue(xml.contains("name=\"clock.rate\">7.9E-4</parameter>"),  "clock rate" );
