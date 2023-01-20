@@ -32,7 +32,8 @@ jobs:
           find . -name "lib"
           echo "BEAST_LIB=LPhyBeast/lphybeast/lib" >> $GITHUB_ENV
           echo "LAUNCHER=launcher-2.7.3.jar" >> $GITHUB_ENV
-          
+
+      # /home/runner/.beast/2.7
       - name: Install packages
         run: |
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add bdtree
@@ -47,13 +48,14 @@ jobs:
       - name: Check file paths
         run: |
           ls LPhyBeast/lphybeast/lib
+          ls /home/runner/.beast/2.7
 
       - name: Run unit tests
         # change working dir, so gradle will work
         working-directory: ./LPhyBeast
         # only available in lphy at the moment
         # temp disable test because of github issue
-        run: ./gradlew build -x test --no-daemon
+        run: ./gradlew build --no-daemon
 
 #      - name: Publish unit test results
 #        uses: EnricoMi/publish-unit-test-result-action@v2
