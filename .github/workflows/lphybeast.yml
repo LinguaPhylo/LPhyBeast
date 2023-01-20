@@ -36,7 +36,6 @@ jobs:
       # /home/runner/.beast/2.7
       - name: Install packages
         run: |
-          java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add BEAST.base
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add bdtree
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add BEAST_CLASSIC
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add BEASTLabs
@@ -46,10 +45,9 @@ jobs:
 
       #./linguaPhylo/lphy/lib
       #./LPhyBeast/lphybeast/lib
-      - name: Check file paths
+      - name: Check all packages
         run: |
-          ls LPhyBeast/lphybeast/lib
-          ls /home/runner/.beast/2.7
+          ls /home/runner/.beast/2.7/*/lib
 
       - name: Run unit tests
         # change working dir, so gradle will work
@@ -58,8 +56,8 @@ jobs:
         # temp disable test because of github issue
         run: ./gradlew build --no-daemon
 
-#      - name: Publish unit test results
-#        uses: EnricoMi/publish-unit-test-result-action@v2
-#        if: always()
-#        with:
-#          files: ./LPhyBeast/*/build/test-results/**/*.xml
+      - name: Publish unit test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: ./LPhyBeast/*/build/test-results/**/*.xml
