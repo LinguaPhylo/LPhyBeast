@@ -1,14 +1,14 @@
 package lphybeast.tobeast.loggers;
 
-import beast.core.BEASTInterface;
-import beast.core.Loggable;
-import beast.core.Logger;
-import beast.core.StateNode;
-import beast.core.util.CompoundDistribution;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeInterface;
-import beast.evolution.tree.TreeStatLogger;
-import beast.evolution.tree.TreeWithMetaDataLogger;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Loggable;
+import beast.base.evolution.TreeWithMetaDataLogger;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeInterface;
+import beast.base.evolution.tree.TreeStatLogger;
+import beast.base.inference.CompoundDistribution;
+import beast.base.inference.Logger;
+import beast.base.inference.StateNode;
 import com.google.common.collect.Multimap;
 import lphy.evolution.coalescent.SkylineCoalescent;
 import lphy.evolution.coalescent.StructuredCoalescent;

@@ -1,9 +1,9 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.parameter.IntegerParameter;
-import beast.core.parameter.RealParameter;
-import beast.math.distributions.Prior;
+import beast.base.core.BEASTInterface;
+import beast.base.inference.distribution.Prior;
+import beast.base.inference.parameter.IntegerParameter;
+import beast.base.inference.parameter.RealParameter;
 import lphy.core.distributions.Uniform;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
@@ -13,7 +13,7 @@ public class UniformToBEAST implements GeneratorToBEAST<Uniform, Prior> {
 
     public Prior generatorToBEAST(Uniform generator, BEASTInterface value, BEASTContext context) {
 
-        beast.math.distributions.Uniform uniform = new beast.math.distributions.Uniform();
+        beast.base.inference.distribution.Uniform uniform = new beast.base.inference.distribution.Uniform();
 
         BEASTInterface lowerB = context.getBEASTObject(generator.getLower());
         BEASTInterface upperB = context.getBEASTObject(generator.getUpper());

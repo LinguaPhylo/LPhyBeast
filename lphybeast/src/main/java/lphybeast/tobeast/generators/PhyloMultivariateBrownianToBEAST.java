@@ -1,6 +1,6 @@
 //package lphybeast.tobeast.generators;
 //
-//import beast.core.BEASTInterface;
+//import beast.base.core.BEASTInterface;
 //import lphybeast.BEASTContext;
 //import lphybeast.GeneratorToBEAST;
 //

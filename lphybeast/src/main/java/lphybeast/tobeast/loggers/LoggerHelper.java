@@ -1,8 +1,8 @@
 package lphybeast.tobeast.loggers;
 
-import beast.core.BEASTInterface;
-import beast.core.Loggable;
-import beast.core.Logger;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Loggable;
+import beast.base.inference.Logger;
 import com.google.common.collect.Multimap;
 import lphy.graphicalModel.GraphicalModelNode;
 

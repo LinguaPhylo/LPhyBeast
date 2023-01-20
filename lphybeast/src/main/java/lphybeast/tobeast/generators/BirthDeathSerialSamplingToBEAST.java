@@ -1,10 +1,10 @@
 package lphybeast.tobeast.generators;
 
 import bdtree.likelihood.BirthDeathSequentialSampling;
-import beast.core.BEASTInterface;
-import beast.evolution.tree.Tree;
-import beast.math.distributions.MRCAPrior;
-import beast.math.distributions.Prior;
+import beast.base.core.BEASTInterface;
+import beast.base.evolution.tree.MRCAPrior;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.distribution.Prior;
 import lphy.evolution.birthdeath.BirthDeathSerialSamplingTree;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;

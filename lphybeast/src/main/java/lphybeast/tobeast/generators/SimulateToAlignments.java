@@ -1,7 +1,7 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.util.XMLProducer;
+import beast.base.core.BEASTInterface;
+import beast.base.parser.XMLProducer;
 import lphy.core.functions.alignment.Simulate;
 import lphy.evolution.alignment.Alignment;
 import lphy.evolution.alignment.SimpleAlignment;
@@ -30,11 +30,11 @@ public class SimulateToAlignments implements GeneratorToBEAST<Simulate, BEASTInt
                 if (entry.getValue() instanceof SimpleAlignment simpleAlignment) {
                     Value<SimpleAlignment> algValue =
                             new Value<>(entry.getKey(), simpleAlignment);
-                    // ValueToBEAST<SimpleAlignment, beast.evolution.alignment.Alignment>
+                    // ValueToBEAST<SimpleAlignment, beast.base.evolution.alignment.Alignment>
                     ValueToBEAST toBEAST = context.getMatchingValueToBEAST(algValue);
 
                     if (toBEAST != null && toBEAST instanceof AlignmentToBEAST alignmentToBEAST) {
-                        beast.evolution.alignment.Alignment beastAlg =
+                        beast.base.evolution.alignment.Alignment beastAlg =
                                 alignmentToBEAST.valueToBEAST(algValue, context);
                         String algXML = new XMLProducer().toXML(beastAlg);
                         // add replicate prefix

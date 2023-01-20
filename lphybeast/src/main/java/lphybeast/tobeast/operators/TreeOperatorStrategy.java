@@ -1,8 +1,8 @@
 package lphybeast.tobeast.operators;
 
-import beast.core.BEASTInterface;
-import beast.core.Operator;
-import beast.evolution.tree.Tree;
+import beast.base.core.BEASTInterface;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.Operator;
 import com.google.common.collect.Multimap;
 import lphy.graphicalModel.GraphicalModelNode;
 import lphybeast.BEASTContext;

@@ -1,18 +1,22 @@
-<addon name='lphybeast' version='0.4.3'>
-    <depends on='beast2' atleast='2.6.7'/>
-    <depends on='BEASTLabs' atleast='1.9.7'/>
-    <depends on='feast' atleast='7.11.0'
+<package name='lphybeast' version='1.0.0'>
+    <depends on='beast2' atleast='2.7.3'/>
+    <depends on='BEASTLabs' atleast='2.0.0'/>
+    <depends on='feast' atleast='9.2.0'
              projectURL="https://github.com/tgvaughan/feast"
              description="Expands the flexibility of BEAST 2 XML."/>
-    <depends on='SSM' atleast='1.1.0'
+    <depends on='SSM' atleast='1.2.0'
              description="Standard Nucleotide Substitution Models"
              projectURL="https://github.com/BEAST2-Dev/substmodels/"/>
-    <depends on='FastRelaxedClockLogNormal' atleast='1.1.1'/>
+    <depends on='FastRelaxedClockLogNormal' atleast='1.2.0'/>
+    <depends on='BEAST_CLASSIC' atleast='1.6.0'/>
+    <depends on='bdtree' atleast='0.0.1'/>
 
-    <!-- TODO   -->
-    <depends on='BEAST_CLASSIC' atleast='1.5.0'/>
+    <!-- add BEAST2 service below  -->
 
-    <!-- Not released : contraband bdtree -->
+    <service type="lphybeast.spi.LPhyBEASTExt">
+        <provider classname="lphybeast.spi.LPhyBEASTExtImpl"/>
+    </service>
+
 
     <packageapp description="A command-line program that takes an LPhy model specification including a data block, and produces a BEAST 2 XML input file."
                 class="lphybeast.LPhyBeastCMD"
@@ -20,5 +24,5 @@
     />
 
 
-</addon>
+</package>
 

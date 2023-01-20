@@ -1,7 +1,7 @@
 package lphybeast.tobeast;
 
-import beast.evolution.datatype.DataType;
-import beast.evolution.datatype.UserDataType;
+import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.datatype.UserDataType;
 import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.sequences.State;
 import lphy.evolution.datatype.Standard;

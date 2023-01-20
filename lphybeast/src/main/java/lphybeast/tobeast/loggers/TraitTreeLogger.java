@@ -1,11 +1,11 @@
 package lphybeast.tobeast.loggers;
 
-import beast.core.BEASTInterface;
-import beast.core.BEASTObject;
-import beast.core.Logger;
-import beast.evolution.likelihood.AncestralStateTreeLikelihood;
-import beast.evolution.tree.TreeInterface;
-import beast.evolution.tree.TreeWithTraitLogger;
+import beast.base.core.BEASTInterface;
+import beast.base.core.BEASTObject;
+import beast.base.evolution.tree.TreeInterface;
+import beast.base.inference.Logger;
+import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
+import beastclassic.evolution.tree.TreeWithTraitLogger;
 import com.google.common.collect.Multimap;
 import lphy.graphicalModel.GraphicalModelNode;
 import lphybeast.BEASTContext;

@@ -1,9 +1,9 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.parameter.IntegerParameter;
-import beast.core.parameter.RealParameter;
-import beast.evolution.tree.coalescent.TreeIntervals;
+import beast.base.core.BEASTInterface;
+import beast.base.evolution.tree.TreeIntervals;
+import beast.base.inference.parameter.IntegerParameter;
+import beast.base.inference.parameter.RealParameter;
 import lphy.evolution.coalescent.SkylineCoalescent;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SkylineToBSP implements
-        GeneratorToBEAST<SkylineCoalescent, beast.evolution.tree.coalescent.BayesianSkyline> {
+        GeneratorToBEAST<SkylineCoalescent, beast.base.evolution.tree.coalescent.BayesianSkyline> {
     @Override
-    public beast.evolution.tree.coalescent.BayesianSkyline generatorToBEAST(SkylineCoalescent coalescent, BEASTInterface value, BEASTContext context) {
+    public beast.base.evolution.tree.coalescent.BayesianSkyline generatorToBEAST(SkylineCoalescent coalescent, BEASTInterface value, BEASTContext context) {
 
-        beast.evolution.tree.coalescent.BayesianSkyline bsp = new beast.evolution.tree.coalescent.BayesianSkyline();
+        beast.base.evolution.tree.coalescent.BayesianSkyline bsp = new beast.base.evolution.tree.coalescent.BayesianSkyline();
 
         TreeIntervals treeIntervals = new TreeIntervals();
         treeIntervals.setInputValue("tree", value);
@@ -77,7 +77,7 @@ public class SkylineToBSP implements
     }
 
     @Override
-    public Class<beast.evolution.tree.coalescent.BayesianSkyline> getBEASTClass() {
-        return beast.evolution.tree.coalescent.BayesianSkyline.class;
+    public Class<beast.base.evolution.tree.coalescent.BayesianSkyline> getBEASTClass() {
+        return beast.base.evolution.tree.coalescent.BayesianSkyline.class;
     }
 }

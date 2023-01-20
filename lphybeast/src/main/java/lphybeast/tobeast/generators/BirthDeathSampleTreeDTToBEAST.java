@@ -1,11 +1,11 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.parameter.RealParameter;
-import beast.evolution.speciation.BirthDeathGernhard08Model;
-import beast.evolution.tree.Tree;
-import beast.math.distributions.MRCAPrior;
-import beast.math.distributions.Prior;
+import beast.base.core.BEASTInterface;
+import beast.base.evolution.speciation.BirthDeathGernhard08Model;
+import beast.base.evolution.tree.MRCAPrior;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.distribution.Prior;
+import beast.base.inference.parameter.RealParameter;
 import lphy.evolution.birthdeath.BirthDeathSamplingTreeDT;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;

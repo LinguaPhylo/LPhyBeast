@@ -1,7 +1,7 @@
 package lphybeast.tobeast.values;
 
-import beast.core.parameter.IntegerParameter;
-import beast.core.parameter.Parameter;
+import beast.base.inference.parameter.IntegerParameter;
+import beast.base.inference.parameter.Parameter;
 import lphy.core.distributions.RandomComposition;
 import lphy.graphicalModel.Value;
 import lphybeast.BEASTContext;

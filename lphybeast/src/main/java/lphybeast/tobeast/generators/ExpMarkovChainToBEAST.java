@@ -1,8 +1,8 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.util.Slice;
-import beast.math.distributions.MarkovChainDistribution;
+import beast.base.core.BEASTInterface;
+import beast.base.inference.distribution.MarkovChainDistribution;
+import beastlabs.core.util.Slice;
 import lphy.core.distributions.ExpMarkovChain;
 import lphy.graphicalModel.Generator;
 import lphy.graphicalModel.GraphicalModelNode;
@@ -44,7 +44,7 @@ public class ExpMarkovChainToBEAST implements GeneratorToBEAST<ExpMarkovChain, M
 //        GenerativeDistribution initialMeanGenerator = (GenerativeDistribution)initialMean.getGenerator();
 //
 //        // replace prior on initialMean with excludable prior on the first element of value
-//        beast.math.distributions.Prior prior = (beast.math.distributions.Prior)context.getBEASTObject(initialMeanGenerator);
+//        beast.base.inference.distribution.Prior prior = (beast.base.inference.distribution.Prior)context.getBEASTObject(initialMeanGenerator);
 //
 //        ExcludablePrior excludablePrior = new ExcludablePrior();
 //        BooleanParameter include = new BooleanParameter();

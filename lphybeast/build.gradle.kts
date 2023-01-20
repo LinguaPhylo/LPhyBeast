@@ -14,16 +14,14 @@ java {
     withSourcesJar()
 }
 
-val beast2Jars = fileTree("lib2") {
-    exclude("**/starbeast2-*.jar")
-    exclude("**/*-sources.jar")
-    exclude("**/*-javadoc.jar")
+val beast2Jars = fileTree("lib") {
+//    exclude("**/starbeast2-*.jar")
+    exclude("**/*src.jar")
+    exclude("**/*javadoc.jar")
 }
-val notReleasedJars = fileTree("lib") {
-    // not released, so must include in lphybeast release
-    include("bdtree.jar")
+//val notReleasedJars = fileTree("lib") {
 //    include("lphy-1.3.*.jar")
-}
+//}
 val lblibs by configurations.creating {
     // Add to defaultDependencies to get their all jars
     defaultDependencies {
@@ -35,7 +33,7 @@ val lblibs by configurations.creating {
 
 // TODO 3 versions: here, LPhyBEAST, version.xml
 // version has to be manually adjusted to keep same between version.xml and here
-version = "0.4.3-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 
 
 // if the project dependencies ues impl, then impl(proj(..)) will only have source code,
@@ -51,7 +49,7 @@ dependencies {
      * such as "io.github.linguaphylo:lphy:1.2.0!!".
      * https://docs.gradle.org/current/userguide/rich_versions.html#sec:strict-version
      */
-    api("io.github.linguaphylo:lphy:1.3.3-SNAPSHOT")
+    api("io.github.linguaphylo:lphy:1.4.0-SNAPSHOT")
 //    api("org.antlr:antlr4-runtime:4.9.3")
 //    api("org.apache.commons:commons-math3:3.6.1")
 //    api("org.apache.commons:commons-lang3:3.12.0")
@@ -62,9 +60,10 @@ dependencies {
 
     // all released beast 2 libs
     // TODO beast2 jar contains Apache math. Be aware of version conflict to LPhy dependency.
+    // TODO better way to load version.xml?
     api(beast2Jars)
     // other jars must be included
-    implementation(notReleasedJars)
+//    implementation(notReleasedJars)
 //    if (project.hasProperty("isRuntime")) {
 //        runtimeOnly("io.github.linguaphylo:lphy:1.1.0")
 //        runtimeOnly(beast2Jars)
@@ -117,8 +116,6 @@ distributions {
                 from(lblibs.files)
                 // lphybeast core jar
                 from(tasks.jar)
-                // bdtree
-                from(notReleasedJars)
                 //TODO require to run distZip after build to copy mascot jar
 //                from(project(":mascot").layout.buildDirectory.dir("libs")){
 //                    exclude("*-sources.jar")

@@ -1,7 +1,7 @@
 package lphybeast.tobeast.values;
 
-import beast.core.parameter.Parameter;
-import beast.core.parameter.RealParameter;
+import beast.base.inference.parameter.Parameter;
+import beast.base.inference.parameter.RealParameter;
 import lphy.graphicalModel.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;

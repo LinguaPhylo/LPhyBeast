@@ -22,7 +22,7 @@ public class LPhyScriptsToBEASTTest {
         TestUtils.assertJC(xml);
 
         assertTrue(xml.contains("<distribution") && xml.contains("id=\"Theta.prior\"") && xml.contains("x=\"@Theta\"") &&
-                xml.contains("spec=\"beast.math.distributions.LogNormalDistributionModel\"") &&
+                xml.contains("distribution.LogNormalDistributionModel") &&
                 xml.contains("name=\"M\">3.0</parameter>") && xml.contains("name=\"S\">1.0</parameter>"), "Theta prior" );
 
         assertTrue(xml.contains("<distribution") && xml.contains("id=\"Coalescent\""), "Coalescent" );
@@ -44,17 +44,19 @@ public class LPhyScriptsToBEASTTest {
                 xml.contains("id=\"lambda\"") && xml.contains("id=\"psi\""), "Check parameters" );
 
         assertTrue(xml.contains("id=\"lambda.prior\"") && xml.contains("x=\"@lambda\"") &&
-                xml.contains("spec=\"beast.math.distributions.LogNormalDistributionModel\"") &&
+                xml.contains("distribution.LogNormalDistributionModel") &&
                 xml.contains("name=\"M\">3.0</parameter>") && xml.contains("name=\"S\">1.0</parameter>"),
                 "lambda prior" );
-        assertTrue(xml.contains("birthDiffRate=\"@lambda\"") && xml.contains("id=\"YuleModel\""), "YuleModel" );
+        assertTrue(xml.contains("birthDiffRate=\"@lambda\"") && xml.contains("id=\"YuleModel\""),
+                "YuleModel" );
 
         assertTrue(xml.contains("id=\"branchRates.prior\"") && xml.contains("x=\"@branchRates\"") &&
                         xml.contains("name=\"M\">-0.25</parameter>") && xml.contains("name=\"S\">0.5</parameter>"),
                 "branchRates prior" );
         assertTrue(xml.contains("<branchRateModel") && xml.contains("id=\"branchRates.model\"") &&
-                        xml.contains("spec=\"beast.evolution.branchratemodel.UCRelaxedClockModel\"") &&
-                        xml.contains("distr=\"@LogNormalDistributionModel") && xml.contains("rates=\"@branchRates\""),
+                        xml.contains("beast.base.evolution.branchratemodel.UCRelaxedClockModel") &&
+                        xml.contains("distr=\"@LogNormalDistributionModel") &&
+                        xml.contains("rates=\"@branchRates\""),
                 "UCRelaxedClockModel prior" );
 
         //TODO operators

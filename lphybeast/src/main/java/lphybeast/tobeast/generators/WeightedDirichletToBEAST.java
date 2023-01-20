@@ -1,8 +1,8 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.Function;
-import beast.math.distributions.Prior;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Function;
+import beast.base.inference.distribution.Prior;
 import lphy.core.distributions.WeightedDirichlet;
 import lphy.graphicalModel.Value;
 import lphybeast.BEASTContext;
@@ -14,7 +14,8 @@ public class WeightedDirichletToBEAST implements GeneratorToBEAST<WeightedDirich
 
         Value<Number[]> concentration = generator.getConcentration();
 
-        beast.math.distributions.WeightedDirichlet beastDirichlet = new beast.math.distributions.WeightedDirichlet();
+        beastlabs.math.distributions.WeightedDirichlet beastDirichlet =
+                new beastlabs.math.distributions.WeightedDirichlet();
         beastDirichlet.setInputValue("alpha", context.getAsRealParameter(concentration));
         beastDirichlet.setInputValue("weights", context.getAsIntegerParameter(generator.getWeights()));
         beastDirichlet.initAndValidate();

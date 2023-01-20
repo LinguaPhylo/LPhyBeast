@@ -1,21 +1,21 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.AlignmentFromTrait;
-import beast.evolution.branchratemodel.StrictClockModel;
-import beast.evolution.branchratemodel.UCRelaxedClockModel;
-import beast.evolution.datatype.DataType;
-import beast.evolution.datatype.UserDataType;
-import beast.evolution.likelihood.AncestralStateTreeLikelihood;
-import beast.evolution.likelihood.GenericTreeLikelihood;
-import beast.evolution.likelihood.ThreadedTreeLikelihood;
-import beast.evolution.operators.UpDownOperator;
-import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.substitutionmodel.SVSGeneralSubstitutionModelLogger;
-import beast.evolution.substitutionmodel.SubstitutionModel;
-import beast.evolution.tree.Tree;
-import beast.math.distributions.Prior;
+import beast.base.core.BEASTInterface;
+import beast.base.evolution.branchratemodel.StrictClockModel;
+import beast.base.evolution.branchratemodel.UCRelaxedClockModel;
+import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.datatype.UserDataType;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
+import beast.base.evolution.likelihood.ThreadedTreeLikelihood;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.substitutionmodel.SubstitutionModel;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.distribution.Prior;
+import beast.base.inference.operator.UpDownOperator;
+import beast.base.inference.parameter.RealParameter;
+import beastclassic.evolution.alignment.AlignmentFromTrait;
+import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
+import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModelLogger;
 import consoperators.BigPulley;
 import consoperators.InConstantDistanceOperator;
 import consoperators.SimpleDistance;
@@ -42,7 +42,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
     public GenericTreeLikelihood generatorToBEAST(PhyloCTMC phyloCTMC, BEASTInterface value, BEASTContext context) {
 
-        if (value instanceof beast.evolution.alignment.AlignmentFromTrait traitAlignment) {
+        if (value instanceof AlignmentFromTrait traitAlignment) {
             // for discrete phylogeography
             return createAncestralStateTreeLikelihood(phyloCTMC, traitAlignment, context);
         } else {
@@ -124,8 +124,8 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
     private ThreadedTreeLikelihood createThreadedTreeLikelihood(PhyloCTMC phyloCTMC, BEASTInterface value, BEASTContext context) {
         ThreadedTreeLikelihood treeLikelihood = new ThreadedTreeLikelihood();
 
-        assert value instanceof beast.evolution.alignment.Alignment;
-        beast.evolution.alignment.Alignment alignment = (beast.evolution.alignment.Alignment)value;
+        assert value instanceof beast.base.evolution.alignment.Alignment;
+        beast.base.evolution.alignment.Alignment alignment = (beast.base.evolution.alignment.Alignment)value;
         treeLikelihood.setInputValue("data", alignment);
 
         constructTreeAndBranchRate(phyloCTMC, treeLikelihood, context);

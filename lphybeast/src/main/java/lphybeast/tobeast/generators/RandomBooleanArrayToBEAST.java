@@ -1,9 +1,9 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.parameter.IntegerParameter;
-import beast.math.distributions.ParametricDistribution;
-import beast.math.distributions.Prior;
+import beast.base.core.BEASTInterface;
+import beast.base.inference.distribution.ParametricDistribution;
+import beast.base.inference.distribution.Prior;
+import beast.base.inference.parameter.IntegerParameter;
 import lphy.core.distributions.RandomBooleanArray;
 import lphy.graphicalModel.Generator;
 import lphy.graphicalModel.Value;
@@ -30,7 +30,7 @@ public class RandomBooleanArrayToBEAST implements GeneratorToBEAST<RandomBoolean
         context.removeBEASTObject(poissonPrior);
 
         ParametricDistribution dist = poissonPrior.distInput.get();
-        beast.core.util.Sum x = new beast.core.util.Sum();
+        beast.base.evolution.Sum x = new beast.base.evolution.Sum();
         x.setInputValue("arg", value);
         Prior prior = BEASTContext.createPrior(dist, x);
         prior.setID(value.getID() + ".prior");

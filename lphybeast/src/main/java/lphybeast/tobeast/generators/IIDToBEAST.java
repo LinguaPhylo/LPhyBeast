@@ -1,9 +1,9 @@
 package lphybeast.tobeast.generators;
 
-import beast.core.BEASTInterface;
-import beast.core.parameter.Parameter;
-import beast.math.distributions.Prior;
-import beast.util.BEASTVector;
+import beast.base.core.BEASTInterface;
+import beast.base.inference.distribution.Prior;
+import beast.base.inference.parameter.Parameter;
+import beastlabs.util.BEASTVector;
 import lphy.core.distributions.Bernoulli;
 import lphy.core.distributions.IID;
 import lphy.graphicalModel.GenerativeDistribution;

@@ -74,7 +74,7 @@ public class H5N1TutorialTest {
                 xml.contains("A_bird_HongKong_542_1997=8.0"), "Time" );
 
         assertTrue(xml.contains("<distribution") && xml.contains("id=\"Theta.prior\"") &&
-                xml.contains("x=\"@Theta\"") && xml.contains("spec=\"beast.math.distributions.LogNormalDistributionModel\"") &&
+                xml.contains("x=\"@Theta\"") && xml.contains("distribution.LogNormalDistributionModel\"") &&
                 xml.contains("name=\"M\">0.0</parameter>") && xml.contains("name=\"S\">1.0</parameter>"), "Theta prior");
 
         assertTrue(xml.contains("x=\"@kappa\"") && xml.contains("id=\"kappa.prior\"") &&
@@ -93,6 +93,7 @@ public class H5N1TutorialTest {
                         xml.contains("name=\"alpha\">1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0</parameter>"),
                 "R_trait prior" );
         assertTrue(xml.contains("parameter=\"@I\"") && xml.contains("id=\"BernoulliDistribution\"") &&
+                xml.contains("beastlabs.math.distributions.BernoulliDistribution") &&
                         xml.contains("name=\"p\">0.5</parameter>") && xml.contains("IntegerParameter\">8</minSuccesses>"),
                 "I prior" );
 
@@ -108,9 +109,10 @@ public class H5N1TutorialTest {
         assertTrue(xml.contains("x=\"@mu_trait\"") && xml.contains("name=\"M\">0.0</parameter>") &&
                 xml.contains("name=\"S\">1.25</parameter>"),  "mu_trait prior" );
 
-        assertTrue(xml.contains("spec=\"AncestralStateTreeLikelihood\"") && xml.contains("tag=\"location\"") &&
-                xml.contains("tree=\"@psi\""),  "D_trait treeLikelihood" );
-        assertTrue(xml.contains("spec=\"AlignmentFromTrait\"") && xml.contains("traitname=\"discrete\"") &&
+        assertTrue(xml.contains("spec=\"beastclassic.evolution.likelihood.AncestralStateTreeLikelihood\"") &&
+                xml.contains("tag=\"location\"") && xml.contains("tree=\"@psi\""),  "D_trait treeLikelihood" );
+        assertTrue(xml.contains("beastclassic.evolution.alignment.AlignmentFromTrait") &&
+                xml.contains("traitname=\"discrete\"") &&
                 xml.contains("value=\"A_chicken_Fujian_1042_2005=Fujian"),  "Trait Alignment" );
 
         assertDPGLocations(xml);
@@ -118,7 +120,7 @@ public class H5N1TutorialTest {
         assertTrue(xml.contains("id=\"SVSGeneralSubstitutionModel\"") && xml.contains("rateIndicator=\"@I\"") &&
                 xml.contains("rates=\"@R_trait\"") && xml.contains("clock.rate=\"@mu_trait\"") , "geo site model" );
 
-        assertTrue(xml.contains("spec=\"BitFlipOperator\"") && xml.contains("parameter=\"@I\""), "I.bitFlip Operator" );
+        assertTrue(xml.contains("BitFlipOperator") && xml.contains("parameter=\"@I\""), "I.bitFlip Operator" );
 
         // 6 ScaleOperator, incl. tree
         assertEquals(6, xml.split("ScaleOperator", -1).length - 1, "ScaleOperator" );
@@ -136,7 +138,8 @@ public class H5N1TutorialTest {
                 "logger" );
 
         assertTrue(xml.contains("<log idref=\"D_trait.treeLikelihood\"/>") && xml.contains("id=\"svs\"") &&
-                xml.contains("spec=\"SVSGeneralSubstitutionModelLogger\"") && xml.contains("dataType=\"@UserDataType\"") &&
+                xml.contains("beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModelLogger") &&
+                xml.contains("dataType=\"@UserDataType\"") &&
                 xml.contains("model=\"@SVSGeneralSubstitutionModel\""), "trait log" );
 
         TestUtils.assertTreeWithTraitLogger(xml);

@@ -1,7 +1,7 @@
 package lphybeast;
 
-import beast.core.BEASTInterface;
-import beast.core.util.Slice;
+import beast.base.core.BEASTInterface;
+import beastlabs.core.util.Slice;
 
 /**
  * Utils class to create frequently used BEAST objects
