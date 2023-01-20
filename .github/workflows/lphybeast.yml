@@ -25,15 +25,27 @@ jobs:
           cache: 'gradle'
 
       ###TODO: require version.xml, so check out all depended B2 pkg
-
+      - name: Set environmental variables
+        run: |
+          pwd
+          ls LPhyBeast
+          find . -name "lib"
+          echo "BEAST_LIB=LPhyBeast/lphybeast/lib" >> $GITHUB_ENV
+          echo "LAUNCHER=launcher-2.7.3.jar" >> $GITHUB_ENV
+          
+      - name: Install packages
+        run: |
+          java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add bdtree
+          java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add BEAST_CLASSIC
+          java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add BEASTLabs
+          java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add FastRelaxedClockLogNormal
+          java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add feast
+          java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add SSM
 
       #./linguaPhylo/lphy/lib
       #./LPhyBeast/lphybeast/lib
       - name: Check file paths
         run: |
-          pwd
-          ls LPhyBeast
-          find . -name "lib"
           ls LPhyBeast/lphybeast/lib
 
       - name: Run unit tests
