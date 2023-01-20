@@ -33,13 +33,6 @@ jobs:
           echo "BEAST_LIB=LPhyBeast/lphybeast/lib" >> $GITHUB_ENV
           echo "LAUNCHER=launcher-2.7.3.jar" >> $GITHUB_ENV
 
-      - name: Install beast2 base
-        run: |
-          ls /home/runner/.beast/2.7
-          mkdir /home/runner/.beast/2.7/BEAST.base
-          cp LPhyBeast/lphybeast/lib/BEAST.base.version.xml /home/runner/.beast/2.7/BEAST.base/version.xml
-          mkdir /home/runner/.beast/2.7/BEAST.base/lib
-          cp LPhyBeast/lphybeast/lib/BEAST-base-*.jar /home/runner/.beast/2.7/BEAST.base/lib
       # /home/runner/.beast/2.7
       - name: Install packages
         run: |
@@ -49,6 +42,13 @@ jobs:
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add FastRelaxedClockLogNormal
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add feast
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add SSM
+      - name: Install beast2 base
+        run: |
+          ls /home/runner/.beast/2.7
+          mkdir /home/runner/.beast/2.7/BEAST.base
+          cp LPhyBeast/lphybeast/lib/BEAST.base.version.xml /home/runner/.beast/2.7/BEAST.base/version.xml
+          mkdir /home/runner/.beast/2.7/BEAST.base/lib
+          cp LPhyBeast/lphybeast/lib/BEAST-base-*.jar /home/runner/.beast/2.7/BEAST.base/lib
 
       #./linguaPhylo/lphy/lib
       #./LPhyBeast/lphybeast/lib
