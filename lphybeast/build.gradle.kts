@@ -27,7 +27,7 @@ val lblibs by configurations.creating {
     defaultDependencies {
         add(project.dependencies.api("com.google.guava:guava:23.6-jre")) // required by LoggerHelper
         add(project.dependencies.implementation("org.jblas:jblas:1.2.3"))
-        add(project.dependencies.implementation("info.picocli:picocli:4.6.2"))
+        add(project.dependencies.implementation("info.picocli:picocli:4.6.3"))
     }
 }
 
@@ -50,13 +50,6 @@ dependencies {
      * https://docs.gradle.org/current/userguide/rich_versions.html#sec:strict-version
      */
     api("io.github.linguaphylo:lphy:1.4.0-SNAPSHOT")
-//    api("org.antlr:antlr4-runtime:4.9.3")
-//    api("org.apache.commons:commons-math3:3.6.1")
-//    api("org.apache.commons:commons-lang3:3.12.0")
-//    // in maven
-//    implementation("net.steppschuh.markdowngenerator:markdowngenerator:1.3.1.1")
-//    // io.github.linguaphylo
-//    api("io.github.linguaphylo:jebl:3.1.0")
 
     // all released beast 2 libs
     // TODO beast2 jar contains Apache math. Be aware of version conflict to LPhy dependency.
@@ -116,13 +109,6 @@ distributions {
                 from(lblibs.files)
                 // lphybeast core jar
                 from(tasks.jar)
-                //TODO require to run distZip after build to copy mascot jar
-//                from(project(":mascot").layout.buildDirectory.dir("libs")){
-//                    exclude("*-sources.jar")
-//                }
-//                from(project(":mm").layout.buildDirectory.dir("libs")){
-//                    exclude("*-sources.jar")
-//                }
             }
             into("."){
                 from("$rootDir") {
@@ -134,13 +120,6 @@ distributions {
             // include src jar
             into("src") {
                 from(tasks.getByName<Jar>("sourcesJar"))
-                //TODO
-//                from(project(":mascot").layout.buildDirectory.dir("libs")){
-//                    include("*-sources.jar")
-//                }
-//                from(project(":mm").layout.buildDirectory.dir("libs")){
-//                    include("*-sources.jar")
-//                }
             }
             // lphybeast script
             from("${layout.projectDirectory.dir("bin")}") {
