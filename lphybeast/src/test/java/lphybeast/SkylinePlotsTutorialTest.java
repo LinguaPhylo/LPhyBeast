@@ -21,6 +21,7 @@ public class SkylinePlotsTutorialTest {
 
     @BeforeEach
     public void setUp() {
+        TestUtils.loadServices();
         fPath = TestUtils.getFileForResources("hcv.nexus");
     }
 

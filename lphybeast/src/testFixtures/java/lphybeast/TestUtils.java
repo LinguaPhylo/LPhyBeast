@@ -17,11 +17,20 @@ public class TestUtils {
 
     private TestUtils() { }
 
-    public static LPhyBeast  getLPhyBeast() {
-        // TODO better way?
-        Path vfPath = Paths.get(UserDir.getUserDir().toAbsolutePath().toString(), "..", "version.xml");
-        LPhyBEASTLoader.addBEAST2Services(new String[]{vfPath.toAbsolutePath().toString()});
+    /**
+     * user.dir/../version.xml
+     */
+    public static void loadServices() {
+        loadServices(UserDir.getUserDir().toAbsolutePath().getParent().toString());
+    }
 
+    public static void loadServices(String parentDir) {
+        // TODO better way?
+        Path vfPath = Paths.get(parentDir, "version.xml");
+        LPhyBEASTLoader.addBEAST2Services(new String[]{vfPath.toAbsolutePath().toString()});
+    }
+
+    public static LPhyBeast getLPhyBeast() {
         if(lPhyBEAST == null) {
             lPhyBEAST = new LPhyBeast();
         }

@@ -22,6 +22,7 @@ public class H5N1TutorialTest {
 
     @BeforeEach
     public void setUp() {
+        TestUtils.loadServices();
         fPath = TestUtils.getFileForResources("H5N1.nex");
     }
 
