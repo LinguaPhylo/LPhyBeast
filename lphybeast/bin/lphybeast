@@ -57,11 +57,11 @@ fi
 ### lphy lib must be loaded to classpath
 
 #TODO: LPHY_DIR=$(find "$BEAST" -maxdepth 1 -type d -name 'lphy-studio-1.*' | head -1)
-# e.g. $BEAST/lphy-studio-1.3.1/lib
-LPHY_LIB="$BEAST/lphy-studio-1.3.1/lib"
+# e.g. $BEAST/lphy-studio-1.*.*/lib
+LPHY_LIB="$BEAST/lphy-studio-1.4.0/lib"
 echo "Set LPHY_LIB = $LPHY_LIB"
 ARG="-Dlauncher.wait.for.exit=true -Xms256m -Xmx8g -Duser.language=en"
-LPHY_BEAST="beast.app.tools.AppLauncherLauncher lphybeast"
+LPHY_BEAST="beast.pkgmgmt.launcher.AppLauncherLauncher lphybeast"
 if [ -n "$BEAST_EXTRA_LIBS" ]; then
   "$JAVA" $ARG -Djava.library.path="$BEAST_EXTRA_LIBS" -cp "$BEAST_LIB/launcher.jar:$LPHY_LIB/*" $LPHY_BEAST $*
 else	
