@@ -21,6 +21,7 @@ public class RSV2TutorialTest {
 
     @BeforeEach
     public void setUp() {
+        TestUtils.loadServices();
         fPath = TestUtils.getFileForResources("RSV2.nex");
     }
 

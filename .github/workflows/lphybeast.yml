@@ -32,6 +32,7 @@ jobs:
           find . -name "lib"
           echo "BEAST_LIB=LPhyBeast/lphybeast/lib" >> $GITHUB_ENV
           echo "LAUNCHER=launcher-2.7.3.jar" >> $GITHUB_ENV
+          echo "REPO_DIR=/home/runner/.beast/2.7" >> $GITHUB_ENV
 
       # /home/runner/.beast/2.7
       - name: Install packages
@@ -45,17 +46,17 @@ jobs:
       # https://github.com/CompEvol/beast2/issues/1078
       - name: Install beast2 base
         run: |
-          ls /home/runner/.beast/2.7
-          mkdir /home/runner/.beast/2.7/BEAST.base
-          cp $BEAST_LIB/BEAST.base.version.xml /home/runner/.beast/2.7/BEAST.base/version.xml
-          mkdir /home/runner/.beast/2.7/BEAST.base/lib
-          cp $BEAST_LIB/BEAST-base-*.jar /home/runner/.beast/2.7/BEAST.base/lib
+          ls $REPO_DIR
+          mkdir $REPO_DIR/BEAST.base
+          cp LPhyBeast/lphybeast/lib/BEAST.base.version.xml $REPO_DIR/BEAST.base/version.xml
+          mkdir $REPO_DIR/BEAST.base/lib
+          cp LPhyBeast/lphybeast/lib/BEAST-base-*.jar $REPO_DIR/BEAST.base/lib
 
       #./linguaPhylo/lphy/lib
       #./LPhyBeast/lphybeast/lib
       - name: Check all packages
         run: |
-          ls /home/runner/.beast/2.7/*/lib
+          ls $REPO_DIR/*/lib
 
       - name: Run unit tests
         # change working dir, so gradle will work
