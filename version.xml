@@ -1,6 +1,9 @@
 <package name='lphybeast' version='1.0.0'>
-    <depends on='beast2' atleast='2.7.3'/>
+    <depends on='BEAST.base' atleast='2.7.3'/>
+    <depends on='BEAST.app' atleast='2.7.3'/>
+
     <depends on='BEASTLabs' atleast='2.0.0'/>
+    <depends on='BEAST_CLASSIC' atleast='1.6.0'/>
     <depends on='feast' atleast='9.2.0'
              projectURL="https://github.com/tgvaughan/feast"
              description="Expands the flexibility of BEAST 2 XML."/>
@@ -8,7 +11,6 @@
              description="Standard Nucleotide Substitution Models"
              projectURL="https://github.com/BEAST2-Dev/substmodels/"/>
     <depends on='FastRelaxedClockLogNormal' atleast='1.2.0'/>
-    <depends on='BEAST_CLASSIC' atleast='1.6.0'/>
     <depends on='bdtree' atleast='0.0.1'/>
 
     <!-- add BEAST2 service below  -->
