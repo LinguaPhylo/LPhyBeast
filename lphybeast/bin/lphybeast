@@ -1,8 +1,5 @@
 #!/bin/sh
 
-### copy this to $BEAST/bin
-### check if lphy-?.?.?.jar and extension jars are available in $BEAST/lphy/lib
-
 if [ -z "$BEAST" ]; then
 	## resolve links - $0 may be a link to application
 	PRG="$0"
@@ -26,6 +23,7 @@ if [ -z "$BEAST" ]; then
 fi
 
 BEAST_LIB="$BEAST/lib"
+export JAVA_HOME="$BEAST/jre"
 
 if [ -z "$JAVA_HOME" ]; then
   JAVA=java
@@ -42,10 +40,8 @@ if [ -n "$BEAGLE_LIB" ]; then
 		BEAST_EXTRA_LIBS="$BEAGLE_LIB"
 	fi
 fi
-# use BEAST_EXTRA_LIBS variable to load BEAGLE and other libraries from non-default locations
-# this assumes that the library path contains all these libraries (or are set through LD_LIBRARY_PATH)
 
-# Explicitly add /usr/local/lib to library search path to ensure 
+# Explicitly add /usr/local/lib to library search path to ensure
 # beast continues to find beagle when installed here.  (This is
 # necessary due to known problems with certain JREs.)
 if [ -z "$LD_LIBRARY_PATH" ]; then
@@ -55,16 +51,17 @@ else
 fi
 
 ### lphy lib must be loaded to classpath
+"$JAVA" -version
 
 #TODO: LPHY_DIR=$(find "$BEAST" -maxdepth 1 -type d -name 'lphy-studio-1.*' | head -1)
-# e.g. $BEAST/lphy-studio-1.*.*/lib
+# e.g. $BEAST/lphy-studio-1.3.1/lib
 LPHY_LIB="$BEAST/lphy-studio-1.4.0/lib"
 echo "Set LPHY_LIB = $LPHY_LIB"
-ARG="-Dlauncher.wait.for.exit=true -Xms256m -Xmx8g -Duser.language=en"
+echo $(ls "$LPHY_LIB")
+ARG="-Dlauncher.wait.for.exit=true -Xms256m -Xmx60g -Duser.language=en -Dpicocli.disable.closures=true"
 LPHY_BEAST="beast.pkgmgmt.launcher.AppLauncherLauncher lphybeast"
 if [ -n "$BEAST_EXTRA_LIBS" ]; then
   "$JAVA" $ARG -Djava.library.path="$BEAST_EXTRA_LIBS" -cp "$BEAST_LIB/launcher.jar:$LPHY_LIB/*" $LPHY_BEAST $*
-else	
+else
   "$JAVA" $ARG -cp "$BEAST_LIB/launcher.jar:$LPHY_LIB/*" $LPHY_BEAST $*
 fi
-
