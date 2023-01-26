@@ -80,6 +80,11 @@ public class LPhyBeastCMD implements Callable<Integer> {
 
     public static void main(String[] args) {
 
+        // must set -Dpicocli.disable.closures=true using picocli:4.7.0
+        // otherwise java.lang.NoClassDefFoundError: groovy.lang.Closure
+        //	at beast.pkgmgmt.MultiParentURLClassLoader.loadClass(Unknown Source)
+        // ...
+        //	at lphybeast.LPhyBeastCMD.main(LPhyBeastCMD.java:88)
         int exitCode = new CommandLine(new LPhyBeastCMD()).execute(args);
 
         if (exitCode != 0)

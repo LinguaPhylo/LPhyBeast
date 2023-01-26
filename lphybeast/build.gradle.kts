@@ -27,7 +27,7 @@ val lblibs by configurations.creating {
     defaultDependencies {
         add(project.dependencies.api("com.google.guava:guava:23.6-jre")) // required by LoggerHelper
         add(project.dependencies.implementation("org.jblas:jblas:1.2.3"))
-        add(project.dependencies.implementation("info.picocli:picocli:4.6.3"))
+        add(project.dependencies.implementation("info.picocli:picocli:4.7.0"))
     }
 }
 
