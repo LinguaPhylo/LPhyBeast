@@ -58,6 +58,8 @@ fi
 LPHY_LIB="$BEAST/lphy-studio-1.4.0/lib"
 echo "Set LPHY_LIB = $LPHY_LIB"
 echo $(ls "$LPHY_LIB")
+# must set -Dpicocli.disable.closures=true using picocli:4.7.0
+# it will throw otherwise java.lang.NoClassDefFoundError: groovy.lang.Closure
 ARG="-Dlauncher.wait.for.exit=true -Xms256m -Xmx60g -Duser.language=en -Dpicocli.disable.closures=true"
 LPHY_BEAST="beast.pkgmgmt.launcher.AppLauncherLauncher lphybeast"
 if [ -n "$BEAST_EXTRA_LIBS" ]; then
