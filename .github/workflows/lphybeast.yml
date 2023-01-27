@@ -30,7 +30,7 @@ jobs:
           pwd
           ls LPhyBeast
           find . -name "lib"
-          echo "BEAST_LIB=$GITHUB_WORKSPACE/lphybeast/lib" >> $GITHUB_ENV
+          echo "BEAST_LIB=LPhyBeast/lphybeast/lib" >> $GITHUB_ENV
           echo "LAUNCHER=launcher-2.7.3.jar" >> $GITHUB_ENV
           echo "REPO_DIR=/home/runner/.beast/2.7" >> $GITHUB_ENV
 
@@ -48,9 +48,9 @@ jobs:
         run: |
           ls $REPO_DIR
           mkdir $REPO_DIR/BEAST.base
-          cp LPhyBeast/lphybeast/lib/BEAST.base.version.xml $REPO_DIR/BEAST.base/version.xml
+          cp $BEAST_LIB/BEAST.base.version.xml $REPO_DIR/BEAST.base/version.xml
           mkdir $REPO_DIR/BEAST.base/lib
-          cp LPhyBeast/lphybeast/lib/BEAST-base-*.jar $REPO_DIR/BEAST.base/lib
+          cp $BEAST_LIB/BEAST-base-*.jar $REPO_DIR/BEAST.base/lib
 
       #./linguaPhylo/lphy/lib
       #./LPhyBeast/lphybeast/lib
