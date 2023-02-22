@@ -1,10 +1,7 @@
 package lphybeast;
 
 import jebl.evolution.sequences.SequenceType;
-import lphy.core.distributions.DiscretizedGamma;
-import lphy.core.distributions.IID;
-import lphy.core.distributions.RandomComposition;
-import lphy.core.distributions.WeightedDirichlet;
+import lphy.core.distributions.*;
 import lphy.core.functions.*;
 import lphy.core.functions.alignment.NCharFunction;
 import lphy.core.functions.alignment.ReadFasta;
@@ -18,9 +15,7 @@ import lphy.core.functions.tree.ExtantTree;
 import lphy.core.functions.tree.MigrationCount;
 import lphy.core.functions.tree.NodeCount;
 import lphy.evolution.Taxa;
-import lphy.evolution.alignment.Alignment;
-import lphy.evolution.alignment.FilterMissingSites;
-import lphy.evolution.alignment.MissingSites;
+import lphy.evolution.alignment.*;
 import lphy.evolution.tree.TimeTree;
 import lphy.graphicalModel.Generator;
 import lphy.graphicalModel.Value;
@@ -56,7 +51,9 @@ public class Exclusion {
                 generator instanceof TaxaFunction || generator instanceof NodeCount ||
                 generator instanceof CreateTaxa || generator instanceof Species ||
                 generator instanceof TaxaAgesFromFunction ||
-                generator instanceof MissingSites || generator instanceof FilterMissingSites ||
+                generator instanceof MissingSites || generator instanceof SelectSitesByMissingFraction ||
+                generator instanceof InvariableSites || generator instanceof VariableSites ||
+                generator instanceof CopySites || generator instanceof Sample<?> ||
                 generator instanceof Simulate || generator instanceof Get<?> ||
                 generator instanceof ReadNexus || generator instanceof ReadFasta ||
                 generator instanceof ExtractTrait || generator instanceof Unique ||
