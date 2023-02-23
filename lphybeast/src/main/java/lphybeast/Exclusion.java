@@ -57,6 +57,7 @@ public class Exclusion {
                 generator instanceof Simulate || generator instanceof Get<?> ||
                 generator instanceof ReadNexus || generator instanceof ReadFasta ||
                 generator instanceof ExtractTrait || generator instanceof Unique ||
+                generator instanceof Intersect ||
                 generator instanceof ARange || generator instanceof Range ||
                 generator instanceof MapFunction || generator instanceof MethodCall  ||
                 generator instanceof RangeList || generator instanceof ElementsAt || generator instanceof Rep ||
