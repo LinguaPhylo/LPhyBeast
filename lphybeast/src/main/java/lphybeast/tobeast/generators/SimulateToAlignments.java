@@ -25,7 +25,7 @@ public class SimulateToAlignments implements GeneratorToBEAST<Simulate, BEASTInt
         Map<String, Alignment> intermediateAlignments = generator.getIntermediateAlignments();
 
         for (Map.Entry<String, Alignment> entry : intermediateAlignments.entrySet()) {
-            if (true) {//TODO
+            if (context.getLPhyBeastConfig().logAllAlignments) {//TODO
                 // limit to SimpleAlignment
                 if (entry.getValue() instanceof SimpleAlignment simpleAlignment) {
                     Value<SimpleAlignment> algValue =
@@ -44,6 +44,8 @@ public class SimulateToAlignments implements GeneratorToBEAST<Simulate, BEASTInt
                         } catch (FileNotFoundException e) {
                             throw new RuntimeException(e);
                         }
+                        LoggerUtils.log.info("Log intermediate alignment " + entry.getValue() +
+                                " to " + outFile);
                     }
 
                 } else LoggerUtils.log.warning("Skip alignment " + entry.getValue() +
