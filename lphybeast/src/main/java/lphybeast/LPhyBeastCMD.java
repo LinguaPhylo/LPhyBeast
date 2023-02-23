@@ -75,8 +75,9 @@ public class LPhyBeastCMD implements Callable<Integer> {
 //                    "but leave the rest unselected alignment(s) unchanged.")
 //    String compressAlgId = null;
 
-//    @Option(names = {"-lal", "--logAlignments"}, description = "Log all alignments including the intermediate process generated in the LPhy script.")
-    boolean logAllAlignments = false;
+    @Option(names = {"-lal", "--logAlignments"},
+            description = "Log all alignments including the intermediate process generated in the LPhy script.")
+    boolean logAllAlignments; //= false;
 
     public static void main(String[] args) {
 
