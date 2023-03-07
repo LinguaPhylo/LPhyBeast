@@ -50,11 +50,11 @@ public class Exclusion {
                 generator instanceof NTaxaFunction || generator instanceof NCharFunction ||
                 generator instanceof TaxaFunction || generator instanceof NodeCount ||
                 generator instanceof CreateTaxa || generator instanceof Species ||
-                generator instanceof TaxaAgesFromFunction ||
+                generator instanceof TaxaAgesFromFunction || generator instanceof Get<?> ||
                 generator instanceof MissingSites || generator instanceof SelectSitesByMissingFraction ||
                 generator instanceof InvariableSites || generator instanceof VariableSites ||
                 generator instanceof CopySites || generator instanceof Sample<?> ||
-                generator instanceof Simulate || generator instanceof Get<?> ||
+                generator instanceof Simulate ||
                 generator instanceof ReadNexus || generator instanceof ReadFasta ||
                 generator instanceof ExtractTrait || generator instanceof Unique ||
                 generator instanceof Intersect || generator instanceof RepArray ||

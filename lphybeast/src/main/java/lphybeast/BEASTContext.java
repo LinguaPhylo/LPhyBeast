@@ -1069,6 +1069,11 @@ public class BEASTContext {
         return extraLoggers;
     }
 
+    /**
+     * Should only be called for loggable that is based on a random variable or a deterministic function
+     * of a random variable.
+     * @param loggable
+     */
     public void addExtraLoggable(Loggable loggable) {
         extraLoggables.add(loggable);
     }

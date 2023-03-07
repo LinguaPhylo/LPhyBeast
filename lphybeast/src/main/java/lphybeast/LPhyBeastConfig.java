@@ -21,6 +21,11 @@ public class LPhyBeastConfig {
 //    If 1, then compress constants sites, where every state is compared;
 //    If 2, then compress constants sites, but ignoring the unknown state or gap.
     final public int compressConstantAlignment;
+
+    /**
+     * use LPhy simulate function instead
+     */
+    @Deprecated
     final public boolean logAllAlignments;
 
     /**
