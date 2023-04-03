@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
-@Command(name = "lphybeast", footer = "Copyright(c) 2020",
+@Command(name = "lphybeast", footer = "Copyright(c) 2023",
         description = "LPhyBEAST takes an LPhy script, which contains a model specification and some data, " +
                 "to produce a BEAST 2 XML file. The installation and usage is available at " +
                 "https://linguaphylo.github.io/setup/",

@@ -165,6 +165,7 @@ public class LPhyBeast implements Runnable {
         final String filePathNoExtTrueVaule = filePathNoExt + "_" + "true";
         loggers.add(new VarFileLogger(filePathNoExtTrueVaule, true, true));
         loggers.add(new TreeFileLogger(filePathNoExtTrueVaule));
+        //TODO no AlignmentFileLogger?
 
         GraphicalLPhyParser gparser = new GraphicalLPhyParser(parser);
         Sampler sampler = new Sampler(gparser);
