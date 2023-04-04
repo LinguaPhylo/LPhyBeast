@@ -32,13 +32,13 @@ jobs:
           find . -name "lib"
           echo "BEAST_LIB=LPhyBeast/lphybeast/lib" >> $GITHUB_ENV
           echo "LAUNCHER=launcher-2.7.4.jar" >> $GITHUB_ENV
-          ls $BEAST_LIB/$LAUNCHER
           echo "REPO_DIR=/home/runner/.beast/2.7" >> $GITHUB_ENV
-          mkdir $REPO_DIR
 
 # /home/runner/.beast/2.7
       - name: Install packages
         run: |
+          ls $BEAST_LIB/$LAUNCHER
+          mkdir $REPO_DIR
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add bdtree
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add BEAST_CLASSIC
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add BEASTLabs
