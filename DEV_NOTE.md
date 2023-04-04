@@ -127,6 +127,11 @@ in order to find any bugs before the final release.
 This can be done programmatically by setting the customised BEAST2 package directory `-Dbeast.user.package.dir=...`.
 The second stage repeats the same process but tests the final release.
 
+You can setup the XML to declare package repositories in your Github, 
+e.g., [prerelease.xml](https://raw.githubusercontent.com/LinguaPhylo/LPhyBeastTest/main/beast2.7/lib/prerelease.xml) 
+in LPhyBeastTest. Then add this URL into the package repositories though 
+Package Manager => Package repositories => Add URL. Remember to delete it after the installation is done.
+
 ## Useful Links
 
 - [LPhy developer note](https://github.com/LinguaPhylo/linguaPhylo/blob/master/DEV_NOTE.md)
