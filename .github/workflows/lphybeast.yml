@@ -25,20 +25,24 @@ jobs:
           cache: 'gradle'
 
       ###TODO: require version.xml, so check out all depended B2 pkg
+      # pwd /home/runner/work/LPhyBeast/LPhyBeast
       - name: Set environmental variables
         run: |
-          pwd
+          PWD=$(pwd)
+          echo $PWD
+          mkdir $PWD/.beast
+          mkdir $PWD/.beast/2.7
           ls LPhyBeast
           find . -name "lib"
           echo "BEAST_LIB=LPhyBeast/lphybeast/lib" >> $GITHUB_ENV
           echo "LAUNCHER=launcher-2.7.4.jar" >> $GITHUB_ENV
-          echo "REPO_DIR=/home/runner/.beast/2.7" >> $GITHUB_ENV
+          echo "REPO_DIR=$PWD/.beast/2.7" >> $GITHUB_ENV
 
 # /home/runner/.beast/2.7
       - name: Install packages
         run: |
           ls $BEAST_LIB/$LAUNCHER
-          mkdir $REPO_DIR
+          ls $REPO_DIR
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add bdtree
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add BEAST_CLASSIC
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add BEASTLabs
