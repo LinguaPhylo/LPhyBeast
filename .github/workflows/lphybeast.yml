@@ -29,15 +29,14 @@ jobs:
       # package path /home/runner/.beast/2.7
       - name: Set environmental variables
         run: |
-          HOME_PATH=/home/runner
+          mkdir /home/runner/.beast
+          mkdir /home/runner/.beast/2.7
           ls LPhyBeast
           find . -name "lib"
           echo "BEAST_LIB=LPhyBeast/lphybeast/lib" >> $GITHUB_ENV
           echo "LAUNCHER=launcher-2.7.4.jar" >> $GITHUB_ENV
-          echo "REPO_DIR=$HOME_PATH/.beast/2.7" >> $GITHUB_ENV
-          echo "$REPO_DIR"
-          mkdir "$HOME_PATH/.beast"
-          mkdir "$REPO_DIR"
+          echo "REPO_DIR=/home/runner/.beast/2.7" >> $GITHUB_ENV
+          echo $REPO_DIR
 
       # /home/runner/.beast/2.7
       - name: Install packages
