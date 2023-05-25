@@ -24,21 +24,22 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
-      ###TODO: require version.xml, so check out all depended B2 pkg
       # pwd /home/runner/work/LPhyBeast/LPhyBeast
+      # PWD=$(pwd)
+      # package path /home/runner/.beast/2.7
       - name: Set environmental variables
         run: |
-          PWD=$(pwd)
-          echo $PWD
-          mkdir $PWD/.beast
-          mkdir $PWD/.beast/2.7
+          HOME_PATH="/home/runner"
           ls LPhyBeast
           find . -name "lib"
           echo "BEAST_LIB=LPhyBeast/lphybeast/lib" >> $GITHUB_ENV
           echo "LAUNCHER=launcher-2.7.4.jar" >> $GITHUB_ENV
-          echo "REPO_DIR=$PWD/.beast/2.7" >> $GITHUB_ENV
+          echo "REPO_DIR=$HOME_PATH/.beast/2.7" >> $GITHUB_ENV
+          echo $REPO_DIR
+          mkdir $HOME_PATH/.beast
+          mkdir $REPO_DIR
 
-# /home/runner/.beast/2.7
+      # /home/runner/.beast/2.7
       - name: Install packages
         run: |
           ls $BEAST_LIB/$LAUNCHER
