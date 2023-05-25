@@ -23,7 +23,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import feast.function.Concatenate;
 import jebl.evolution.sequences.SequenceType;
-import lphy.core.LPhyParser;
+import lphy.core.LPhyMetaParser;
 import lphy.core.functions.ElementsAt;
 import lphy.graphicalModel.*;
 import lphy.util.LoggerUtils;
@@ -57,7 +57,7 @@ public class BEASTContext {
 
     //*** registry ***//
 
-    LPhyParser parser;
+    LPhyMetaParser parser;
 
     List<ValueToBEAST> valueToBEASTList;
     //use LinkedHashMap to keep inserted ordering, so the first matching converter is used.
@@ -104,7 +104,7 @@ public class BEASTContext {
     final private LPhyBeastConfig lPhyBeastConfig;
 
     @Deprecated
-    public BEASTContext(LPhyParser parser, LPhyBeastConfig lPhyBeastConfig) {
+    public BEASTContext(LPhyMetaParser parser, LPhyBeastConfig lPhyBeastConfig) {
         this(parser, null, lPhyBeastConfig);
     }
 
@@ -116,7 +116,7 @@ public class BEASTContext {
      * @param loader to load LPhyBEAST extensions.
      *               Can be null, then initiate here.
      */
-    public BEASTContext(LPhyParser parser, LPhyBEASTLoader loader, LPhyBeastConfig lPhyBeastConfig) {
+    public BEASTContext(LPhyMetaParser parser, LPhyBEASTLoader loader, LPhyBeastConfig lPhyBeastConfig) {
         this.parser = parser;
         if (loader == null)
             loader = LPhyBEASTLoader.getInstance();
@@ -466,7 +466,7 @@ public class BEASTContext {
      */
     public boolean isClamped(String id) {
         if (id != null) {
-            Value dataValue = parser.getValue(id, LPhyParser.Context.data);
+            Value dataValue = parser.getValue(id, LPhyMetaParser.Context.data);
             Value modelValue = parser.getModelDictionary().get(id);
             return (dataValue != null && modelValue != null && modelValue instanceof RandomVariable);
         }
@@ -479,11 +479,11 @@ public class BEASTContext {
      */
     public Value getClampedValue(String id) {
         if (id != null) {
-            Value clampedValue = parser.getValue(id, LPhyParser.Context.data);
+            Value clampedValue = parser.getValue(id, LPhyMetaParser.Context.data);
             if (clampedValue != null) {
                 return clampedValue;
             }
-            return parser.getValue(id, LPhyParser.Context.model);
+            return parser.getValue(id, LPhyMetaParser.Context.model);
         }
         return null;
     }

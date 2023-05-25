@@ -1,7 +1,7 @@
 package lphybeast;
 
 import lphy.core.GraphicalLPhyParser;
-import lphy.core.LPhyParser;
+import lphy.core.LPhyMetaParser;
 import lphy.core.Sampler;
 import lphy.graphicalModel.RandomValueLogger;
 import lphy.graphicalModel.logger.TreeFileLogger;
@@ -157,7 +157,7 @@ public class LPhyBeast implements Runnable {
      */
     private String toBEASTXML(BufferedReader reader, String filePathNoExt) throws IOException {
         //*** Parse LPhy file ***//
-        LPhyParser parser = new REPL();
+        LPhyMetaParser parser = new REPL();
         parser.source(reader);
 
         // log true values and tree
@@ -197,9 +197,9 @@ public class LPhyBeast implements Runnable {
 
 
 
-    //    private static void source(BufferedReader reader, LPhyParser parser)
+    //    private static void source(BufferedReader reader, LPhyMetaParser parser)
 //            throws IOException {
-//        LPhyParser.Context mode = null;
+//        LPhyMetaParser.Context mode = null;
 //
 //        String line = reader.readLine();
 //        while (line != null) {
@@ -207,9 +207,9 @@ public class LPhyBeast implements Runnable {
 //            if (s.isEmpty()) {
 //                // skip empty lines
 //            } else if (s.startsWith("data{"))
-//                mode = LPhyParser.Context.data;
+//                mode = LPhyMetaParser.Context.data;
 //            else if (s.startsWith("model{"))
-//                mode = LPhyParser.Context.model;
+//                mode = LPhyMetaParser.Context.model;
 //            else if (s.startsWith("}"))
 //                mode = null; // reset
 //            else {
