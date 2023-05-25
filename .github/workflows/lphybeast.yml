@@ -69,7 +69,7 @@ jobs:
         working-directory: ./LPhyBeast
         # only available in lphy at the moment
         # temp disable test because of github issue
-        run: ./gradlew build -x test --no-daemon
+        run: ./gradlew build --no-daemon
 
       - name: Publish unit test results
         uses: EnricoMi/publish-unit-test-result-action@v2
