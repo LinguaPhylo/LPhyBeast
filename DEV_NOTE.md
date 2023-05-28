@@ -31,7 +31,7 @@ For example, if only lphy 1.2.0 is required, you can use `io.github.linguaphylo:
 ### Dependencies to zip files
 
 BEAST 2 packages are released as zip files. LPhyBeast and [LPhyBeastExt](https://github.com/LinguaPhylo/LPhyBeastExt)
-are published to [Maven linguaphylo group](https://search.maven.org/search?q=io.github.linguaphylo).
+are published to [Maven linguaphylo group](https://central.sonatype.com/namespace/io.github.linguaphylo).
 Using the predefined [Gradle function](https://github.com/LinguaPhylo/LPhyBeastExt/blob/a31263ef418c63596515eb2ee1b308046423184e/lphybeast-ext/build.gradle.kts#L21-L56), 
 the zip file can be downloaded and unzipped automatically, and then jars will be loaded into the library. 
 
@@ -136,7 +136,7 @@ Package Manager => Package repositories => Add URL. Remember to delete it after 
 
 - [LPhy developer note](https://github.com/LinguaPhylo/linguaPhylo/blob/master/DEV_NOTE.md)
 
-- [Maven linguaphylo group](https://search.maven.org/search?q=io.github.linguaphylo)
+- [Maven linguaphylo group](https://central.sonatype.com/namespace/io.github.linguaphylo)
 
 - [LPhyBeastExt](https://github.com/LinguaPhylo/LPhyBeastExt)
 
