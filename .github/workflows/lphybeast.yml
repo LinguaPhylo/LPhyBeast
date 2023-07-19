@@ -50,10 +50,10 @@ jobs:
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add feast
           java -Djava.library.path="$BEAST_LIB" -cp "$BEAST_LIB/$LAUNCHER" beast.pkgmgmt.PackageManager -add SSM
       # https://github.com/CompEvol/beast2/issues/1078
+      # mkdir $REPO_DIR/BEAST.base
       - name: Install beast2 base
         run: |
-          ls $REPO_DIR
-      # mkdir $REPO_DIR/BEAST.base
+          find $REPO_DIR -type d
           cp $BEAST_LIB/BEAST.base.version.xml $REPO_DIR/BEAST.base/version.xml
           mkdir $REPO_DIR/BEAST.base/lib
           cp $BEAST_LIB/BEAST-base-*.jar $REPO_DIR/BEAST.base/lib
