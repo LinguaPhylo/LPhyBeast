@@ -57,7 +57,7 @@ jobs:
           mkdir $REPO_DIR/BEAST.base
           cp $BEAST_LIB/BEAST.base.version.xml $REPO_DIR/BEAST.base/version.xml
           mkdir $REPO_DIR/BEAST.base/lib
-          cp $BEAST_LIB/BEAST-base-*.jar $REPO_DIR/BEAST.base/lib
+          cp $BEAST_LIB/BEAST.base-*.jar $REPO_DIR/BEAST.base/lib
 
       #./linguaPhylo/lphy/lib
       #./LPhyBeast/lphybeast/lib
