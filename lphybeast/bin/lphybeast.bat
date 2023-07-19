@@ -86,8 +86,6 @@ set "LPHY_LIB=%LPHY_DIR%\lib"
 :Done
 echo set the LPHY_LIB to ""%LPHY_LIB%""
 
-
-
 :execute
 @rem Setup the command line
 @rem Execute 
