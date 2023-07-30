@@ -68,11 +68,11 @@ if [ -z "$LPHY_LIB" ]; then
   # if $LPHY_LIB does not exist, detect the OS
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       echo "Guessing LPHY_LIB on Linux ..."
-      OS_PREFIX = "/usr/local"
+      OS_PREFIX="/usr/local"
 
   elif [[ "$OSTYPE" == "darwin"* ]]; then
       echo "Guessing LPHY_LIB on macOS ..."
-      OS_PREFIX = "/Applications"
+      OS_PREFIX="/Applications"
 
 #  elif [[ "$OSTYPE" == "cygwin" ]]; then
 #      echo "Running on Cygwin (Windows)"
@@ -93,6 +93,8 @@ if [ -z "$LPHY_LIB" ]; then
   # Guess LPHY_LIB
   LPHY_LIB="$LPHY_DIR/lib"
 fi
+# set to specific path in script
+#LPHY_LIB="/Applications/BEAST 2.7.5/lphystudio-1.4.3/lib"
 
 if [ ! -d "$LPHY_LIB" ]; then
   echo "Error: Invalid LPhy library path : $LPHY_LIB !"
@@ -100,21 +102,24 @@ if [ ! -d "$LPHY_LIB" ]; then
   echo "Get help from https://linguaphylo.github.io/setup"
   exit 1
 fi
+echo "BEAST_LIB = $BEAST_LIB"
+echo "BEAST_EXTRA_LIBS = $BEAST_EXTRA_LIBS"
 echo "LPHY_LIB = $LPHY_LIB"
+echo ""
 
+# test if there is any lphy*.jar
 JAR_FILES=$(ls "$LPHY_LIB"/lphy*.jar)
-if [ -z "$jar_files" ]; then
+if [ -z "$JAR_FILES" ]; then
   echo "Error: No core jar files found in $LPHY_LIB !"
   echo "Please install LPhy properly. Get help from https://linguaphylo.github.io/setup"
   exit 1
 fi
 
 # must set -Dpicocli.disable.closures=true using picocli:4.7.0
-# it will throw otherwise java.lang.NoClassDefFoundError: groovy.lang.Closure
-ARG="-Dlauncher.wait.for.exit=true -Xms256m -Xmx60g -Duser.language=en -Dpicocli.disable.closures=true"
-LPHY_BEAST="beast.pkgmgmt.launcher.AppLauncherLauncher lphybeast"
+# otherwise it will throw otherwise java.lang.NoClassDefFoundError: groovy.lang.Closure
+ARG="-Xms256m -Xmx60g -Dpicocli.disable.closures=true -Dlauncher.wait.for.exit=true -Duser.language=en"
 if [ -n "$BEAST_EXTRA_LIBS" ]; then
-  "$JAVA" $ARG -Djava.library.path="$BEAST_EXTRA_LIBS" -cp "$BEAST_LIB/launcher.jar:$LPHY_LIB/*" $LPHY_BEAST $*
+  "$JAVA" $ARG -Djava.library.path="$BEAST_EXTRA_LIBS" -cp "$BEAST_LIB/launcher.jar:$LPHY_LIB/*" beast.pkgmgmt.launcher.AppLauncherLauncher lphybeast $*
 else
-  "$JAVA" $ARG -cp "$BEAST_LIB/launcher.jar:$LPHY_LIB/*" $LPHY_BEAST $*
+  "$JAVA" $ARG -cp "$BEAST_LIB/launcher.jar:$LPHY_LIB/*" beast.pkgmgmt.launcher.AppLauncherLauncher lphybeast $*
 fi
