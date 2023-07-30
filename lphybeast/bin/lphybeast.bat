@@ -17,79 +17,100 @@
 @if "%DEBUG%" == "" @echo off
 @rem ##########################################################################
 @rem
-@rem  The command line program for running a LPhy script to create simulated data for Windows
+@rem  lphybeast launcher for Windows
 @rem
 @rem ##########################################################################
 
 @rem Set local scope for the variables with windows NT shell
 if "%OS%"=="Windows_NT" setlocal
 
+@rem It is preferable to place lphybeast inside the BEAST2 bin folder
 set DIRNAME=%~dp0
 if "%DIRNAME%" == "" set DIRNAME=.
-set APP_BASE_NAME=%~n0
-set APP_HOME=%DIRNAME%
+set BIN_FOLDER=%DIRNAME%
 
-@rem Resolve any "." and ".." in APP_HOME to make it shorter.
-for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
-
-@rem Add default JVM options here. 
-set DEFAULT_JVM_OPTS="-Xmx60g" "-Xms256m" ""-Duser.language=en" "-Dpicocli.disable.closures=true"
-
-@rem Find java.exe
-if defined JAVA_HOME goto findJavaFromJavaHome
-
-set JAVA_EXE=java.exe
-%JAVA_EXE% -version >NUL 2>&1
-if "%ERRORLEVEL%" == "0" goto setLPHYLIB
-
-echo.
-echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
-echo.
-echo Please set the JAVA_HOME variable in your environment to match the
-echo location of your Java installation.
-
-goto fail
-
-:findJavaFromJavaHome
-set JAVA_HOME=%JAVA_HOME:"=%
-set JAVA_EXE=%JAVA_HOME%/bin/java.exe
-
-if exist "%JAVA_EXE%" goto setLPHYLIB
-
-echo.
-echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
-echo.
-echo Please set the JAVA_HOME variable in your environment to match the
-echo location of your Java installation.
-
-goto fail
+@rem Resolve any "." and ".." in BIN_FOLDER to make it shorter.
+for %%i in ("%BIN_FOLDER%") do set BIN_FOLDER=%%~fi
 
 :setBEAST
-set BEAST=%APP_HOME%\..\
+@rem
+set BEAST=%BIN_FOLDER%\..\
 echo set the BEAST root dir to "%BEAST%"
 
 :setBEASTLIB
 set BEAST_LIB=%BEAST%\lib
 echo set the BEAST_LIB to "%BEAST_LIB%"
 
-for /d %%G in ("%BEAST%\lphy*studio-1*") do (
-  set "LPHY_DIR=%%G"
-  goto FoundLphyDir
+if exist "%BEAST%\jre" (
+  @rem Use Zulu JRE in the BEAST directory if it exists
+  set "JAVA=%BEAST%\jre\bin\java"
+) else if defined JAVA_HOME (
+  @rem Else use %JAVA_HOME%
+  set "JAVA=%JAVA_HOME%\bin\java"
+) else (
+  @rem Else use java from the PATH
+  set "JAVA=java"
 )
 
-set "LPHY_LIB=%BEAST%\lphystudio-1.4.3\lib"
-goto Done
+@rem Print Java version
+"%JAVA%" -version
 
-:FoundLphyDir
-set "LPHY_LIB=%LPHY_DIR%\lib"
+@rem $LPHY_LIB must be provided
+if not defined LPHY_LIB (
+  @rem If %LPHY_LIB% does not exist, detect the OS
+  if /I not x%OS:Windows=%==x%OS% (
+    echo Guessing LPHY_LIB on Windows ...
+    set "OS_PREFIX=C:\Program Files"
 
-:Done
-echo set the LPHY_LIB to ""%LPHY_LIB%""
+    dir /b "%OS_PREFIX%\lphy*studio-1*" > nul
+    if errorlevel 1 (
+        set "OS_PREFIX_x86=C:\Program Files (x86)"
+        echo Cannot find the lphy installation in %OS_PREFIX%, try %OS_PREFIX_x86%.
+        set "OS_PREFIX=%OS_PREFIX_x86%"
+    )
+
+  ) else (
+    echo Cannot guess the LPhy library path LPHY_LIB in unknown OS: %OS% !
+    echo Please set it as your environment variable.
+    echo Get help from https://linguaphylo.github.io/setup
+    exit /b 1
+  )
+
+  @rem If multiple LPhy installations are found, ensure to get the latest version, usually the last line
+  for /f "delims=" %%i in ('dir /b /ad "%OS_PREFIX%\lphy*studio-1*"') do set "LPHY_DIR=%OS_PREFIX%\%%i"
+  @rem Guess LPHY_LIB
+  set "LPHY_LIB=%LPHY_DIR%\lib"
+)
+
+if not exist "%LPHY_LIB%" (
+  echo Error: Invalid LPhy library path: %LPHY_LIB% !
+  echo Please set an existing LPhy library path to LPHY_LIB as your environment variable.
+  echo Get help from https://linguaphylo.github.io/setup
+  exit /b 1
+)
+
+echo BEAST_LIB = %BEAST_LIB%
+echo BEAST_EXTRA_LIBS = %BEAST_EXTRA_LIBS%
+echo LPHY_LIB = %LPHY_LIB%
+echo.
+
+@rem Use the "dir" command to check for lphy*.jar files in the %LPHY_LIB% folder
+dir /b "%LPHY_LIB%\lphy*.jar" > nul
+@rem Check the errorlevel to determine if any lphy*.jar files were found
+if errorlevel 1 (
+    echo Error: No core jar files found in %LPHY_LIB% !
+    echo Please install LPhy properly. Get help from https://linguaphylo.github.io/setup
+    exit /b 1
+)
+
+@rem Must set -Dpicocli.disable.closures=true using picocli:4.7.0
+@rem Otherwise, it will throw java.lang.NoClassDefFoundError: groovy.lang.Closure
+set "ARG=-Xms256m -Xmx60g -Dpicocli.disable.closures=true -Dlauncher.wait.for.exit=true -Duser.language=en"
 
 :execute
 @rem Setup the command line
 @rem Execute 
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% -cp "%BEAST_LIB%"\launcher.jar:%LPHY_LIB%\*" beast.pkgmgmt.launcher.AppLauncherLauncher lphybeast %*
+"%JAVA%" %ARG% -cp "%BEAST_LIB%"\launcher.jar:%LPHY_LIB%\*" beast.pkgmgmt.launcher.AppLauncherLauncher lphybeast %*
 
 :end
 @rem End local scope for the variables with windows NT shell
@@ -97,10 +118,8 @@ if "%ERRORLEVEL%"=="0" goto mainEnd
 
 :fail
 echo ERROR: fail to run 
-echo "%JAVA_EXE%" %DEFAULT_JVM_OPTS% -cp %BEAST_LIB%"\launcher.jar:%LPHY_LIB%\*" beast.pkgmgmt.launcher.AppLauncherLauncher lphybeast %*
-
+echo "%JAVA%" %ARG% -cp %BEAST_LIB%"\launcher.jar:%LPHY_LIB%\*" beast.pkgmgmt.launcher.AppLauncherLauncher lphybeast %*
 
 :mainEnd
 if "%OS%"=="Windows_NT" endlocal
 
-:omega
