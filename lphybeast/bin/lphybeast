@@ -88,8 +88,8 @@ if [ -z "$LPHY_LIB" ]; then
       exit 1
   fi
 
-  # if multiple LPhy installed, ensure to get the latest version, usually last line
-  LPHY_DIR=$(find "$OS_PREFIX" -maxdepth 1 -type d -name 'lphy*studio-1*' | tail -1)
+  # if multiple LPhy installed, sort the search result to get the latest version, usually last line
+  LPHY_DIR=$(find "$OS_PREFIX" -maxdepth 1 -type d -name 'lphy*studio-1*' | sort | tail -1)
   # Guess LPHY_LIB
   LPHY_LIB="$LPHY_DIR/lib"
 fi
