@@ -68,7 +68,8 @@ if [ -z "$LPHY_LIB" ]; then
   # if $LPHY_LIB does not exist, detect the OS
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       echo "Guessing LPHY_LIB on Linux ..."
-      OS_PREFIX="/usr/local"
+      # set working dir to ~
+      OS_PREFIX="~"
 
   elif [[ "$OSTYPE" == "darwin"* ]]; then
       echo "Guessing LPHY_LIB on macOS ..."
