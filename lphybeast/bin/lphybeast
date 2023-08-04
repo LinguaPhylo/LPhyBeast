@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # It is preferable to place lphybeast inside the BEAST2 bin folder
 
 if [ -z "$BEAST" ]; then
@@ -69,7 +69,7 @@ if [ -z "$LPHY_LIB" ]; then
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       echo "Guessing LPHY_LIB on Linux ..."
       # set working dir to ~
-      OS_PREFIX="~"
+      OS_PREFIX="$HOME"
 
   elif [[ "$OSTYPE" == "darwin"* ]]; then
       echo "Guessing LPHY_LIB on macOS ..."
