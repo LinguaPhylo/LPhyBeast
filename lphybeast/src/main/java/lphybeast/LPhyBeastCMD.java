@@ -65,7 +65,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
     @Option(names = {"-seed"}, description = "the seed to run the LPhy script.")
     int seed;
 
-    @Option(names = {"-u", "--logunicode"}, description = "logging as unicode for non-Windows users.")
+    @Option(names = {"-u", "--logunicode"}, defaultValue = "false", description = "logging as unicode for non-Windows users.")
     boolean logunicode;
 
     @Option(names = {"-vf", "--version_file"}, split = ",",
