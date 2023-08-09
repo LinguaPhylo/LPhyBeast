@@ -109,7 +109,7 @@ goto fail
 :execute
 @rem Must set -Dpicocli.disable.closures=true using picocli:4.7.0
 @rem Otherwise, it will throw java.lang.NoClassDefFoundError: groovy.lang.Closure
-set "ARG=-Xms256m -Xmx60g -Dpicocli.disable.closures=true -Dlauncher.wait.for.exit=true -Duser.language=en"
+set "ARG=-Xms256m -Xmx60g -Dpicocli.disable.closures=true -Dlauncher.wait.for.exit=true -Dfile.encoding=UTF8 -Duser.language=en"
 
 @rem Setup the command line
 @rem Execute
