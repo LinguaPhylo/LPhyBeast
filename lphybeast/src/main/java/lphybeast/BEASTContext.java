@@ -353,7 +353,7 @@ public class BEASTContext {
         if (beastInterface != null) {
             return beastInterface;
         } else {
-            String id = node.getUniqueId();
+            String id = lPhyBeastConfig.isLogUnicode() ? node.getUniqueId() : Symbols.getCanonical(node.getUniqueId());
             String[] parts = id.split(VectorUtils.INDEX_SEPARATOR);
             if (parts.length == 2) {
                 int index = Integer.parseInt(parts[1]);
@@ -407,7 +407,8 @@ public class BEASTContext {
 
         if (slicedBEASTValue != null) {
             if (!(slicedBEASTValue instanceof Concatenate)) {
-                Slice slice = SliceFactory.createSlice(slicedBEASTValue, sliceValue.getIndex(), sliceValue.getId());
+                String id = lPhyBeastConfig.isLogUnicode() ? sliceValue.getId() : sliceValue.getCanonicalId();
+                Slice slice = SliceFactory.createSlice(slicedBEASTValue, sliceValue.getIndex(), id);
                 addToContext(sliceValue, slice);
                 return slice;
             } else {
@@ -627,12 +628,22 @@ public class BEASTContext {
         }
     }
 
+    private void updateIDs(Value<?> value) {
+        String id = value.getId();
+        if (id != null && !id.trim().isEmpty())
+            value.setId(Symbols.getCanonical(id));
+    }
+
     /**
      * Creates the beast value objects in a post-order traversal, so that inputs are always created before outputs.
      *
      * @param value the value to convert to a beast value (after doing so for the inputs of its generator, recursively)
      */
     private void createBEASTValueObjects(Value<?> value) {
+        // Windows issue that cannot display greek letters correctly
+        if (!lPhyBeastConfig.isLogUnicode()) {
+            updateIDs(value);
+        }
 
         // do values of inputs recursively first
         Generator<?> generator = value.getGenerator();

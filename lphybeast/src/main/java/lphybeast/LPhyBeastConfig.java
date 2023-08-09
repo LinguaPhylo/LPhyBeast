@@ -41,6 +41,8 @@ public class LPhyBeastConfig {
     private long chainLength = 1000000; // 1M
     private int repId = -1; // >=0 for multi-outputs
 
+    private boolean logunicode;
+
     /**
      * The configuration to create a BEAST 2 XML.
      * Handle the input file path, output file path, and user.dir.
@@ -54,11 +56,13 @@ public class LPhyBeastConfig {
      *                 then set user.dir to the parent folder of lphy script.
      */
     public LPhyBeastConfig(Path infile, Path outfile, Path wd,
-                           int compressConstantAlignment, boolean logAllAlignments)
+                           int compressConstantAlignment, boolean logAllAlignments,
+                           boolean logunicode)
             throws IOException {
 
         this.compressConstantAlignment = compressConstantAlignment;
         this.logAllAlignments = logAllAlignments;
+        this.logunicode = logunicode;
 
         if (infile == null || !infile.toFile().exists())
             throw new IOException("Cannot find LPhy script file ! " + (infile != null ? infile.toAbsolutePath() : null));
@@ -168,5 +172,9 @@ public class LPhyBeastConfig {
      */
     public void setRepId(int repId) {
         if (repId >= 0) this.repId = repId;
+    }
+
+    public boolean isLogUnicode() {
+        return logunicode;
     }
 }

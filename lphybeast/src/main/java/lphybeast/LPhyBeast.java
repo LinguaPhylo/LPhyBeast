@@ -60,7 +60,7 @@ public class LPhyBeast implements Runnable {
         repTot = 1;
         loader = null;
         try {
-            lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd, 0, false);
+            lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd, 0, false, false);
             lPhyBeastConfig.setChainLength(chainLength);
             lPhyBeastConfig.setPreBurnin(preBurnin);
         } catch (IOException e) {
