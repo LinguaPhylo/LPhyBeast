@@ -161,6 +161,7 @@ public class LPhyBeast implements Runnable {
         LPhyMetaParser parser = new REPL();
         parser.source(reader);
 
+        // Add lphy script to the top of XML
         CanonicalCodeBuilder canonicalCodeBuilder = new CanonicalCodeBuilder();
         StringBuilder xmlBuilder = new StringBuilder();
         xmlBuilder.append("<!--\n").append(canonicalCodeBuilder.getCode(parser)).append("\n-->\n");
