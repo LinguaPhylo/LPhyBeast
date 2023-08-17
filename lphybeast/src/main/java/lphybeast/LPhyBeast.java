@@ -4,6 +4,7 @@ import lphy.core.GraphicalLPhyParser;
 import lphy.core.LPhyMetaParser;
 import lphy.core.Sampler;
 import lphy.graphicalModel.RandomValueLogger;
+import lphy.graphicalModel.code.CanonicalCodeBuilder;
 import lphy.graphicalModel.logger.TreeFileLogger;
 import lphy.graphicalModel.logger.VarFileLogger;
 import lphy.parser.REPL;
@@ -160,6 +161,10 @@ public class LPhyBeast implements Runnable {
         LPhyMetaParser parser = new REPL();
         parser.source(reader);
 
+        CanonicalCodeBuilder canonicalCodeBuilder = new CanonicalCodeBuilder();
+        StringBuilder xmlBuilder = new StringBuilder();
+        xmlBuilder.append("<!--\n").append(canonicalCodeBuilder.getCode(parser)).append("\n-->\n");
+
         // log true values and tree
         List<RandomValueLogger> loggers = new ArrayList<>();
         final String filePathNoExtTrueVaule = filePathNoExt + "_" + "true";
@@ -179,7 +184,8 @@ public class LPhyBeast implements Runnable {
         final String logFileStem = lPhyBeastConfig.rmParentDir(filePathNoExt);
         // filePathNoExt here is file stem, which will be used in XML log file names.
         // Cannot handle any directories from other machines.
-        return context.toBEASTXML(logFileStem);
+        xmlBuilder.append("\n").append(context.toBEASTXML(logFileStem)).append("\n");
+        return xmlBuilder.toString();
     }
 
     /**
