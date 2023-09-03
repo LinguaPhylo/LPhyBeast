@@ -291,7 +291,7 @@ public class BEASTContext {
 
             }
         }
-        throw new RuntimeException("No coercable parameter found.");
+        throw new RuntimeException("No coercible parameter found for " + value);
     }
 
     public IntegerParameter getAsIntegerParameter(Value value) {
@@ -317,7 +317,7 @@ public class BEASTContext {
 
             }
         }
-        throw new RuntimeException("No coercable parameter found.");
+        throw new RuntimeException("No coercible parameter found for " + value);
     }
 
     //*** handle BEAST 2 objects ***//
@@ -618,11 +618,14 @@ public class BEASTContext {
         }
 
         Set<Generator> visited = new HashSet<>();
+        // 1st traverse calls modifyBEASTValues in each GeneratorToBEAST if implemented,
+        // which is to modify/replace the BEASTInterface stored in map, e.g., SliceDoubleArrayToBEAST
         for (Value<?> value : sinks) {
             traverseBEASTGeneratorObjects(value, true, false, visited);
         }
 
         visited.clear();
+        // 2nd traverse converts a generator to an equivalent BEAST object
         for (Value<?> value : sinks) {
             traverseBEASTGeneratorObjects(value, false, true, visited);
         }
