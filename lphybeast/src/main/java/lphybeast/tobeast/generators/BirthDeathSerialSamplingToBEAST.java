@@ -2,6 +2,10 @@ package lphybeast.tobeast.generators;
 
 import bdtree.likelihood.BirthDeathSequentialSampling;
 import beast.base.core.BEASTInterface;
+import beast.base.evolution.tree.MRCAPrior;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.distribution.Prior;
+import beast.base.inference.parameter.RealParameter;
 import lphy.evolution.birthdeath.BirthDeathSerialSamplingTree;
 import lphy.graphicalModel.Value;
 import lphy.graphicalModel.ValueUtils;
@@ -29,14 +33,17 @@ public class BirthDeathSerialSamplingToBEAST implements
 //        Input<Double> rootAgeInput;
         Value<Number> rootAgeVal = generator.getRootAge();
         if (rootAgeVal.getGenerator() != null) {
-            throw new UnsupportedOperationException("The development of specifying lower and upper bounds for the root age is still in progress !");
-
-            /*TODO Alexei: what is RootAgeGenerator? I assume you want to assign the lower and upper here
+            // BirthDeathSequentialSampling requires either set rootAge or both the lower and upper in init,
+            // otherwise initAndValidate will throw err
             // https://github.com/fkmendes/bdtree/blob/master/examples/testing/Shankarappa.xml
-            BEASTInterface beastRootAgeGenerator = context.getBEASTObject(generator.getRootAge().getGenerator());
+            RealParameter beastRootAge = context.getAsRealParameter(generator.getRootAge());
+            // this should be only for init, it must have operator to sample from dist
+            beastBDSS.setInputValue("rootAge", beastRootAge.getValue());
+// setting rootAge seems easier than setting bound, because the generator may not provide lower and upper to beastRootAge
 //            beastBDSS.setInputValue("lower", lower);
 //            beastBDSS.setInputValue("upper", upper);
 
+            BEASTInterface beastRootAgeGenerator = context.getBEASTObject(generator.getRootAge().getGenerator());
             if (beastRootAgeGenerator instanceof Prior) {
                 Prior rootAgePrior = (Prior) beastRootAgeGenerator;
 
@@ -46,11 +53,11 @@ public class BirthDeathSerialSamplingToBEAST implements
                 prior.setInputValue("taxonset", ((Tree) tree).getTaxonset());
                 prior.initAndValidate();
                 context.addBEASTObject(prior, generator.getRootAge().getGenerator());
-//                context.removeBEASTObject(beastRootAge);
+                context.removeBEASTObject(beastRootAge);
                 context.removeBEASTObject(beastRootAgeGenerator);
             } else {
                 throw new RuntimeException("Can't map BirthDeathSamplingTree.rootAge prior to tree in BEAST conversion.");
-            }*/
+            }
 
         } else {
             // https://github.com/fkmendes/bdtree/blob/master/examples/testing/BDSSLikelihood.xml
