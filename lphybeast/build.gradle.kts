@@ -50,7 +50,7 @@ dependencies {
      * https://docs.gradle.org/current/userguide/rich_versions.html#sec:strict-version
      */
     // no API change in 1.4.4
-    api("io.github.linguaphylo:lphy:1.4.3") //-SNAPSHOT
+    api("io.github.linguaphylo:lphy:1.4.4-SNAPSHOT") //-SNAPSHOT
 
     // all released beast 2 libs
     // TODO beast2 jar contains Apache math. Be aware of version conflict to LPhy dependency.
