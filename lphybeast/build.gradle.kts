@@ -33,7 +33,7 @@ val lblibs by configurations.creating {
 
 // TODO 3 versions: here, LPhyBeastCMD, version.xml
 // version has to be manually adjusted to keep same between version.xml and here
-version = "1.0.3-SNAPSHOT"//-SNAPSHOT
+version = "1.0.3"//-SNAPSHOT
 
 
 // if the project dependencies ues impl, then impl(proj(..)) will only have source code,
@@ -50,7 +50,7 @@ dependencies {
      * https://docs.gradle.org/current/userguide/rich_versions.html#sec:strict-version
      */
     // no API change in 1.4.4
-    api("io.github.linguaphylo:lphy:1.4.4-SNAPSHOT") //-SNAPSHOT
+    api("io.github.linguaphylo:lphy:1.4.5") //-SNAPSHOT
 
     // all released beast 2 libs
     // TODO beast2 jar contains Apache math. Be aware of version conflict to LPhy dependency.
