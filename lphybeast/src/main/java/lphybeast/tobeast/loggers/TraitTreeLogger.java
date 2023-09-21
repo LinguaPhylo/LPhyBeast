@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.lang.Math.toIntExact;
+
 /**
  * The extra tree logger for discrete phylogeography.
  * @see TreeWithTraitLogger
@@ -45,7 +47,8 @@ public class TraitTreeLogger implements TreeLoggerHelper {
         treeWithTraitLogger.setInputValue("metadata", metadata);
 
         Logger logger = new Logger();
-        logger.setInputValue("logEvery", logEvery);
+        // Must convert to int
+        logger.setInputValue("logEvery", toIntExact(logEvery));
         logger.setInputValue("log", treeWithTraitLogger);
         logger.setInputValue("fileName", getFileName());
         logger.setInputValue("mode", "tree");

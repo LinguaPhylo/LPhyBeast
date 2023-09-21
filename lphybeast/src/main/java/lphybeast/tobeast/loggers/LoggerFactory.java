@@ -181,7 +181,7 @@ public class LoggerFactory implements LoggerHelper {
 
         public Logger createLogger(long logEvery, Multimap<BEASTInterface, GraphicalModelNode<?>> elements) {
             Logger logger = new Logger();
-            // integer
+            // Must convert to int
             logger.setInputValue("logEvery", toIntExact(logEvery));
             if (logMetaData()) {
                 TreeWithMetaDataLogger treeWithMetaDataLogger = new TreeWithMetaDataLogger();
