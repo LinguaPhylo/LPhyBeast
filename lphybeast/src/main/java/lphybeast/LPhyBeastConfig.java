@@ -11,6 +11,8 @@ import java.util.Objects;
 
 public class LPhyBeastConfig {
 
+    public static final int NUM_OF_SAMPLES = 2000;
+
     public final Path inPath;
     public final Path outPath;
 //    public final Path wd;//TODO currently using UserDir.set/getUserDir
@@ -39,6 +41,7 @@ public class LPhyBeastConfig {
      */
     private int preBurnin = -1; // auto estimate
     private long chainLength = 1000000; // 1M
+    private long logEvery = 0;
     private int repId = -1; // >=0 for multi-outputs
 
     private boolean logunicode;
@@ -163,6 +166,16 @@ public class LPhyBeastConfig {
         this.chainLength = chainLength;
     }
 
+    public long getLogEvery() {
+        if (logEvery > 0) return logEvery;
+        // Will throw an ArithmeticException in case of overflow.
+        return getChainLength() / NUM_OF_SAMPLES;
+    }
+
+    public void setLogEvery(long logEvery) {
+        this.logEvery = logEvery;
+    }
+
     public int getRepId() {
         return repId;
     }
@@ -177,4 +190,5 @@ public class LPhyBeastConfig {
     public boolean isLogUnicode() {
         return logunicode;
     }
+
 }

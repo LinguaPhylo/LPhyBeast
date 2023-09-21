@@ -72,7 +72,7 @@ public class LPhyBeast implements Runnable {
     @Override
     public void run() {
         if (lPhyBeastConfig.inPath == null || lPhyBeastConfig.outPath == null || repTot < 1 ||
-                lPhyBeastConfig.getChainLength() < BEASTContext.NUM_OF_SAMPLES)
+                lPhyBeastConfig.getChainLength() < LPhyBeastConfig.NUM_OF_SAMPLES)
             throw new IllegalArgumentException("Illegal inputs : inPath = " + lPhyBeastConfig.inPath +
                     ", outPath = " + lPhyBeastConfig.outPath + ", rep = " + repTot + ", chainLength = " +
                     lPhyBeastConfig.getChainLength() + ", preBurnin = " + lPhyBeastConfig.getPreBurnin());

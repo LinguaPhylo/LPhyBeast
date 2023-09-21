@@ -20,6 +20,8 @@ import lphybeast.BEASTContext;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.toIntExact;
+
 /**
  * A class to create all operators
  * @author Walter Xie
@@ -43,7 +45,7 @@ public class LoggerFactory implements LoggerHelper {
      * @return    3 default loggers: parameter logger, screen logger, tree logger.
      * @see Logger
      */
-    public List<Logger> createLoggers(int logEvery, String logFileStem) {
+    public List<Logger> createLoggers(long logEvery, String logFileStem) {
         Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
 
         List<Logger> loggers = new ArrayList<>();
@@ -78,9 +80,10 @@ public class LoggerFactory implements LoggerHelper {
     //*** default parameter/screen loggers ***//
 
     // screen logger if fileName is null
-    public Logger createLogger(int logEvery, Multimap<BEASTInterface, GraphicalModelNode<?>> elements) {
+    public Logger createLogger(long logEvery, Multimap<BEASTInterface, GraphicalModelNode<?>> elements) {
         Logger logger = new Logger();
-        logger.setInputValue("logEvery", logEvery);
+        // integer
+        logger.setInputValue("logEvery", toIntExact(logEvery));
         logger.setInputValue("log", getLoggables());
         if (getFileName() == null) {
             logger.setID("ScreenLogger"); // only 1 screen logger
@@ -176,9 +179,10 @@ public class LoggerFactory implements LoggerHelper {
                     generator instanceof StructuredCoalescent;
         }
 
-        public Logger createLogger(int logEvery, Multimap<BEASTInterface, GraphicalModelNode<?>> elements) {
+        public Logger createLogger(long logEvery, Multimap<BEASTInterface, GraphicalModelNode<?>> elements) {
             Logger logger = new Logger();
-            logger.setInputValue("logEvery", logEvery);
+            // integer
+            logger.setInputValue("logEvery", toIntExact(logEvery));
             if (logMetaData()) {
                 TreeWithMetaDataLogger treeWithMetaDataLogger = new TreeWithMetaDataLogger();
                 treeWithMetaDataLogger.setInputValue("tree", getTree());

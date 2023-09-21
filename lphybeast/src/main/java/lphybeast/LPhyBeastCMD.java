@@ -48,6 +48,9 @@ public class LPhyBeastCMD implements Callable<Integer> {
             description = "The number of burnin samples taken before entering the main loop of MCMC. " +
                     "If < 0, as default, then estimate it based on all state nodes size.")
     int preBurnin;
+    @Option(names = {"-le", "--logEvery"},
+            description = "The state frequency to be logged.")
+    long logEvery;
 
     //well calibrated study
     @Option(names = {"-r", "--replicates"}, defaultValue = "1", description = "the number of replicates (XML) given one LPhy script, " +
@@ -121,6 +124,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
                     compressConstantAlignment, logAllAlignments, logunicode);
             lPhyBeastConfig.setPreBurnin(preBurnin);
             lPhyBeastConfig.setChainLength(chainLength);
+            lPhyBeastConfig.setLogEvery(logEvery);
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);

@@ -43,6 +43,7 @@ import java.io.PrintWriter;
 import java.util.*;
 
 import static java.lang.Math.toIntExact;
+import static lphybeast.LPhyBeastConfig.NUM_OF_SAMPLES;
 
 /**
  * The central class to keep the configurations,
@@ -132,8 +133,6 @@ public class BEASTContext {
         newTreeOperatorStrategies = loader.newTreeOperatorStrategies;
     }
 
-    public static final int NUM_OF_SAMPLES = 2000;
-
     /**
      * Main method to process configurations to create BEAST 2 XML from LPhy objects.
      *
@@ -147,7 +146,10 @@ public class BEASTContext {
         if (chainLength < NUM_OF_SAMPLES)
             throw new IllegalArgumentException("Invalid length for MCMC chain, len = " + chainLength);
         // Will throw an ArithmeticException in case of overflow.
-        int logEvery = toIntExact(chainLength / NUM_OF_SAMPLES);
+        long logEvery = lPhyBeastConfig.getLogEvery();
+        int nsamp = toIntExact(chainLength/logEvery);
+        if (nsamp < NUM_OF_SAMPLES/2)
+            LoggerUtils.log.warning("The number of logged sample (" + nsamp + ") is too small ! Prefer " + NUM_OF_SAMPLES);
 
         // this fills in List<StateNode> state
         createBEASTObjects();
@@ -542,7 +544,7 @@ public class BEASTContext {
     /**
      * The main class to init BEAST 2 MCMC
      */
-    private MCMC createMCMC(long chainLength, int logEvery, String logFileStem, int preBurnin) {
+    private MCMC createMCMC(long chainLength, long logEvery, String logFileStem, int preBurnin) {
 
         CompoundDistribution posterior = createBEASTPosterior();
 

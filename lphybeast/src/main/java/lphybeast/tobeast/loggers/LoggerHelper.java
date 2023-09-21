@@ -22,7 +22,7 @@ public interface LoggerHelper {
      *                        to make sure not mapping logger to any GraphicalModelNode.
      * @return a parameter or screen {@link Logger}. Or tree logger
      */
-    Logger createLogger(int logEvery, final Multimap<BEASTInterface, GraphicalModelNode<?>> elements);
+    Logger createLogger(long logEvery, final Multimap<BEASTInterface, GraphicalModelNode<?>> elements);
 
     /**
      * @return  a list of loggable parameters.

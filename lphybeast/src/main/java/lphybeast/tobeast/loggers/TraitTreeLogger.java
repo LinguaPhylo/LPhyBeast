@@ -31,7 +31,7 @@ public class TraitTreeLogger implements TreeLoggerHelper {
     }
 
     @Override
-    public Logger createLogger(int logEvery, Multimap<BEASTInterface, GraphicalModelNode<?>> elements) {
+    public Logger createLogger(long logEvery, Multimap<BEASTInterface, GraphicalModelNode<?>> elements) {
         TreeInterface tree = getTree();
 
         TreeWithTraitLogger treeWithTraitLogger = new TreeWithTraitLogger();
