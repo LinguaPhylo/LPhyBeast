@@ -4,11 +4,15 @@ import bdtree.likelihood.BirthDeathSequentialSampling;
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.tree.MRCAPrior;
 import beast.base.evolution.tree.Tree;
+import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.distribution.Prior;
+import beast.base.inference.distribution.Uniform;
 import beast.base.inference.parameter.RealParameter;
 import lphy.evolution.birthdeath.BirthDeathSerialSamplingTree;
+import lphy.graphicalModel.GenerativeDistribution1D;
 import lphy.graphicalModel.Value;
 import lphy.graphicalModel.ValueUtils;
+import lphy.util.LoggerUtils;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.operators.OperatorFactory;
@@ -36,24 +40,46 @@ public class BirthDeathSerialSamplingToBEAST implements
         if (rootAgeVal.getGenerator() != null) {
             // BirthDeathSequentialSampling requires either set rootAge or both the lower and upper in init,
             // otherwise initAndValidate will throw err
-            // https://github.com/fkmendes/bdtree/blob/master/examples/testing/Shankarappa.xml
-            RealParameter beastRootAge = context.getAsRealParameter(generator.getRootAge());
-            // this should be only for init, it must have operator to sample from dist
-            beastBDSS.setInputValue("rootAge", beastRootAge.getValue());
-// setting rootAge seems easier than setting bound, because the generator may not provide lower and upper to beastRootAge
-//            beastBDSS.setInputValue("lower", lower);
-//            beastBDSS.setInputValue("upper", upper);
 
-            BEASTInterface beastRootAgeGenerator = context.getBEASTObject(generator.getRootAge().getGenerator());
+            BEASTInterface beastRootAgeGenerator = context.getBEASTObject(rootAgeVal.getGenerator());
             if (beastRootAgeGenerator instanceof Prior) {
                 Prior rootAgePrior = (Prior) beastRootAgeGenerator;
+                ParametricDistribution dist = rootAgePrior.distInput.get();
 
+                Double lower = Double.NEGATIVE_INFINITY;
+                Double upper = Double.POSITIVE_INFINITY;
+                // first check domain bounds
+                if (rootAgeVal.getGenerator() instanceof GenerativeDistribution1D geneDist1D) {
+                    Object[] bounds = geneDist1D.getDomainBounds();
+                    if (bounds[0] instanceof Number number)
+                        if (number.doubleValue() > lower)
+                            lower = number.doubleValue();
+                    if (bounds[1] instanceof Number number)
+                        if (number.doubleValue() < upper)
+                            upper = number.doubleValue();
+                }
+                //TODO then, only Uniform has lower upper
+                if (dist instanceof Uniform uniform) {
+                    lower = uniform.lowerInput.get();
+                    upper = uniform.upperInput.get();
+                } else
+                    LoggerUtils.log.warning("Cannot detect lower and upper for the root age of BDSS, " +
+                            "set to its distribution domain bounds [" + lower + ", " + upper + "].");
+                // https://github.com/fkmendes/bdtree/blob/master/examples/testing/Shankarappa.xml
+                // cannot set rootAge, which will ignore tree op
+                // setting rootAge seems easier than setting bound, because the generator may not provide lower and upper to beastRootAge
+                beastBDSS.setInputValue("lower", lower);
+                beastBDSS.setInputValue("upper", upper);
+
+                //TODO why create MRCAPrior here? BirthDeathSequentialSampling has no input of MRCAPrior.
                 MRCAPrior prior = new MRCAPrior();
-                prior.setInputValue("distr", rootAgePrior.distInput.get());
+                prior.setInputValue("distr", dist);
                 prior.setInputValue("tree", tree);
                 prior.setInputValue("taxonset", ((Tree) tree).getTaxonset());
                 prior.initAndValidate();
                 context.addBEASTObject(prior, generator.getRootAge().getGenerator());
+
+                RealParameter beastRootAge = context.getAsRealParameter(generator.getRootAge());
                 context.removeBEASTObject(beastRootAge);
                 context.removeBEASTObject(beastRootAgeGenerator);
             } else {
