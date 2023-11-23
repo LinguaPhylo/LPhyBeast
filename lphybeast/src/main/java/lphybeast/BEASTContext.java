@@ -858,8 +858,12 @@ public class BEASTContext {
         return prior;
     }
 
+    public static double getOperatorWeight(int size, double pow) {
+        return Math.pow(size, pow);
+    }
+
     public static double getOperatorWeight(int size) {
-        return Math.pow(size, 0.7);
+        return getOperatorWeight(size, 0.7);
     }
 
     /**

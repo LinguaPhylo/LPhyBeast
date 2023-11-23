@@ -86,7 +86,8 @@ public class OperatorFactory {
         TreeOperatorStrategy treeOperatorStrategy = context.resolveTreeOperatorStrategy(tree);
         Operator exchange = treeOperatorStrategy.getExchangeOperator();
         exchange.setInputValue("tree", tree);
-        exchange.setInputValue("weight", getOperatorWeight(tree.getInternalNodeCount()));
+        double pow = (isNarrow) ? 0.7 : 0.2; // WideExchange size^0.2
+        exchange.setInputValue("weight", getOperatorWeight(tree.getInternalNodeCount(), pow));
         exchange.setInputValue("isNarrow", isNarrow);
         exchange.initAndValidate();
         exchange.setID(tree.getID() + "." + ((isNarrow) ? "narrow" : "wide") + "Exchange");
@@ -110,7 +111,7 @@ public class OperatorFactory {
         TreeOperatorStrategy treeOperatorStrategy = context.resolveTreeOperatorStrategy(tree);
         Operator wilsonBalding = treeOperatorStrategy.getWilsonBaldingOperator();
         wilsonBalding.setInputValue("tree", tree);
-        wilsonBalding.setInputValue("weight", getOperatorWeight(tree.getInternalNodeCount()));
+        wilsonBalding.setInputValue("weight", getOperatorWeight(tree.getInternalNodeCount(), 0.2));
         wilsonBalding.initAndValidate();
         wilsonBalding.setID(tree.getID() + "." + "wilsonBalding");
         context.getElements().put(wilsonBalding, null);
