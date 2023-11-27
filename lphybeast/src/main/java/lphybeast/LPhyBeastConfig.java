@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class LPhyBeastConfig {
@@ -45,6 +46,8 @@ public class LPhyBeastConfig {
     private int repId = -1; // >=0 for multi-outputs
 
     private boolean logunicode;
+
+    private String[] lphyConst;
 
     /**
      * The configuration to create a BEAST 2 XML.
@@ -191,4 +194,17 @@ public class LPhyBeastConfig {
         return logunicode;
     }
 
+    public String[] getLphyConst() {
+        return Arrays.stream(lphyConst)
+                .map(String::trim)
+                // filter out empty line
+                .filter(s -> !s.isEmpty())
+                // add ; if not in the end of string
+                .map(s -> s.endsWith(";") ? s : s + ";")
+                .toArray(String[]::new);
+    }
+
+    public void setLphyConst(String[] lphyConst) {
+        this.lphyConst = lphyConst;
+    }
 }

@@ -33,7 +33,7 @@ val lblibs by configurations.creating {
 
 // TODO 3 versions: here, LPhyBeastCMD, version.xml
 // version has to be manually adjusted to keep same between version.xml and here
-version = "1.0.3"//-SNAPSHOT
+version = "1.0.4"//-SNAPSHOT
 
 
 // if the project dependencies ues impl, then impl(proj(..)) will only have source code,

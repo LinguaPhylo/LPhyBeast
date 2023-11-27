@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
                 "OS: ${os.name} ${os.version} ${os.arch}"})
 public class LPhyBeastCMD implements Callable<Integer> {
 
-    public static final String VERSION = "1.0.3";
+    public static final String VERSION = "1.0.4";
 
     @Parameters(paramLabel = "LPhy_scripts", description = "File of the LPhy model specification. " +
             "If it is a relative path, then concatenate 'user.dir' to the front of the path. " +
@@ -56,6 +56,9 @@ public class LPhyBeastCMD implements Callable<Integer> {
     @Option(names = {"-r", "--replicates"}, defaultValue = "1", description = "the number of replicates (XML) given one LPhy script, " +
             "usually to create simulations for well-calibrated study.") int repTot;
 
+    @Option(names = {"-d", "--data"}, split = ";",
+            description = "Replace the constant value in the lphy script, e.g. -d n=12;L=100;")
+    String[] lphyConst = null;
 
     @Option(names = {"-cca", "--compressConstantAlignments"},
             description = "Compress the alignment only having constants sites into " +
@@ -125,6 +128,8 @@ public class LPhyBeastCMD implements Callable<Integer> {
             lPhyBeastConfig.setPreBurnin(preBurnin);
             lPhyBeastConfig.setChainLength(chainLength);
             lPhyBeastConfig.setLogEvery(logEvery);
+            // replace lphy constants
+            lPhyBeastConfig.setLphyConst(lphyConst);
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);

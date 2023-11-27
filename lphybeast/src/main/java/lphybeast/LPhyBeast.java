@@ -12,9 +12,7 @@ import lphy.util.LoggerUtils;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Main class to set up a simulation or simulations.
@@ -135,8 +133,49 @@ public class LPhyBeast implements Runnable {
         // outPath may be added i
         final String filePathNoExt = lPhyBeastConfig.getOutPathNoExtension(outPath);
 
+        BufferedReader finalReader;
+        // replace constants by lines
+        String[] lphyConst = lPhyBeastConfig.getLphyConst();
+        if (lphyConst != null) {
+            Map<String, String> idValMap = new HashMap<>();
+            for (String lc : lphyConst) {
+                String[] idVal = parse(lc);
+                if (idVal == null)
+                    throw new IllegalArgumentException("Invalid constant assignment : " + lc);
+                idValMap.put(idVal[0], idVal[1]);
+            }
+
+            int replaced = 0;
+            // read and update original line
+            StringBuilder builder = new StringBuilder();
+            for(String line = reader.readLine(); line != null; line = reader.readLine()) {
+                // not data {, func, or gene dist
+                if (line.contains("=") &&
+                        !(line.trim().startsWith("//") || line.contains("{") || line.contains("(") || line.contains("~"))) {
+                    String[] idVal = parse(line);
+
+                    if (idVal != null && idValMap.containsKey(idVal[0])) {
+                        line = idVal[0] + " = " + idValMap.get(idVal[0]) + ";";
+                        replaced++;
+                    }
+                }
+                builder.append(line);
+                builder.append("\n");
+            }
+            reader.close();
+
+            if (replaced != lphyConst.length)
+                throw new IllegalArgumentException("The required constants (" + Arrays.toString(lphyConst) +
+                        " to replace do not match the scripts !");
+
+            Reader modifiedString = new StringReader(builder.toString());
+            finalReader = new BufferedReader(modifiedString);
+
+        } else // use original
+            finalReader = reader;
+
         // create XML string from reader, given file name and MCMC setting
-        String xml = toBEASTXML(Objects.requireNonNull(reader), filePathNoExt);
+        String xml = toBEASTXML(Objects.requireNonNull(finalReader), filePathNoExt);
 
         FileWriter fileWriter = new FileWriter(Objects.requireNonNull(outPath).toFile());
         PrintWriter writer = new PrintWriter(fileWriter);
@@ -145,6 +184,18 @@ public class LPhyBeast implements Runnable {
         writer.close();
 
         LoggerUtils.log.info("Save BEAST 2 XML to " + outPath.toAbsolutePath() + "\n\n");
+    }
+
+    // 1st is id, 2nd is value in string, otherwise null.
+    // line looks like : n = 50;
+    private String[] parse(String line) {
+        // trim all spaces, TODO not working for string
+        String[] idVal = line.trim().split("=");
+        if (idVal.length != 2)
+            return null;
+        idVal[0] = idVal[0].trim();
+        idVal[1] = idVal[1].replace(";", "").trim();
+        return idVal;
     }
 
 
