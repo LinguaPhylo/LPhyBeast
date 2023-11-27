@@ -24,6 +24,11 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: 7.6
+
       # pwd /home/runner/work/LPhyBeast/LPhyBeast
       # PWD=$(pwd)
       # package path /home/runner/.beast/2.7
@@ -70,7 +75,7 @@ jobs:
         working-directory: ./LPhyBeast
         # only available in lphy at the moment
         # temp disable test because of github issue
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build
 
       - name: Publish unit test results
         uses: EnricoMi/publish-unit-test-result-action@v2
