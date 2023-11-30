@@ -195,6 +195,7 @@ public class LPhyBeastConfig {
     }
 
     public String[] getLphyConst() {
+        if (lphyConst == null) return null;
         return Arrays.stream(lphyConst)
                 .map(String::trim)
                 // filter out empty line
