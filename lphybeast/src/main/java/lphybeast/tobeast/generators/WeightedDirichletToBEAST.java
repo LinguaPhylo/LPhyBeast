@@ -3,8 +3,8 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.core.Function;
 import beast.base.inference.distribution.Prior;
-import lphy.core.distributions.WeightedDirichlet;
-import lphy.graphicalModel.Value;
+import lphy.base.distribution.WeightedDirichlet;
+import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

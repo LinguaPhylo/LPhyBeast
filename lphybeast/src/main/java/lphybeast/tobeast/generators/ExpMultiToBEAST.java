@@ -4,7 +4,7 @@ import beast.base.core.BEASTInterface;
 import beast.base.inference.distribution.Exponential;
 import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.RealParameter;
-import lphy.core.distributions.ExpMulti;
+import lphy.base.distribution.ExpMulti;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

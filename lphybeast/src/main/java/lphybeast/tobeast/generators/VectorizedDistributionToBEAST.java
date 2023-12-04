@@ -2,9 +2,9 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beastlabs.util.BEASTVector;
-import lphy.core.distributions.VectorizedDistribution;
-import lphy.graphicalModel.GenerativeDistribution;
-import lphy.graphicalModel.GraphicalModelNode;
+import lphy.core.model.GenerativeDistribution;
+import lphy.core.model.GraphicalModelNode;
+import lphy.core.vectorization.VectorizedDistribution;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

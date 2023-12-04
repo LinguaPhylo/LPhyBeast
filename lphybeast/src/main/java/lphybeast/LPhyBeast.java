@@ -1,18 +1,17 @@
 package lphybeast;
 
-import lphy.core.GraphicalLPhyParser;
-import lphy.core.LPhyMetaParser;
-import lphy.core.Sampler;
-import lphy.graphicalModel.RandomValueLogger;
-import lphy.graphicalModel.code.CanonicalCodeBuilder;
-import lphy.graphicalModel.logger.TreeFileLogger;
-import lphy.graphicalModel.logger.VarFileLogger;
-import lphy.parser.REPL;
-import lphy.util.LoggerUtils;
+import lphy.core.codebuilder.CanonicalCodeBuilder;
+import lphy.core.logger.LoggerUtils;
+import lphy.core.model.Value;
+import lphy.core.parser.LPhyParserDictionary;
+import lphy.core.simulator.NamedRandomValueSimulator;
+import lphy.core.simulator.Sampler;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Main class to set up a simulation or simulations.
@@ -94,13 +93,13 @@ public class LPhyBeast implements Runnable {
             for (int i = 0; i < repTot; i++) {
                 // add _i after file stem
                 lPhyBeastConfig.setRepId(i);
-                BufferedReader reader = lphyReader();
+//                BufferedReader reader = lphyReader();
                 // need new reader
-                writeXMLFrom(reader);
+                writeXMLFrom();
             }
         } else { // 1 simulation
-            BufferedReader reader = lphyReader();
-            writeXMLFrom(reader);
+//            BufferedReader reader = lphyReader();
+            writeXMLFrom();
         }
     }
 
@@ -119,63 +118,25 @@ public class LPhyBeast implements Runnable {
         }
     }
 
-    private BufferedReader lphyReader() throws FileNotFoundException {
-        // need to call reader each loop
-        FileReader fileReader = new FileReader(Objects.requireNonNull(lPhyBeastConfig.inPath).toFile());
-        return new BufferedReader(fileReader);
-    }
-
     // the relative path given in readNexus in a script always refers to user.dir
     // out path without file extension for output file name,
     // and XML loggers after removing the parent dir.
-    private void writeXMLFrom(BufferedReader reader) throws IOException {
+    private void writeXMLFrom() throws IOException {
+        final File lphyFile = Objects.requireNonNull(lPhyBeastConfig.inPath).toFile();
         Path outPath = getXMLFilePath();
         // outPath may be added i
         final String filePathNoExt = lPhyBeastConfig.getOutPathNoExtension(outPath);
 
-        BufferedReader finalReader;
-        // replace constants by lines
-        String[] lphyConst = lPhyBeastConfig.getLphyConst();
-        if (lphyConst != null) {
-            Map<String, String> idValMap = new HashMap<>();
-            for (String lc : lphyConst) {
-                String[] idVal = parse(lc);
-                if (idVal == null)
-                    throw new IllegalArgumentException("Invalid constant assignment : " + lc);
-                idValMap.put(idVal[0], idVal[1]);
-            }
+        NamedRandomValueSimulator simulator = new NamedRandomValueSimulator();
+        // constants are inputted by user for Macro
+        final String[] constants = lPhyBeastConfig.getLphyConst();
+        // must provide File lphyFile, int numReplicates, Long seed
+        Map<Integer, List<Value>> allReps = simulator.simulateAndLog(lphyFile, filePathNoExt,
+                1, constants, null);
 
-            int replaced = 0;
-            // read and update original line
-            StringBuilder builder = new StringBuilder();
-            for(String line = reader.readLine(); line != null; line = reader.readLine()) {
-                // not data {, func, or gene dist
-                if (line.contains("=") &&
-                        !(line.trim().startsWith("//") || line.contains("{") || line.contains("(") || line.contains("~"))) {
-                    String[] idVal = parse(line);
-
-                    if (idVal != null && idValMap.containsKey(idVal[0])) {
-                        line = idVal[0] + " = " + idValMap.get(idVal[0]) + ";";
-                        replaced++;
-                    }
-                }
-                builder.append(line);
-                builder.append("\n");
-            }
-            reader.close();
-
-            if (replaced != lphyConst.length)
-                throw new IllegalArgumentException("The required constants (" + Arrays.toString(lphyConst) +
-                        " to replace do not match the scripts !");
-
-            Reader modifiedString = new StringReader(builder.toString());
-            finalReader = new BufferedReader(modifiedString);
-
-        } else // use original
-            finalReader = reader;
-
+        LPhyParserDictionary parserDict = simulator.getParserDictionary();
         // create XML string from reader, given file name and MCMC setting
-        String xml = toBEASTXML(Objects.requireNonNull(finalReader), filePathNoExt);
+        String xml = dictToBEASTXML(parserDict, filePathNoExt);
 
         FileWriter fileWriter = new FileWriter(Objects.requireNonNull(outPath).toFile());
         PrintWriter writer = new PrintWriter(fileWriter);
@@ -186,31 +147,15 @@ public class LPhyBeast implements Runnable {
         LoggerUtils.log.info("Save BEAST 2 XML to " + outPath.toAbsolutePath() + "\n\n");
     }
 
-    // 1st is id, 2nd is value in string, otherwise null.
-    // line looks like : n = 50;
-    private String[] parse(String line) {
-        // trim all spaces, TODO not working for string
-        String[] idVal = line.trim().split("=");
-        if (idVal.length != 2)
-            return null;
-        idVal[0] = idVal[0].trim();
-        idVal[1] = idVal[1].replace(";", "").trim();
-        return idVal;
-    }
-
-
     /**
      * Alternative method to give LPhy script (e.g. from String), not only from a file.
-     * @param reader         BufferedReader
+     * @param parserDictionary
      * @param filePathNoExt  file path but without extension
      * @return    BEAST 2 XML
      * @see BEASTContext#toBEASTXML(String)
      * @throws IOException
      */
-    private String toBEASTXML(BufferedReader reader, String filePathNoExt) throws IOException {
-        //*** Parse LPhy file ***//
-        LPhyMetaParser parser = new REPL();
-        parser.source(reader);
+    private String dictToBEASTXML(LPhyParserDictionary parserDictionary, String filePathNoExt) throws IOException {
 
         // Add lphy script to the top of XML
         CanonicalCodeBuilder canonicalCodeBuilder = new CanonicalCodeBuilder();
@@ -218,21 +163,11 @@ public class LPhyBeast implements Runnable {
         // this has to be the 1st line in the file
         xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>").append("\n");
         // lphy code in comment block
-        xmlBuilder.append("<!--\n").append(canonicalCodeBuilder.getCode(parser)).append("\n-->");
-
-        // log true values and tree
-        List<RandomValueLogger> loggers = new ArrayList<>();
-        final String filePathNoExtTrueVaule = filePathNoExt + "_" + "true";
-        loggers.add(new VarFileLogger(filePathNoExtTrueVaule, true, true));
-        loggers.add(new TreeFileLogger(filePathNoExtTrueVaule));
-        //TODO no AlignmentFileLogger?
-
-        GraphicalLPhyParser gparser = new GraphicalLPhyParser(parser);
-        Sampler sampler = new Sampler(gparser);
-        sampler.sample(1, loggers);
+        String codeBlock = canonicalCodeBuilder.getCode(parserDictionary);
+        xmlBuilder.append("<!--\n").append(codeBlock).append("\n-->");
 
         // register parser, pass cached loader
-        BEASTContext context = new BEASTContext(parser, loader, lPhyBeastConfig);
+        BEASTContext context = new BEASTContext(parserDictionary, loader, lPhyBeastConfig);
 
         //*** Write BEAST 2 XML ***//
         // remove any dir in filePathNoExt here
@@ -253,40 +188,31 @@ public class LPhyBeast implements Runnable {
      * @return  BEAST 2 XML in string
      */
     public String lphyStrToXML(String lphy, String fileNameStem) throws IOException {
-        Reader inputString = new StringReader(lphy);
-        BufferedReader reader = new BufferedReader(inputString);
-
-        return toBEASTXML(Objects.requireNonNull(reader), fileNameStem);
+        // no output no replicates
+        Sampler sampler = Sampler.createSampler(lphy);
+        LPhyParserDictionary parserDict = sampler.getParserDictionary();
+        return dictToBEASTXML(parserDict, fileNameStem);
     }
 
 
 
-    //    private static void source(BufferedReader reader, LPhyMetaParser parser)
-//            throws IOException {
-//        LPhyMetaParser.Context mode = null;
-//
-//        String line = reader.readLine();
-//        while (line != null) {
-//            String s = line.replaceAll("\\s+","");
-//            if (s.isEmpty()) {
-//                // skip empty lines
-//            } else if (s.startsWith("data{"))
-//                mode = LPhyMetaParser.Context.data;
-//            else if (s.startsWith("model{"))
-//                mode = LPhyMetaParser.Context.model;
-//            else if (s.startsWith("}"))
-//                mode = null; // reset
-//            else {
-//                if (mode == null)
-//                    throw new IllegalArgumentException("Please use data{} to define data and " +
-//                            "model{} to define models !\n" + line);
-//
-//                parser.parse(line, mode);
-//            }
-//            line = reader.readLine();
-//        }
-//        reader.close();
-//    }
+    private BufferedReader lphyReader() throws FileNotFoundException {
+        // need to call reader each loop
+        FileReader fileReader = new FileReader(Objects.requireNonNull(lPhyBeastConfig.inPath).toFile());
+        return new BufferedReader(fileReader);
+    }
+
+    // 1st is id, 2nd is value in string, otherwise null.
+    // line looks like : n = 50;
+    private String[] parse(String line) {
+        // trim all spaces, TODO not working for string
+        String[] idVal = line.trim().split("=");
+        if (idVal.length != 2)
+            return null;
+        idVal[0] = idVal[0].trim();
+        idVal[1] = idVal[1].replace(";", "").trim();
+        return idVal;
+    }
 
 
 }

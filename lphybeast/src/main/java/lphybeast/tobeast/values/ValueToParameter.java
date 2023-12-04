@@ -1,7 +1,7 @@
 package lphybeast.tobeast.values;
 
 import beast.base.core.BEASTInterface;
-import lphy.graphicalModel.Value;
+import lphy.core.model.Value;
 
 public class ValueToParameter {
 

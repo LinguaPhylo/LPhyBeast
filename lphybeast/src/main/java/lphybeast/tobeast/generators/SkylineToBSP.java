@@ -4,7 +4,7 @@ import beast.base.core.BEASTInterface;
 import beast.base.evolution.tree.TreeIntervals;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
-import lphy.evolution.coalescent.SkylineCoalescent;
+import lphy.base.evolution.coalescent.SkylineCoalescent;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

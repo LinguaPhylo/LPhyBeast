@@ -2,10 +2,10 @@ package lphybeast.tobeast.values;
 
 import beast.base.core.BEASTInterface;
 import beastlabs.util.BEASTVector;
-import lphy.graphicalModel.CompoundVector;
-import lphy.graphicalModel.GraphicalModelNode;
-import lphy.graphicalModel.Value;
-import lphy.graphicalModel.types.StringValue;
+import lphy.core.model.GraphicalModelNode;
+import lphy.core.model.Value;
+import lphy.core.model.datatype.StringValue;
+import lphy.core.vectorization.CompoundVector;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 

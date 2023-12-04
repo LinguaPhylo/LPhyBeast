@@ -1,8 +1,8 @@
 package lphybeast;
 
-import lphy.system.UserDir;
-import lphy.util.LoggerUtils;
-import lphy.util.RandomUtils;
+import lphy.core.io.UserDir;
+import lphy.core.logger.LoggerUtils;
+import lphy.core.simulator.RandomUtils;
 import picocli.CommandLine;
 import picocli.CommandLine.*;
 

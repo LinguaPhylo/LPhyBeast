@@ -4,12 +4,12 @@ import beast.base.evolution.alignment.Taxon;
 import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.tree.TraitSet;
 import beast.base.evolution.tree.TreeParser;
-import lphy.core.functions.ElementsAt;
-import lphy.evolution.alignment.SimpleAlignment;
-import lphy.evolution.tree.TimeTree;
-import lphy.evolution.tree.TimeTreeNode;
-import lphy.graphicalModel.RandomVariable;
-import lphy.graphicalModel.Value;
+import lphy.base.evolution.alignment.SimpleAlignment;
+import lphy.base.evolution.tree.TimeTree;
+import lphy.base.evolution.tree.TimeTreeNode;
+import lphy.core.model.RandomVariable;
+import lphy.core.model.Value;
+import lphy.core.vectorization.operation.ElementsAt;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 

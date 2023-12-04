@@ -6,7 +6,7 @@ import beast.base.evolution.tree.MRCAPrior;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.RealParameter;
-import lphy.evolution.birthdeath.BirthDeathSamplingTreeDT;
+import lphy.base.evolution.birthdeath.BirthDeathSamplingTreeDT;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

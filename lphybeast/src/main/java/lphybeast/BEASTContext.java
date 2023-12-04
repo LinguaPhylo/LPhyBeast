@@ -23,11 +23,15 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import feast.function.Concatenate;
 import jebl.evolution.sequences.SequenceType;
-import lphy.core.LPhyMetaParser;
-import lphy.core.functions.ElementsAt;
-import lphy.graphicalModel.*;
-import lphy.util.LoggerUtils;
-import lphy.util.Symbols;
+import lphy.core.logger.LoggerUtils;
+import lphy.core.model.*;
+import lphy.core.parser.LPhyParserDictionary;
+import lphy.core.parser.graphicalmodel.GraphicalModelNodeVisitor;
+import lphy.core.parser.graphicalmodel.ValueCreator;
+import lphy.core.vectorization.VectorUtils;
+import lphy.core.vectorization.VectorizedRandomVariable;
+import lphy.core.vectorization.operation.ElementsAt;
+import lphy.core.vectorization.operation.SliceValue;
 import lphybeast.tobeast.loggers.LoggerFactory;
 import lphybeast.tobeast.loggers.LoggerHelper;
 import lphybeast.tobeast.operators.DefaultTreeOperatorStrategy;
@@ -58,7 +62,8 @@ public class BEASTContext {
 
     //*** registry ***//
 
-    LPhyMetaParser parser;
+    // contain the Values and Generators parsed from a lphy script.
+    LPhyParserDictionary parserDictionary;
 
     List<ValueToBEAST> valueToBEASTList;
     //use LinkedHashMap to keep inserted ordering, so the first matching converter is used.
@@ -105,20 +110,20 @@ public class BEASTContext {
     final private LPhyBeastConfig lPhyBeastConfig;
 
     @Deprecated
-    public BEASTContext(LPhyMetaParser parser, LPhyBeastConfig lPhyBeastConfig) {
-        this(parser, null, lPhyBeastConfig);
+    public BEASTContext(LPhyParserDictionary parserDictionary, LPhyBeastConfig lPhyBeastConfig) {
+        this(parserDictionary, null, lPhyBeastConfig);
     }
 
     /**
      * Find all core classes {@link ValueToBEAST} and {@link GeneratorToBEAST},
      * including {@link DataType} mapped to lphy {@link SequenceType},
      * and then register them for XML creators to use.
-     * @param parser  the parsed lphy commands
+     * @param parserDictionary  the parsed lphy commands
      * @param loader to load LPhyBEAST extensions.
      *               Can be null, then initiate here.
      */
-    public BEASTContext(LPhyMetaParser parser, LPhyBEASTLoader loader, LPhyBeastConfig lPhyBeastConfig) {
-        this.parser = parser;
+    public BEASTContext(LPhyParserDictionary parserDictionary, LPhyBEASTLoader loader, LPhyBeastConfig lPhyBeastConfig) {
+        this.parserDictionary = parserDictionary;
         if (loader == null)
             loader = LPhyBEASTLoader.getInstance();
         this.lPhyBeastConfig = lPhyBeastConfig;
@@ -469,8 +474,8 @@ public class BEASTContext {
      */
     public boolean isClamped(String id) {
         if (id != null) {
-            Value dataValue = parser.getValue(id, LPhyMetaParser.Context.data);
-            Value modelValue = parser.getModelDictionary().get(id);
+            Value dataValue = parserDictionary.getValue(id, LPhyParserDictionary.Context.data);
+            Value modelValue = parserDictionary.getModelDictionary().get(id);
             return (dataValue != null && modelValue != null && modelValue instanceof RandomVariable);
         }
         return false;
@@ -482,11 +487,11 @@ public class BEASTContext {
      */
     public Value getClampedValue(String id) {
         if (id != null) {
-            Value clampedValue = parser.getValue(id, LPhyMetaParser.Context.data);
+            Value clampedValue = parserDictionary.getValue(id, LPhyParserDictionary.Context.data);
             if (clampedValue != null) {
                 return clampedValue;
             }
-            return parser.getValue(id, LPhyMetaParser.Context.model);
+            return parserDictionary.getValue(id, LPhyParserDictionary.Context.model);
         }
         return null;
     }
@@ -613,7 +618,7 @@ public class BEASTContext {
      */
     private void createBEASTObjects() {
 
-        List<Value<?>> sinks = parser.getModelSinks();
+        List<Value<?>> sinks = parserDictionary.getModelSinks();
 
         for (Value<?> value : sinks) {
             createBEASTValueObjects(value);
@@ -996,7 +1001,7 @@ public class BEASTContext {
     }
 
     private boolean generatorOfSink(Generator g) {
-        for (Value<?> var : parser.getModelSinks()) {
+        for (Value<?> var : parserDictionary.getModelSinks()) {
             if (var.getGenerator() == g) {
                 return true;
             }
@@ -1142,11 +1147,11 @@ public class BEASTContext {
         return taxonList;
     }
 
-    public List<Value<lphy.evolution.alignment.Alignment>> getAlignments() {
-        ArrayList<Value<lphy.evolution.alignment.Alignment>> alignments = new ArrayList<>();
+    public List<Value<lphy.base.evolution.alignment.Alignment>> getAlignments() {
+        ArrayList<Value<lphy.base.evolution.alignment.Alignment>> alignments = new ArrayList<>();
         for (GraphicalModelNode node : beastObjects.keySet()) {
-            if (node instanceof Value && node.value() instanceof lphy.evolution.alignment.Alignment) {
-                alignments.add((Value<lphy.evolution.alignment.Alignment>) node);
+            if (node instanceof Value && node.value() instanceof lphy.base.evolution.alignment.Alignment) {
+                alignments.add((Value<lphy.base.evolution.alignment.Alignment>) node);
             }
         }
         return alignments;
@@ -1155,9 +1160,9 @@ public class BEASTContext {
     public Value getOutput(Generator generator) {
 
         final Value[] outputValue = new Value[1];
-        for (Value value : parser.getModelSinks()) {
+        for (Value value : parserDictionary.getModelSinks()) {
 
-            Value.traverseGraphicalModel(value, new GraphicalModelNodeVisitor() {
+            ValueCreator.traverseGraphicalModel(value, new GraphicalModelNodeVisitor() {
                 @Override
                 public void visitValue(Value value) {
                     if (value.getGenerator() == generator) {

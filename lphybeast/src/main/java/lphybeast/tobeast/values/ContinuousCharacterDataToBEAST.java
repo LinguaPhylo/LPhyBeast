@@ -1,8 +1,8 @@
 package lphybeast.tobeast.values;
 
 import beast.base.inference.parameter.RealParameter;
-import lphy.evolution.alignment.ContinuousCharacterData;
-import lphy.graphicalModel.Value;
+import lphy.base.evolution.alignment.ContinuousCharacterData;
+import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 

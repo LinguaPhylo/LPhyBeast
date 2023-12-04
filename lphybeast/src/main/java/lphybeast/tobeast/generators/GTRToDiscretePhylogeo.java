@@ -5,11 +5,11 @@ import beast.base.evolution.substitutionmodel.Frequencies;
 import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.RealParameter;
 import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModel;
-import lphy.core.functions.Select;
-import lphy.evolution.substitutionmodel.GeneralTimeReversible;
-import lphy.graphicalModel.Generator;
-import lphy.graphicalModel.GraphicalModelNode;
-import lphy.graphicalModel.Value;
+import lphy.base.evolution.substitutionmodel.GeneralTimeReversible;
+import lphy.base.function.Select;
+import lphy.core.model.Generator;
+import lphy.core.model.GraphicalModelNode;
+import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

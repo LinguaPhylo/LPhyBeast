@@ -3,8 +3,8 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.Parameter;
-import lphy.core.distributions.Poisson;
-import lphy.util.LoggerUtils;
+import lphy.base.distribution.Poisson;
+import lphy.core.logger.LoggerUtils;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

@@ -2,7 +2,7 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.tree.TreeStatLogger;
-import lphy.core.functions.tree.TreeLength;
+import lphy.base.function.tree.TreeLength;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

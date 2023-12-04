@@ -4,7 +4,7 @@ import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.UserDataType;
 import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.sequences.State;
-import lphy.evolution.datatype.Standard;
+import lphy.base.evolution.datatype.Standard;
 
 import java.util.List;
 import java.util.Map;

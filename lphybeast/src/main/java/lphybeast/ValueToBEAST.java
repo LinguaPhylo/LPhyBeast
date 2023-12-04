@@ -1,7 +1,7 @@
 package lphybeast;
 
 import beast.base.core.BEASTInterface;
-import lphy.graphicalModel.Value;
+import lphy.core.model.Value;
 
 public interface ValueToBEAST<T, S extends BEASTInterface> {
 

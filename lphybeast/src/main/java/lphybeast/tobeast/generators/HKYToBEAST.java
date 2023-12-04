@@ -2,7 +2,7 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.inference.parameter.RealParameter;
-import lphy.evolution.substitutionmodel.HKY;
+import lphy.base.evolution.substitutionmodel.HKY;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

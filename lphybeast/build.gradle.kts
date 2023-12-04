@@ -51,6 +51,7 @@ dependencies {
      */
     // no API change in 1.4.4
     api("io.github.linguaphylo:lphy:1.5.0-SNAPSHOT") //-SNAPSHOT
+    api("io.github.linguaphylo:lphy-base:1.5.0-SNAPSHOT")
 
     // all released beast 2 libs
     // TODO beast2 jar contains Apache math. Be aware of version conflict to LPhy dependency.

@@ -4,9 +4,9 @@ import beast.base.core.BEASTInterface;
 import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.IntegerParameter;
-import lphy.core.distributions.RandomBooleanArray;
-import lphy.graphicalModel.Generator;
-import lphy.graphicalModel.Value;
+import lphy.base.distribution.RandomBooleanArray;
+import lphy.core.model.Generator;
+import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

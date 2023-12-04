@@ -2,10 +2,10 @@ package lphybeast.spi;
 
 import beast.base.evolution.datatype.DataType;
 import jebl.evolution.sequences.SequenceType;
-import lphy.evolution.datatype.Binary;
-import lphy.evolution.datatype.Continuous;
-import lphy.graphicalModel.Generator;
-import lphy.graphicalModel.Value;
+import lphy.base.evolution.datatype.Binary;
+import lphy.base.evolution.datatype.Continuous;
+import lphy.core.model.Generator;
+import lphy.core.model.Value;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
 import lphybeast.tobeast.generators.*;

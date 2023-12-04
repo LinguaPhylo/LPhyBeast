@@ -6,12 +6,12 @@
 //import beast.base.evolution.tree.TraitSet;
 //import beast.base.evolution.tree.Tree;
 //import beast.util.BEASTVector;
-//import lphy.evolution.Taxa;
-//import lphy.evolution.alignment.Alignment;
-//import lphy.evolution.coalescent.MultispeciesCoalescent;
-//import lphy.evolution.tree.TimeTree;
-//import lphy.graphicalModel.GraphicalModelNode;
-//import lphy.graphicalModel.Value;
+//import lphy.base.evolution.Taxa;
+//import lphy.base.evolution.alignment.Alignment;
+//import lphy.base.evolution.coalescent.MultispeciesCoalescent;
+//import lphy.base.evolution.tree.TimeTree;
+//import lphy.core.model.GraphicalModelNode;
+//import lphy.core.model.Value;
 //import lphybeast.BEASTContext;
 //import lphybeast.GeneratorToBEAST;
 //import starbeast2.GeneTree;
@@ -165,8 +165,8 @@
 //
 //        List<Value<Alignment>> alignments = context.getAlignments();
 //
-//        Value<lphy.evolution.alignment.Alignment> a = null;
-//        for (Value<lphy.evolution.alignment.Alignment> candidate : alignments) {
+//        Value<lphy.base.evolution.alignment.Alignment> a = null;
+//        for (Value<lphy.base.evolution.alignment.Alignment> candidate : alignments) {
 //            List<String> taxaNames = Arrays.asList(candidate.value().getTaxa().getTaxaNames());
 //            if (taxaNames.containsAll(speciesTaxaNames)) {
 //                a = candidate;
@@ -181,7 +181,7 @@
 //
 //            TaxonSet spTaxonSet = new TaxonSet();
 //            List<Taxon> geneTaxonList = new ArrayList<>();
-//            for (lphy.evolution.Taxon taxon : geneTaxa.getTaxonArray()) {
+//            for (lphy.base.evolution.Taxon taxon : geneTaxa.getTaxonArray()) {
 //
 //                if (taxon.getSpecies().equals(speciesId)) {
 //                    Taxon geneTaxon = context.getTaxon(taxon.getName());
@@ -230,7 +230,7 @@
 //    private TraitSet createTraitSet(TimeTree tree, TaxonSet taxonSuperSet) {
 //
 //        StringBuilder builder = new StringBuilder();
-//        lphy.evolution.Taxon[] taxonArray = tree.getTaxa().getTaxonArray();
+//        lphy.base.evolution.Taxon[] taxonArray = tree.getTaxa().getTaxonArray();
 //        builder.append(taxonArray[0].getName());
 //        builder.append("=");
 //        builder.append(taxonArray[0].getAge());

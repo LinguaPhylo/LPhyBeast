@@ -2,7 +2,7 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beastlabs.math.distributions.BernoulliDistribution;
-import lphy.core.distributions.BernoulliMulti;
+import lphy.base.distribution.BernoulliMulti;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

@@ -4,11 +4,11 @@ import beast.base.core.BEASTInterface;
 import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.Parameter;
 import beastlabs.util.BEASTVector;
-import lphy.core.distributions.Bernoulli;
-import lphy.core.distributions.IID;
-import lphy.graphicalModel.GenerativeDistribution;
-import lphy.graphicalModel.GraphicalModelNode;
-import lphy.util.LoggerUtils;
+import lphy.base.distribution.Bernoulli;
+import lphy.core.logger.LoggerUtils;
+import lphy.core.model.GenerativeDistribution;
+import lphy.core.model.GraphicalModelNode;
+import lphy.core.vectorization.IID;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

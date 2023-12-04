@@ -10,11 +10,11 @@ import beast.base.inference.CompoundDistribution;
 import beast.base.inference.Logger;
 import beast.base.inference.StateNode;
 import com.google.common.collect.Multimap;
-import lphy.evolution.coalescent.SkylineCoalescent;
-import lphy.evolution.coalescent.StructuredCoalescent;
-import lphy.graphicalModel.Generator;
-import lphy.graphicalModel.GraphicalModelNode;
-import lphy.graphicalModel.RandomVariable;
+import lphy.base.evolution.coalescent.SkylineCoalescent;
+import lphy.base.evolution.coalescent.StructuredCoalescent;
+import lphy.core.model.Generator;
+import lphy.core.model.GraphicalModelNode;
+import lphy.core.model.RandomVariable;
 import lphybeast.BEASTContext;
 
 import java.util.*;

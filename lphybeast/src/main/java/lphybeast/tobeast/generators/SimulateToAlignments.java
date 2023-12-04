@@ -1,7 +1,7 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import lphy.core.functions.alignment.Simulate;
+import lphy.core.simulator.Simulate;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

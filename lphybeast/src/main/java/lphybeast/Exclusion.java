@@ -1,32 +1,43 @@
 package lphybeast;
 
 import jebl.evolution.sequences.SequenceType;
-import lphy.core.distributions.*;
-import lphy.core.functions.*;
-import lphy.core.functions.alignment.NCharFunction;
-import lphy.core.functions.alignment.ReadFasta;
-import lphy.core.functions.alignment.ReadNexus;
-import lphy.core.functions.alignment.Simulate;
-import lphy.core.functions.datatype.BinaryDatatypeFunction;
-import lphy.core.functions.datatype.NucleotidesFunction;
-import lphy.core.functions.datatype.StandardDatatypeFunction;
-import lphy.core.functions.taxa.*;
-import lphy.core.functions.tree.ExtantTree;
-import lphy.core.functions.tree.MigrationCount;
-import lphy.core.functions.tree.NodeCount;
-import lphy.evolution.Taxa;
-import lphy.evolution.alignment.*;
-import lphy.evolution.tree.TimeTree;
-import lphy.graphicalModel.Generator;
-import lphy.graphicalModel.Value;
-import lphy.parser.functions.*;
+import lphy.base.distribution.DiscretizedGamma;
+import lphy.base.distribution.RandomComposition;
+import lphy.base.distribution.Sample;
+import lphy.base.distribution.WeightedDirichlet;
+import lphy.base.evolution.Taxa;
+import lphy.base.evolution.alignment.Alignment;
+import lphy.base.evolution.tree.TimeTree;
+import lphy.base.function.*;
+import lphy.base.function.alignment.*;
+import lphy.base.function.datatype.BinaryDatatypeFunction;
+import lphy.base.function.datatype.NucleotidesFunction;
+import lphy.base.function.datatype.StandardDatatypeFunction;
+import lphy.base.function.io.ReadFasta;
+import lphy.base.function.io.ReadNexus;
+import lphy.base.function.taxa.*;
+import lphy.base.function.tree.ExtantTree;
+import lphy.base.function.tree.MigrationCount;
+import lphy.base.function.tree.NodeCount;
+import lphy.core.model.ExpressionNode;
+import lphy.core.model.Generator;
+import lphy.core.model.Value;
+import lphy.core.parser.function.ExpressionNodeWrapper;
+import lphy.core.parser.function.MapFunction;
+import lphy.core.parser.function.MethodCall;
+import lphy.core.simulator.Simulate;
+import lphy.core.vectorization.IID;
+import lphy.core.vectorization.array.IntegerArray;
+import lphy.core.vectorization.operation.ElementsAt;
+import lphy.core.vectorization.operation.Range;
+import lphy.core.vectorization.operation.RangeList;
 
 import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
- * Utils class to exclude {@link lphy.graphicalModel.Value}
- * or {@link lphy.graphicalModel.Generator} to skip the validation
+ * Utils class to exclude {@link lphy.core.model.Value}
+ * or {@link lphy.core.model.Generator} to skip the validation
  * so not to throw UnsupportedOperationException
  * in either <code>BEASTContext#valueToBEAST(Value)<code/> or
  * <code>BEASTContext#generatorToBEAST(Value, Generator)<code/>.
@@ -49,7 +60,7 @@ public class Exclusion {
                 generator instanceof ExpressionNode || generator instanceof RandomComposition ||
                 generator instanceof NTaxaFunction || generator instanceof NCharFunction ||
                 generator instanceof TaxaFunction || generator instanceof NodeCount ||
-                generator instanceof CreateTaxa || generator instanceof Species ||
+                generator instanceof CreateTaxa || generator instanceof SpeciesTaxa ||
                 generator instanceof TaxaAgesFromFunction || generator instanceof Get<?> ||
                 generator instanceof MissingSites || generator instanceof SelectSitesByMissingFraction ||
                 generator instanceof InvariableSites || generator instanceof VariableSites ||

@@ -8,10 +8,10 @@ import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.Parameter;
 import beast.base.inference.parameter.RealParameter;
 import feast.function.Concatenate;
-import lphy.core.distributions.Dirichlet;
-import lphy.core.distributions.WeightedDirichlet;
-import lphy.graphicalModel.Value;
-import lphy.graphicalModel.VectorUtils;
+import lphy.base.distribution.Dirichlet;
+import lphy.base.distribution.WeightedDirichlet;
+import lphy.core.model.Value;
+import lphy.core.vectorization.VectorUtils;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
