@@ -183,12 +183,12 @@ public class LPhyBEASTLoader {
                 }
             }
 
-            System.out.println(valueToBEASTList.size() + " ValuesToBEAST = " + valueToBEASTList);
-            System.out.println(generatorToBEASTMap.size() + " GeneratorToBEAST = " + generatorToBEASTMap);
-            System.out.println(dataTypeMap.size() + " Data Type = " + dataTypeMap);
-            System.out.println(excludedGeneratorClasses.size() + " extra Generator(s) excluded = " + excludedGeneratorClasses);
-            System.out.println(excludedValueClasses.size() + " extra Value(s) excluded = " + excludedValueClasses);
-            System.out.println(newTreeOperatorStrategies.size() + " new Tree Operator Strategies = " + newTreeOperatorStrategies);
+            System.out.println("Load " + valueToBEASTList.size() + " ValuesToBEAST = " + valueToBEASTList);
+            System.out.println("Load " + generatorToBEASTMap.size() + " GeneratorToBEAST = " + generatorToBEASTMap);
+            System.out.println("Map" + dataTypeMap.size() + " data type(s) = " + dataTypeMap);
+            System.out.println("Exclude " + excludedGeneratorClasses.size() + " extra Generator(s) = " + excludedGeneratorClasses);
+            System.out.println("Exclude " + excludedValueClasses.size() + " extra Value(s) = " + excludedValueClasses);
+            System.out.println("Load " + newTreeOperatorStrategies.size() + " new Tree Operator Strategies = " + newTreeOperatorStrategies);
 
         } catch (ServiceConfigurationError serviceError) {
             System.err.println(serviceError);
