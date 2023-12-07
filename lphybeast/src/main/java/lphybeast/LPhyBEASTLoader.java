@@ -185,7 +185,7 @@ public class LPhyBEASTLoader {
 
             System.out.println("Load " + valueToBEASTList.size() + " ValuesToBEAST = " + valueToBEASTList);
             System.out.println("Load " + generatorToBEASTMap.size() + " GeneratorToBEAST = " + generatorToBEASTMap);
-            System.out.println("Map" + dataTypeMap.size() + " data type(s) = " + dataTypeMap);
+            System.out.println("Map " + dataTypeMap.size() + " data type(s) = " + dataTypeMap);
             System.out.println("Exclude " + excludedGeneratorClasses.size() + " extra Generator(s) = " + excludedGeneratorClasses);
             System.out.println("Exclude " + excludedValueClasses.size() + " extra Value(s) = " + excludedValueClasses);
             System.out.println("Load " + newTreeOperatorStrategies.size() + " new Tree Operator Strategies = " + newTreeOperatorStrategies);
