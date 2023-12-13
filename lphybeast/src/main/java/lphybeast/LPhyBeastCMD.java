@@ -56,9 +56,9 @@ public class LPhyBeastCMD implements Callable<Integer> {
     @Option(names = {"-r", "--replicates"}, defaultValue = "1", description = "the number of replicates (XML) given one LPhy script, " +
             "usually to create simulations for well-calibrated study.") int repTot;
 
-    @Option(names = {"-d", "--data"}, split = ";",
+    @Option(names = {"-D", "--data"}, split = ";",
             description = "Replace the constant value in the lphy script, multiple constants can be split by ';', " +
-                    "but no ';' at the last: e.g. -d n=12;L=100 or -d n=20")
+                    "but no ';' at the last: e.g. -D \"n=12;L=100\" or -D n=20")
     String[] lphyConst = null;
 
     @Option(names = {"-cca", "--compressConstantAlignments"},
