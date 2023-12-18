@@ -30,14 +30,14 @@ public interface TreeOperatorStrategy {
     default List<Operator> createTreeOperators(Tree tree, BEASTContext context) {
         List<Operator> operators = new ArrayList<>();
 
-        operators.add(OperatorFactory.createTreeScaleOperator(tree, context));
-        operators.add(OperatorFactory.createRootHeightOperator(tree, context));
-        operators.add(OperatorFactory.createExchangeOperator(tree, context, true));
-        operators.add(OperatorFactory.createExchangeOperator(tree, context, false));
-        operators.add(OperatorFactory.createTreeUniformOperator(tree, context));
+        operators.add(StandardOperatorFactory.createTreeScaleOperator(tree, context));
+        operators.add(StandardOperatorFactory.createRootHeightOperator(tree, context));
+        operators.add(StandardOperatorFactory.createExchangeOperator(tree, context, true));
+        operators.add(StandardOperatorFactory.createExchangeOperator(tree, context, false));
+        operators.add(StandardOperatorFactory.createTreeUniformOperator(tree, context));
 
-        operators.add(OperatorFactory.createSubtreeSlideOperator(tree, context));
-        operators.add(OperatorFactory.createWilsonBaldingOperator(tree, context));
+        operators.add(StandardOperatorFactory.createSubtreeSlideOperator(tree, context));
+        operators.add(StandardOperatorFactory.createWilsonBaldingOperator(tree, context));
 
         return operators;
     }

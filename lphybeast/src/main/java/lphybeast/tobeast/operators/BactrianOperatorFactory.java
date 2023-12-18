@@ -29,19 +29,18 @@ import static lphybeast.BEASTContext.getOperatorWeight;
 /**
  * A class to create all operators
  * @author Walter Xie
- * @author Alexei Drommand
  */
-public class OperatorFactory {
+public class BactrianOperatorFactory {
 
     private final BEASTContext context;
 
     /**
      * @param context               passing all configurations
      */
-    public OperatorFactory(BEASTContext context) {
+    public BactrianOperatorFactory(BEASTContext context) {
         this.context = context;
     }
-
+//TODO
     public static Operator createTreeScaleOperator(Tree tree, BEASTContext context) {
         TreeOperatorStrategy treeOperatorStrategy = context.resolveTreeOperatorStrategy(tree);
         Operator operator = treeOperatorStrategy.getScaleOperator();

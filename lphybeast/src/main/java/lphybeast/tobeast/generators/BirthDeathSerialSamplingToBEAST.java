@@ -15,7 +15,7 @@ import lphy.core.model.Value;
 import lphy.core.model.ValueUtils;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
-import lphybeast.tobeast.operators.OperatorFactory;
+import lphybeast.tobeast.operators.StandardOperatorFactory;
 
 // bdtree (https://github.com/fkmendes/bdtree) is not released as a BEAST2 package,
 // but the XML created by this class can run if lphybeast package is installed and loaded by BEAST 2 ClassLoader.
@@ -94,11 +94,11 @@ public class BirthDeathSerialSamplingToBEAST implements
             // rm all tree op
             context.addSkipOperator((Tree) tree);
             // add required ones back
-            context.addExtraOperator(OperatorFactory.createExchangeOperator((Tree) tree, context, true));
-            context.addExtraOperator(OperatorFactory.createExchangeOperator((Tree) tree, context, false));
-            context.addExtraOperator(OperatorFactory.createTreeUniformOperator((Tree) tree, context));
-            context.addExtraOperator(OperatorFactory.createSubtreeSlideOperator((Tree) tree, context));
-            context.addExtraOperator(OperatorFactory.createWilsonBaldingOperator((Tree) tree, context));
+            context.addExtraOperator(StandardOperatorFactory.createExchangeOperator((Tree) tree, context, true));
+            context.addExtraOperator(StandardOperatorFactory.createExchangeOperator((Tree) tree, context, false));
+            context.addExtraOperator(StandardOperatorFactory.createTreeUniformOperator((Tree) tree, context));
+            context.addExtraOperator(StandardOperatorFactory.createSubtreeSlideOperator((Tree) tree, context));
+            context.addExtraOperator(StandardOperatorFactory.createWilsonBaldingOperator((Tree) tree, context));
         }
 
         beastBDSS.initAndValidate();

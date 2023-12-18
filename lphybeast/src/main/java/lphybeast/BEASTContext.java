@@ -35,7 +35,7 @@ import lphy.core.vectorization.operation.SliceValue;
 import lphybeast.tobeast.loggers.LoggerFactory;
 import lphybeast.tobeast.loggers.LoggerHelper;
 import lphybeast.tobeast.operators.DefaultTreeOperatorStrategy;
-import lphybeast.tobeast.operators.OperatorFactory;
+import lphybeast.tobeast.operators.StandardOperatorFactory;
 import lphybeast.tobeast.operators.TreeOperatorStrategy;
 import lphybeast.tobeast.values.ValueToParameter;
 import org.xml.sax.SAXException;
@@ -559,9 +559,9 @@ public class BEASTContext {
 
         // TODO eventually all operator related code should go there
         // create XML operator section, with the capability to replace default operators
-        OperatorFactory operatorFactory = new OperatorFactory(this);
+        StandardOperatorFactory standardOperatorFactory = new StandardOperatorFactory(this);
         // create all operators, where tree operators strategy can be changed in an extension.
-        List<Operator> operators = operatorFactory.createOperators();
+        List<Operator> operators = standardOperatorFactory.createOperators();
         for (int i = 0; i < operators.size(); i++) {
             System.out.println(operators.get(i));
         }
