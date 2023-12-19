@@ -10,6 +10,7 @@ import beast.base.inference.Operator;
 import lphybeast.BEASTContext;
 
 /**
+ * Bactrian operators
  * @author Walter Xie
  * @author Alexei Drommand
  */
@@ -47,6 +48,7 @@ public class DefaultTreeOperatorStrategy implements TreeOperatorStrategy {
     public Operator getWilsonBaldingOperator() {
         return new WilsonBalding();
     }
+
 
     @Override
     public String getName() {
