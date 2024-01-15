@@ -10,6 +10,7 @@ import beast.base.inference.operator.BitFlipOperator;
 import beast.base.inference.operator.IntRandomWalkOperator;
 import beast.base.inference.operator.kernel.BactrianDeltaExchangeOperator;
 import beast.base.inference.operator.kernel.BactrianRandomWalkOperator;
+import beast.base.inference.operator.kernel.BactrianUpDownOperator;
 import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
@@ -187,5 +188,20 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         return operator;
     }
 
+    //*** static methods ***//
 
+    // when both mu and tree are random var
+    public static void addUpDownOperator(Tree tree, RealParameter clockRate, BEASTContext context) {
+        String idStr = clockRate.getID() + "Up" + tree.getID() + "DownOperator";
+        // avoid to duplicate updown ops from the same pair of rate and tree
+        if (!context.hasExtraOperator(idStr)) {
+            BactrianUpDownOperator upDownOperator = new BactrianUpDownOperator();
+            upDownOperator.setID(idStr);
+            upDownOperator.setInputValue("up", clockRate);
+            upDownOperator.setInputValue("down", tree);
+            upDownOperator.setInputValue("scaleFactor", 0.9);
+            upDownOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getInternalNodeCount()+1));
+            context.addExtraOperator(upDownOperator);
+        }
+    }
 }

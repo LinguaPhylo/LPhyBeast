@@ -11,7 +11,6 @@ import beast.base.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.distribution.Prior;
-import beast.base.inference.operator.kernel.BactrianUpDownOperator;
 import beast.base.inference.parameter.RealParameter;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
@@ -33,6 +32,7 @@ import lphy.core.vectorization.IID;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.loggers.TraitTreeLogger;
+import lphybeast.tobeast.operators.DefaultOperatorStrategy;
 
 import java.util.Map;
 
@@ -215,7 +215,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             treeLikelihood.setInputValue("branchRateModel", clockModel);
 
             if (clockRate instanceof RandomVariable && timeTreeValue instanceof RandomVariable && skipBranchOperators == false) {
-                addUpDownOperator(tree, clockRatePara, context);
+                DefaultOperatorStrategy.addUpDownOperator(tree, clockRatePara, context);
             }
         }
     }
@@ -321,21 +321,6 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         smallPulley.setID(relaxedClockModel.getID() + ".smallPulley");
         smallPulley.initAndValidate();
         context.addExtraOperator(smallPulley);
-    }
-
-    // when both mu and tree are random var
-    private static void addUpDownOperator(Tree tree, RealParameter clockRate, BEASTContext context) {
-        String idStr = clockRate.getID() + "Up" + tree.getID() + "DownOperator";
-        // avoid to duplicate updown ops from the same pair of rate and tree
-        if (!context.hasExtraOperator(idStr)) {
-            BactrianUpDownOperator upDownOperator = new BactrianUpDownOperator();
-            upDownOperator.setID(idStr);
-            upDownOperator.setInputValue("up", clockRate);
-            upDownOperator.setInputValue("down", tree);
-            upDownOperator.setInputValue("scaleFactor", 0.9);
-            upDownOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getInternalNodeCount()+1));
-            context.addExtraOperator(upDownOperator);
-        }
     }
 
     @Override
