@@ -79,6 +79,7 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         Set<StateNode> skipOperators = context.getSkipOperators();
         for (StateNode stateNode : context.getState()) {
             if (!skipOperators.contains(stateNode)) {
+                // The default template to create operators
                 if (stateNode instanceof RealParameter realParameter) {
                     Operator operator = createBEASTOperator(realParameter);
                     if (operator != null) operators.add(operator);
