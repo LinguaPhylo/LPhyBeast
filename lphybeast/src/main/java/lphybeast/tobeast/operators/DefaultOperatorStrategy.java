@@ -38,7 +38,11 @@ import static lphybeast.BEASTContext.getOperatorWeight;
  */
 public class DefaultOperatorStrategy implements OperatorStrategy {
 
-    private final BEASTContext context;
+    // store all <f idref= /> inside each AVMNOperator,
+    // which maps to each data partition (tree likelihood) in beast.
+    protected Map<StateNode, String> idrefAVMNN = new HashMap<>();
+
+    protected final BEASTContext context;
 
     /**
      * @param context               passing all configurations
@@ -81,8 +85,11 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         List<Operator> operators = new ArrayList<>();
 
         for (BEASTInterface beastInterface : context.getBeastObjForOpSamplers()) {
-            if (beastInterface instanceof AdaptableVarianceMultivariateNormalOperator opAVMNN)
+            if (beastInterface instanceof AdaptableVarianceMultivariateNormalOperator opAVMNN) {
                 operators.add(opAVMNN);
+
+                // TODO fill in Map<StateNode, String> idrefAVMNN, value is opAVMNN.getID()
+            }
         }
 
         Set<StateNode> skipOperators = context.getSkipOperators();
