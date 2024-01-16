@@ -1,16 +1,21 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
+import beast.base.core.Function;
+import beast.base.core.Input;
 import beast.base.evolution.branchratemodel.StrictClockModel;
 import beast.base.evolution.branchratemodel.UCRelaxedClockModel;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.UserDataType;
 import beast.base.evolution.likelihood.GenericTreeLikelihood;
 import beast.base.evolution.likelihood.ThreadedTreeLikelihood;
+import beast.base.evolution.operator.kernel.AdaptableVarianceMultivariateNormalOperator;
 import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.substitutionmodel.Frequencies;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.distribution.Prior;
+import beast.base.inference.operator.kernel.Transform;
 import beast.base.inference.parameter.RealParameter;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
@@ -34,6 +39,7 @@ import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.loggers.TraitTreeLogger;
 import lphybeast.tobeast.operators.DefaultOperatorStrategy;
 
+import java.util.List;
 import java.util.Map;
 
 public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTreeLikelihood> {
@@ -55,8 +61,9 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         AncestralStateTreeLikelihood treeLikelihood = new AncestralStateTreeLikelihood();
         treeLikelihood.setInputValue("tag", LOCATION);
         treeLikelihood.setInputValue("data", traitAlignment);
-
-        constructTreeAndBranchRate(phyloCTMC, treeLikelihood, context);
+//TODO
+        constructTreeAndBranchRate(phyloCTMC, treeLikelihood, null, null,
+                context, false);
 
         DataType userDataType = traitAlignment.getDataType();
         if (! (userDataType instanceof UserDataType) )
@@ -129,9 +136,19 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         beast.base.evolution.alignment.Alignment alignment = (beast.base.evolution.alignment.Alignment)value;
         treeLikelihood.setInputValue("data", alignment);
 
-        constructTreeAndBranchRate(phyloCTMC, treeLikelihood, context);
+        // AVMNOperator for each TreeLikelihood
+        AdaptableVarianceMultivariateNormalOperator opAVMNN = DefaultOperatorStrategy.initAVMNOperator();
+        opAVMNN.setID(alignment.getID() + ".AVMNOperator");
 
-        SiteModel siteModel = constructSiteModel(phyloCTMC, context);
+        Transform.LogConstrainedSumTransform sumTransform = DefaultOperatorStrategy.initAVMNSumTransform(alignment.getID());
+        Transform.LogTransform logTransform = DefaultOperatorStrategy.initLogTransform(alignment.getID());
+        Transform.NoTransform noTransform = DefaultOperatorStrategy.initNoTransform(alignment.getID());
+
+        // branch models
+        constructTreeAndBranchRate(phyloCTMC, treeLikelihood, logTransform, noTransform,
+                context, false);
+
+        SiteModel siteModel = constructSiteModel(phyloCTMC, sumTransform, logTransform, context);
         treeLikelihood.setInputValue("siteModel", siteModel);
 
         treeLikelihood.initAndValidate();
@@ -139,18 +156,17 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         // logging
         context.addExtraLoggable(treeLikelihood);
 
+        // AVMNOperator
+        sumTransform.initAndValidate();
+        logTransform.initAndValidate();
+        noTransform.initAndValidate();
+
+        List<Transform> transformList = List.of(sumTransform, logTransform, noTransform);
+        opAVMNN.setInputValue("transformations", transformList);
+        opAVMNN.initAndValidate();
+        context.addBeastObjForOpSamplers(opAVMNN);
+
         return treeLikelihood;
-    }
-
-
-    /**
-     * Create tree and clock rate inside this tree likelihood.
-     * @param phyloCTMC
-     * @param treeLikelihood
-     * @param context
-     */
-    public static void constructTreeAndBranchRate(PhyloCTMC phyloCTMC, GenericTreeLikelihood treeLikelihood, BEASTContext context) {
-        constructTreeAndBranchRate(phyloCTMC, treeLikelihood, context, false);
     }
 
     /**
@@ -160,7 +176,9 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
      * @param context
      * @param skipBranchOperators skip constructing branch rates
      */
-    public static void constructTreeAndBranchRate(PhyloCTMC phyloCTMC, GenericTreeLikelihood treeLikelihood, BEASTContext context, boolean skipBranchOperators) {
+    public static void constructTreeAndBranchRate(PhyloCTMC phyloCTMC, GenericTreeLikelihood treeLikelihood,
+                                                  Transform.LogTransform logTransform, Transform.NoTransform noTransform,
+                                                  BEASTContext context, boolean skipBranchOperators) {
         Value<TimeTree> timeTreeValue = phyloCTMC.getTree();
         Tree tree = (Tree) context.getBEASTObject(timeTreeValue);
         //tree.setInputValue("taxa", value);
@@ -175,7 +193,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             Generator generator = branchRates.getGenerator();
             if (generator instanceof IID &&
                     ((IID<?>) generator).getBaseDistribution() instanceof LogNormal) {
-
+//TODO migrate to new operators
                 // simpleRelaxedClock.lphy
                 UCRelaxedClockModel relaxedClockModel = new UCRelaxedClockModel();
 
@@ -216,8 +234,14 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
             if (clockRate instanceof RandomVariable && timeTreeValue instanceof RandomVariable && skipBranchOperators == false) {
                 DefaultOperatorStrategy.addUpDownOperator(tree, clockRatePara, context);
+                // will create AdaptableOperatorSampler later
+                context.addBeastObjForOpSamplers(clockRatePara);
+                // AVMN log Transform
+                logTransform.setInputValue("f", clockRatePara);
             }
         }
+        // AVMN No Transform
+        noTransform.setInputValue("f", tree);
     }
 
 
@@ -226,7 +250,8 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
      * @param context the beast context
      * @return a BEAST SiteModel representing the site model of this LPHY PhyloCTMC
      */
-    public static SiteModel constructSiteModel(PhyloCTMC phyloCTMC, BEASTContext context) {
+    public static SiteModel constructSiteModel(PhyloCTMC phyloCTMC, Transform.LogConstrainedSumTransform sumTransform,
+                                               Transform.LogTransform logTransform, BEASTContext context) {
 
         SiteModel siteModel = new SiteModel();
 
@@ -251,11 +276,20 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             } else {
                 throw new UnsupportedOperationException("Only discretized gamma site rates are supported by LPhyBEAST !");
             }
-            siteModel.setInputValue("shape", context.getAsRealParameter(shape));
+            RealParameter shapeParam = context.getAsRealParameter(shape);
+            siteModel.setInputValue("shape", shapeParam);
+            // ncat is Integer, do not require to be parameter
             siteModel.setInputValue("gammaCategoryCount", ncat.value());
+
+            //TODO add proportionInvariant
 
             //TODO need a better solution than rm RandomVariable siteRates
             context.removeBEASTObject(context.getBEASTObject(siteRates));
+
+            // will create AdaptableOperatorSampler later
+            context.addBeastObjForOpSamplers(shapeParam);
+            // AVMN log Transform
+            logTransform.setInputValue("f", shapeParam);
         }
 
         // Scenario 2: siteRates = NULL
@@ -267,10 +301,40 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             if (substitutionModel == null) throw new IllegalArgumentException("Substitution Model was null!");
             siteModel.setInputValue("substModel", substitutionModel);
 
+            if (substitutionModel instanceof SubstitutionModel.Base substBase) {
+
+                Map<String, Input<?>> allInputs = substBase.getInputs();
+                // check if any inputs of SubstitutionModel.Base have been added to create AdaptableOperatorSampler,
+                // therefore no context.addBeastObjForOpSamplers here
+                for (Map.Entry<String, Input<?>> entry : allInputs.entrySet()) {
+                    Input<?> input = entry.getValue();
+                    if (input.get() instanceof BEASTInterface beastInterface) {
+                        if (context.isForOperatorSampler(beastInterface)) {
+                            if (beastInterface instanceof Frequencies frequencies) {
+                                Function freqParam = frequencies.frequenciesInput.get();
+                                // AVMN Log Constrained Sum Transform
+                                sumTransform.setInputValue("f", freqParam);
+                                sumTransform.setInputValue("sum", "1.0");
+                            } else
+                                // AVMN log Transform
+                                logTransform.setInputValue("f", beastInterface);
+                        }
+                    }
+                }
+
+            }
+
             RateMatrix rateMatrix = (RateMatrix)qGenerator;
             Value<Double> meanRate = rateMatrix.getMeanRate();
             BEASTInterface mutationRate = meanRate==null ? null : context.getBEASTObject(meanRate);
-            if (mutationRate != null) siteModel.setInputValue("mutationRate", mutationRate);
+            if (mutationRate != null) {
+                siteModel.setInputValue("mutationRate", mutationRate);
+
+                // will create AdaptableOperatorSampler later
+                context.addBeastObjForOpSamplers(mutationRate);
+                // AVMN log Transform
+                logTransform.setInputValue("f", mutationRate);
+            }
 
             siteModel.initAndValidate();
         }

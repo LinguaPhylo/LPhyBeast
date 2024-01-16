@@ -2,6 +2,8 @@ package lphybeast.tobeast.operators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.core.BEASTObject;
+import beast.base.evolution.operator.AdaptableOperatorSampler;
+import beast.base.evolution.operator.kernel.AdaptableVarianceMultivariateNormalOperator;
 import beast.base.evolution.operator.kernel.BactrianScaleOperator;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.Operator;
@@ -11,6 +13,7 @@ import beast.base.inference.operator.IntRandomWalkOperator;
 import beast.base.inference.operator.kernel.BactrianDeltaExchangeOperator;
 import beast.base.inference.operator.kernel.BactrianRandomWalkOperator;
 import beast.base.inference.operator.kernel.BactrianUpDownOperator;
+import beast.base.inference.operator.kernel.Transform;
 import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
@@ -77,17 +80,25 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
 
         List<Operator> operators = new ArrayList<>();
 
+        for (BEASTInterface beastInterface : context.getBeastObjForOpSamplers()) {
+            if (beastInterface instanceof AdaptableVarianceMultivariateNormalOperator opAVMNN)
+                operators.add(opAVMNN);
+        }
+
         Set<StateNode> skipOperators = context.getSkipOperators();
         for (StateNode stateNode : context.getState()) {
             if (!skipOperators.contains(stateNode)) {
                 // The default template to create operators
                 if (stateNode instanceof RealParameter realParameter) {
                     Operator operator = createBEASTOperator(realParameter);
-                    if (operator != null) operators.add(operator);
+                    if (operator != null)
+                        addOperatorOrSampler(stateNode, operator, operators);
                 } else if (stateNode instanceof IntegerParameter integerParameter) {
-                    operators.add(createBEASTOperator(integerParameter));
+                    Operator operator = createBEASTOperator(integerParameter);
+                    addOperatorOrSampler(stateNode, operator, operators);
                 } else if (stateNode instanceof BooleanParameter booleanParameter) {
-                    operators.add(createBitFlipOperator(booleanParameter));
+                    Operator operator = createBitFlipOperator(booleanParameter);
+                    addOperatorOrSampler(stateNode, operator, operators);
                 } else if (stateNode instanceof Tree tree) {
                     TreeOperatorStrategy treeOperatorStrategy = context.resolveTreeOperatorStrategy(tree);
                     // create operators
@@ -95,6 +106,7 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                     if (treeOperators.size() < 1)
                         throw new IllegalArgumentException("No operators are created by strategy " +
                                 treeOperatorStrategy.getName() + " !");
+                    //TODO or samplers?
                     operators.addAll(treeOperators);
                 }
             }
@@ -104,6 +116,27 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         operators.sort(Comparator.comparing(BEASTObject::getID));
 
         return operators;
+    }
+
+    protected void addOperatorOrSampler(StateNode stateNode, Operator operator, List<Operator> operators) {
+        // frequencies, site and substitution model parameters, trees
+        if (context.isForOperatorSampler(stateNode)) {
+            AdaptableOperatorSampler operatorSampler = new AdaptableOperatorSampler();
+
+            operatorSampler.setInputValue("weight", "0.05");
+            // TODO not only parameter
+            operatorSampler.setInputValue("parameter", stateNode);
+            // add operator here
+            operatorSampler.setInputValue("operator", operator);
+
+            //TODO  <operator idref="AVMNOperator.$(n)"/>
+
+            operatorSampler.setID(stateNode.getID() + ".OperatorSampler");
+            operatorSampler.initAndValidate();
+            operators.add(operatorSampler);
+
+        } else operators.add(operator);
+
     }
 
     //*** parameter operators ***//
@@ -189,6 +222,39 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
     }
 
     //*** static methods ***//
+
+    // AVMNOperator for each TreeLikelihood
+    public static AdaptableVarianceMultivariateNormalOperator initAVMNOperator() {
+        AdaptableVarianceMultivariateNormalOperator opAVMNN = new AdaptableVarianceMultivariateNormalOperator();
+        opAVMNN.setInputValue("weight", "0.1");
+        opAVMNN.setInputValue("coefficient", "1.0");
+        opAVMNN.setInputValue("scaleFactor", "1");
+        opAVMNN.setInputValue("beta", "0.05");
+        opAVMNN.setInputValue("initial", "800");
+        opAVMNN.setInputValue("burnin", "400");
+        opAVMNN.setInputValue("every", "1");
+        opAVMNN.setInputValue("allowNonsense", "true");
+        // require initAndValidate later for adding more input in runtime
+        return opAVMNN;
+    }
+
+    public static Transform.LogConstrainedSumTransform initAVMNSumTransform(String idSteam) {
+        Transform.LogConstrainedSumTransform transform = new Transform.LogConstrainedSumTransform();
+        transform.setID(idSteam + ".AVMNSumTransform");
+        return transform;
+    }
+
+    public static Transform.LogTransform initLogTransform(String idSteam) {
+        Transform.LogTransform transform = new Transform.LogTransform();
+        transform.setID(idSteam + ".AVMNLogTransform");
+        return transform;
+    }
+
+    public static Transform.NoTransform initNoTransform(String idSteam) {
+        Transform.NoTransform transform = new Transform.NoTransform();
+        transform.setID(idSteam + ".AVMNNoTransform");
+        return transform;
+    }
 
     // when both mu and tree are random var
     public static void addUpDownOperator(Tree tree, RealParameter clockRate, BEASTContext context) {

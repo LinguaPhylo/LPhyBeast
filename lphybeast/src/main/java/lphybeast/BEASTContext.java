@@ -100,6 +100,10 @@ public class BEASTContext {
     // A list of strategy patterns define how to create operators in extensions,
     // which already exclude DefaultTreeOperatorStrategy
     private List<TreeOperatorStrategy> newTreeOperatorStrategies;
+    // BEAST 2.7.6 introduced AdaptableOperatorSampler and AdaptableVarianceMultivariateNormalOperator
+    // which creates the new format for some operators.
+    // A list of AdaptableOperatorSampler, and create AVMNOperator if list is not empty.
+    private List<BEASTInterface> beastObjForOpSamplers = new ArrayList<>();
 
     //*** operators ***//
     // a list of extra loggables in 3 default loggers: parameter logger, screen logger, tree logger.
@@ -1037,6 +1041,7 @@ public class BEASTContext {
         beastObjects.clear();
         extraOperators.clear();
         skipOperators.clear();
+        beastObjForOpSamplers.clear();
     }
 
     public void runBEAST(String logFileStem) {
@@ -1066,6 +1071,18 @@ public class BEASTContext {
 
     public boolean hasExtraOperator(String opID) {
         return extraOperators.stream().anyMatch(op -> op.getID().equals(opID));
+    }
+
+    public void addBeastObjForOpSamplers(BEASTInterface beastInterface) {
+        beastObjForOpSamplers.add(beastInterface);
+    }
+
+    public boolean isForOperatorSampler(BEASTInterface beastInterface) {
+        return beastObjForOpSamplers.contains(beastInterface);
+    }
+
+    public List<BEASTInterface> getBeastObjForOpSamplers() {
+        return beastObjForOpSamplers;
     }
 
     public List<StateNode> getState() {
