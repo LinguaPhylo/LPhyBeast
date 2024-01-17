@@ -83,13 +83,15 @@ public class SkylinePlotsTutorialTest {
         assertTrue(xml.contains("gammaCategoryCount=\"4\"") && xml.contains("shape=\"@gamma\""), "SiteModel" );
 
         // 4 ScaleOperator, incl. tree
-        assertEquals(4, xml.split("ScaleOperator", -1).length - 1, "ScaleOperator" );
+        assertEquals(4, xml.split("BactrianScaleOperator", -1).length - 1,
+                "BactrianScaleOperator" );
 
-        assertTrue(xml.contains("Exchange") && xml.contains("SubtreeSlide") && xml.contains("Uniform") &&
-                xml.contains("WilsonBalding"), "Tree Operator" );
+        assertTrue(xml.contains("Exchange") && xml.contains("BactrianSubtreeSlide") &&
+                xml.contains("BactrianNodeOperator") && xml.contains("WilsonBalding"), "Tree Operator" );
 
        // 3 DeltaExchangeOperator
-        assertEquals(3, xml.split("DeltaExchangeOperator", -1).length - 1, "DeltaExchangeOperator");
+        assertEquals(3, xml.split("BactrianDeltaExchangeOperator", -1).length - 1,
+                "BactrianDeltaExchangeOperator");
 
         assertTrue(xml.contains("chainLength=\"1000000\"") && xml.contains("logEvery=\"500\"") &&
                 xml.contains("fileName=\"" + fileStem + ".log\"") && xml.contains("fileName=\"" + fileStem + ".trees\"") &&
