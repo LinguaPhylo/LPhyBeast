@@ -3,7 +3,7 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.tree.TreeIntervals;
 import beast.base.evolution.tree.coalescent.ConstantPopulation;
-import lphy.evolution.coalescent.SerialCoalescent;
+import lphy.base.evolution.coalescent.SerialCoalescent;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

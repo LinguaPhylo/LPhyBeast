@@ -1,8 +1,8 @@
 package lphybeast;
 
-import lphy.system.UserDir;
-import lphy.util.LoggerUtils;
-import lphy.util.RandomUtils;
+import lphy.core.io.UserDir;
+import lphy.core.logger.LoggerUtils;
+import lphy.core.simulator.RandomUtils;
 import picocli.CommandLine;
 import picocli.CommandLine.*;
 
@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
                 "OS: ${os.name} ${os.version} ${os.arch}"})
 public class LPhyBeastCMD implements Callable<Integer> {
 
-    public static final String VERSION = "1.0.5";
+    public static final String VERSION = "1.1.0";
 
     @Parameters(paramLabel = "LPhy_scripts", description = "File of the LPhy model specification. " +
             "If it is a relative path, then concatenate 'user.dir' to the front of the path. " +
@@ -56,9 +56,9 @@ public class LPhyBeastCMD implements Callable<Integer> {
     @Option(names = {"-r", "--replicates"}, defaultValue = "1", description = "the number of replicates (XML) given one LPhy script, " +
             "usually to create simulations for well-calibrated study.") int repTot;
 
-    @Option(names = {"-d", "--data"}, split = ";",
+    @Option(names = {"-D", "--data"}, split = ";",
             description = "Replace the constant value in the lphy script, multiple constants can be split by ';', " +
-                    "but no ';' at the last: e.g. -d n=12;L=100 or -d n=20")
+                    "but no ';' at the last: e.g. -D \"n=12;L=100\" or -D n=20")
     String[] lphyConst = null;
 
     @Option(names = {"-cca", "--compressConstantAlignments"},

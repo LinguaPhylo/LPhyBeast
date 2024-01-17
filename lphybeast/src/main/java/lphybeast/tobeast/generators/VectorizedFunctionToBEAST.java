@@ -4,9 +4,9 @@ import beast.base.core.BEASTInterface;
 import beast.base.core.BEASTObject;
 import beast.base.inference.parameter.RealParameter;
 import beastlabs.util.BEASTVector;
-import lphy.core.functions.VectorizedFunction;
-import lphy.graphicalModel.DeterministicFunction;
-import lphy.graphicalModel.GraphicalModelNode;
+import lphy.core.model.DeterministicFunction;
+import lphy.core.model.GraphicalModelNode;
+import lphy.core.vectorization.VectorizedFunction;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

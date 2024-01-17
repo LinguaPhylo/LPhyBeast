@@ -2,10 +2,10 @@ package lphybeast.tobeast.values;
 
 import beast.base.core.BEASTInterface;
 import beastlabs.util.BEASTVector;
-import lphy.core.distributions.VectorizedDistribution;
-import lphy.core.functions.VectorizedFunction;
-import lphy.graphicalModel.Value;
-import lphy.graphicalModel.Vector;
+import lphy.core.model.Value;
+import lphy.core.model.datatype.Vector;
+import lphy.core.vectorization.VectorizedDistribution;
+import lphy.core.vectorization.VectorizedFunction;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 

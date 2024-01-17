@@ -7,7 +7,7 @@ import beast.base.inference.Logger;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
 import beastclassic.evolution.tree.TreeWithTraitLogger;
 import com.google.common.collect.Multimap;
-import lphy.graphicalModel.GraphicalModelNode;
+import lphy.core.model.GraphicalModelNode;
 import lphybeast.BEASTContext;
 
 import java.util.ArrayList;

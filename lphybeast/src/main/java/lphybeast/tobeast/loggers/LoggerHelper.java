@@ -4,7 +4,7 @@ import beast.base.core.BEASTInterface;
 import beast.base.core.Loggable;
 import beast.base.inference.Logger;
 import com.google.common.collect.Multimap;
-import lphy.graphicalModel.GraphicalModelNode;
+import lphy.core.model.GraphicalModelNode;
 
 import java.util.List;
 

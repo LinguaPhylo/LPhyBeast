@@ -1,6 +1,6 @@
 package lphybeast;
 
-import lphy.system.UserDir;
+import lphy.core.io.UserDir;
 
 import java.io.IOException;
 import java.nio.file.Path;

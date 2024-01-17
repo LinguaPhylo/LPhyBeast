@@ -3,7 +3,7 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.RealParameter;
-import lphy.core.distributions.InverseGamma;
+import lphy.base.distribution.InverseGamma;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

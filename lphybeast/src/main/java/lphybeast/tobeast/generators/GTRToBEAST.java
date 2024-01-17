@@ -2,8 +2,8 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.inference.parameter.RealParameter;
-import lphy.evolution.substitutionmodel.GTR;
-import lphy.graphicalModel.Value;
+import lphy.base.evolution.substitutionmodel.GTR;
+import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

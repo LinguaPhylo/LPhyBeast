@@ -1,7 +1,7 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import lphy.evolution.substitutionmodel.JukesCantor;
+import lphy.base.evolution.substitutionmodel.JukesCantor;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

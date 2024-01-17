@@ -1,7 +1,7 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import lphy.evolution.substitutionmodel.K80;
+import lphy.base.evolution.substitutionmodel.K80;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

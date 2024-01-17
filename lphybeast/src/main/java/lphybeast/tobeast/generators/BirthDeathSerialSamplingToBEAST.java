@@ -8,14 +8,14 @@ import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.distribution.Prior;
 import beast.base.inference.distribution.Uniform;
 import beast.base.inference.parameter.RealParameter;
-import lphy.evolution.birthdeath.BirthDeathSerialSamplingTree;
-import lphy.graphicalModel.GenerativeDistribution1D;
-import lphy.graphicalModel.Value;
-import lphy.graphicalModel.ValueUtils;
-import lphy.util.LoggerUtils;
+import lphy.base.evolution.birthdeath.BirthDeathSerialSamplingTree;
+import lphy.core.logger.LoggerUtils;
+import lphy.core.model.GenerativeDistribution1D;
+import lphy.core.model.Value;
+import lphy.core.model.ValueUtils;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
-import lphybeast.tobeast.operators.OperatorFactory;
+import lphybeast.tobeast.operators.TreeOperatorStrategy;
 
 // bdtree (https://github.com/fkmendes/bdtree) is not released as a BEAST2 package,
 // but the XML created by this class can run if lphybeast package is installed and loaded by BEAST 2 ClassLoader.
@@ -94,11 +94,11 @@ public class BirthDeathSerialSamplingToBEAST implements
             // rm all tree op
             context.addSkipOperator((Tree) tree);
             // add required ones back
-            context.addExtraOperator(OperatorFactory.createExchangeOperator((Tree) tree, context, true));
-            context.addExtraOperator(OperatorFactory.createExchangeOperator((Tree) tree, context, false));
-            context.addExtraOperator(OperatorFactory.createTreeUniformOperator((Tree) tree, context));
-            context.addExtraOperator(OperatorFactory.createSubtreeSlideOperator((Tree) tree, context));
-            context.addExtraOperator(OperatorFactory.createWilsonBaldingOperator((Tree) tree, context));
+            context.addExtraOperator(TreeOperatorStrategy.createExchangeOperator((Tree) tree, context, true));
+            context.addExtraOperator(TreeOperatorStrategy.createExchangeOperator((Tree) tree, context, false));
+            context.addExtraOperator(TreeOperatorStrategy.createTreeUniformOperator((Tree) tree, context));
+            context.addExtraOperator(TreeOperatorStrategy.createSubtreeSlideOperator((Tree) tree, context));
+            context.addExtraOperator(TreeOperatorStrategy.createWilsonBaldingOperator((Tree) tree, context));
         }
 
         beastBDSS.initAndValidate();

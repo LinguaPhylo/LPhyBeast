@@ -4,9 +4,9 @@
 //import lphybeast.BEASTContext;
 //import lphybeast.GeneratorToBEAST;
 //
-//public class PhyloMultivariateBrownianToBEAST implements GeneratorToBEAST<lphy.evolution.continuous.PhyloMultivariateBrownian, multivariatelikelihood.BMPCMShrinkageLikelihood> {
+//public class PhyloMultivariateBrownianToBEAST implements GeneratorToBEAST<lphy.base.evolution.continuous.PhyloMultivariateBrownian, multivariatelikelihood.BMPCMShrinkageLikelihood> {
 //
-//    public multivariatelikelihood.BMPCMShrinkageLikelihood generatorToBEAST(lphy.evolution.continuous.PhyloMultivariateBrownian phyloMultivariateBrownian, BEASTInterface value, BEASTContext context) {
+//    public multivariatelikelihood.BMPCMShrinkageLikelihood generatorToBEAST(lphy.base.evolution.continuous.PhyloMultivariateBrownian phyloMultivariateBrownian, BEASTInterface value, BEASTContext context) {
 //
 //        multivariatelikelihood.BMPCMShrinkageLikelihood treeLikelihood = new multivariatelikelihood.BMPCMShrinkageLikelihood();
 //
@@ -23,8 +23,8 @@
 //
 //
 //    @Override
-//    public Class<lphy.evolution.continuous.PhyloMultivariateBrownian> getGeneratorClass() {
-//        return lphy.evolution.continuous.PhyloMultivariateBrownian.class;
+//    public Class<lphy.base.evolution.continuous.PhyloMultivariateBrownian> getGeneratorClass() {
+//        return lphy.base.evolution.continuous.PhyloMultivariateBrownian.class;
 //    }
 //
 //    @Override

@@ -2,9 +2,9 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.core.Function;
-import lphy.graphicalModel.GraphicalModelNode;
-import lphy.graphicalModel.Value;
-import lphy.parser.functions.ExpressionNodeWrapper;
+import lphy.core.model.GraphicalModelNode;
+import lphy.core.model.Value;
+import lphy.core.parser.function.ExpressionNodeWrapper;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 

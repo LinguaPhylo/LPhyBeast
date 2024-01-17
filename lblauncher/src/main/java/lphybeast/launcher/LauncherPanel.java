@@ -1,7 +1,7 @@
 package lphybeast.launcher;
 
 import beast.util.BEASTClassLoader;
-import lphy.util.LoggerUtils;
+import lphy.core.logger.LoggerUtils;
 import lphystudio.app.Utils;
 import lphystudio.app.graphicalmodelpanel.ErrorPanel;
 import lphystudio.core.swing.SpringUtilities;
