@@ -2,9 +2,6 @@ package lphybeast.tobeast.values;
 
 import beast.base.core.BEASTInterface;
 import beast.base.core.Function;
-import beast.base.inference.Operator;
-import beast.base.inference.operator.DeltaExchangeOperator;
-import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.Parameter;
 import beast.base.inference.parameter.RealParameter;
 import feast.function.Concatenate;
@@ -14,6 +11,7 @@ import lphy.core.model.Value;
 import lphy.core.vectorization.VectorUtils;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
+import lphybeast.tobeast.operators.DefaultOperatorStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +37,7 @@ public class DoubleArrayValueToBEAST implements ValueToBEAST<Double[], BEASTInte
 
             ValueToParameter.setID(concatenatedParameters, value);
 
-            addDeltaExchangeOperator(value, args, context);
+            DefaultOperatorStrategy.addDeltaExchangeOperator(value, args, context);
 
             return concatenatedParameters;
         }
@@ -74,17 +72,4 @@ public class DoubleArrayValueToBEAST implements ValueToBEAST<Double[], BEASTInte
         return BEASTInterface.class;
     }
 
-    private void addDeltaExchangeOperator(Value<Double[]> value, List<Function> args, BEASTContext context) {
-        WeightedDirichlet weightedDirichlet = (WeightedDirichlet) value.getGenerator();
-        IntegerParameter weightIntParam = context.getAsIntegerParameter(weightedDirichlet.getWeights());
-
-        Operator operator = new DeltaExchangeOperator();
-        operator.setInputValue("parameter", args);
-        operator.setInputValue("weight", BEASTContext.getOperatorWeight(args.size() - 1));
-        operator.setInputValue("weightvector", weightIntParam);
-        operator.setInputValue("delta", 1.0 / value.value().length);
-        operator.initAndValidate();
-        operator.setID(value.getCanonicalId() + ".deltaExchange");
-        context.addExtraOperator(operator);
-    }
 }

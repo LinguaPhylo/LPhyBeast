@@ -2,6 +2,7 @@ package lphybeast.tobeast.operators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.core.BEASTObject;
+import beast.base.core.Function;
 import beast.base.evolution.operator.kernel.BactrianScaleOperator;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.Operator;
@@ -17,10 +18,12 @@ import beast.base.inference.parameter.RealParameter;
 import com.google.common.collect.Multimap;
 import lphy.base.distribution.Dirichlet;
 import lphy.base.distribution.RandomComposition;
+import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.GenerativeDistribution;
 import lphy.core.model.GraphicalModelNode;
 import lphy.core.model.RandomVariable;
+import lphy.core.model.Value;
 import lphy.core.vectorization.IID;
 import lphybeast.BEASTContext;
 
@@ -195,7 +198,7 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         String idStr = clockRate.getID() + "Up" + tree.getID() + "DownOperator";
         // avoid to duplicate updown ops from the same pair of rate and tree
         if (!context.hasExtraOperator(idStr)) {
-            BactrianUpDownOperator upDownOperator = new BactrianUpDownOperator();
+            Operator upDownOperator = new BactrianUpDownOperator();
             upDownOperator.setID(idStr);
             upDownOperator.setInputValue("up", clockRate);
             upDownOperator.setInputValue("down", tree);
@@ -203,5 +206,19 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
             upDownOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getInternalNodeCount()+1));
             context.addExtraOperator(upDownOperator);
         }
+    }
+
+    public static void addDeltaExchangeOperator(Value<Double[]> value, List<Function> args, BEASTContext context) {
+        WeightedDirichlet weightedDirichlet = (WeightedDirichlet) value.getGenerator();
+        IntegerParameter weightIntParam = context.getAsIntegerParameter(weightedDirichlet.getWeights());
+
+        Operator operator = new BactrianDeltaExchangeOperator();
+        operator.setInputValue("parameter", args);
+        operator.setInputValue("weight", BEASTContext.getOperatorWeight(args.size() - 1));
+        operator.setInputValue("weightvector", weightIntParam);
+        operator.setInputValue("delta", 1.0 / value.value().length);
+        operator.initAndValidate();
+        operator.setID(value.getCanonicalId() + ".deltaExchange");
+        context.addExtraOperator(operator);
     }
 }
