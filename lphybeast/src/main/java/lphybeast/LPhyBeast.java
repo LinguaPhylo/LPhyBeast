@@ -132,7 +132,7 @@ public class LPhyBeast implements Runnable {
         final String[] constants = lPhyBeastConfig.getLphyConst();
         // must provide File lphyFile, int numReplicates, Long seed
         Map<Integer, List<Value>> allReps = simulator.simulateAndLog(lphyFile, filePathNoExt,
-                1, constants, null);
+                1, constants, null, null);
 
         LPhyParserDictionary parserDict = simulator.getParserDictionary();
         // create XML string from reader, given file name and MCMC setting
