@@ -15,6 +15,7 @@ import lphy.base.function.datatype.NucleotidesFunction;
 import lphy.base.function.datatype.StandardDatatypeFunction;
 import lphy.base.function.io.ReadFasta;
 import lphy.base.function.io.ReadNexus;
+import lphy.base.function.io.WriteFasta;
 import lphy.base.function.taxa.*;
 import lphy.base.function.tree.ExtantTree;
 import lphy.base.function.tree.MigrationCount;
@@ -65,7 +66,7 @@ public class Exclusion {
                 generator instanceof MissingSites || generator instanceof SelectSitesByMissingFraction ||
                 generator instanceof InvariableSites || generator instanceof VariableSites ||
                 generator instanceof CopySites || generator instanceof Sample<?> ||
-                generator instanceof Simulate ||
+                generator instanceof Simulate || generator instanceof WriteFasta ||
                 generator instanceof ReadNexus || generator instanceof ReadFasta ||
                 generator instanceof ExtractTrait || generator instanceof Unique ||
                 generator instanceof Intersect || generator instanceof RepArray ||
