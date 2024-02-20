@@ -28,7 +28,7 @@ import lphy.core.parser.function.MapFunction;
 import lphy.core.parser.function.MethodCall;
 import lphy.core.simulator.Simulate;
 import lphy.core.vectorization.IID;
-import lphy.core.vectorization.array.IntegerArray;
+import lphy.core.vectorization.array.ArrayFunction;
 import lphy.core.vectorization.operation.ElementsAt;
 import lphy.core.vectorization.operation.Range;
 import lphy.core.vectorization.operation.RangeList;
@@ -57,7 +57,7 @@ public class Exclusion {
 
     public static boolean isExcludedGenerator(Generator generator) {
 
-        return generator instanceof WeightedDirichlet || generator instanceof IntegerArray ||
+        return generator instanceof WeightedDirichlet || generator instanceof ArrayFunction ||
                 generator instanceof ExpressionNode || generator instanceof RandomComposition ||
                 generator instanceof NTaxaFunction || generator instanceof NCharFunction ||
                 generator instanceof TaxaFunction || generator instanceof NodeCount ||

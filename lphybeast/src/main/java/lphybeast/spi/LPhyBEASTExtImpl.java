@@ -47,6 +47,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
     public List<Class<? extends GeneratorToBEAST>> getGeneratorToBEASTs() {
         return Arrays.asList( BernoulliMultiToBEAST.class, // cannot be replaced by IID
                 BetaToBEAST.class,
+                BinaryCovarionToBEAST.class, // language
                 BirthDeathSerialSamplingToBEAST.class,
                 BirthDeathSampleTreeDTToBEAST.class,
                 DirichletToBEAST.class,
