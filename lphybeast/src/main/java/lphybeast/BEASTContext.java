@@ -32,6 +32,7 @@ import lphy.core.vectorization.VectorUtils;
 import lphy.core.vectorization.VectorizedRandomVariable;
 import lphy.core.vectorization.operation.ElementsAt;
 import lphy.core.vectorization.operation.SliceValue;
+import lphybeast.spi.LPhyBEASTExt;
 import lphybeast.tobeast.loggers.LoggerFactory;
 import lphybeast.tobeast.loggers.LoggerHelper;
 import lphybeast.tobeast.operators.DefaultOperatorStrategy;
@@ -73,7 +74,7 @@ public class BEASTContext {
     Map<SequenceType, DataType> dataTypeMap;
 
     List<Class<? extends Generator>> excludedGeneratorClasses;
-    List<Class<? extends Value>> excludedValueClasses;
+    List<Class> excludedValueTypes;
 
     //*** to BEAST ***//
 
@@ -134,7 +135,7 @@ public class BEASTContext {
         dataTypeMap = loader.dataTypeMap;
 
         excludedGeneratorClasses = loader.excludedGeneratorClasses;
-        excludedValueClasses = loader.excludedValueClasses;
+        excludedValueTypes = loader.excludedValueTypes;
 
         newTreeOperatorStrategies = loader.newTreeOperatorStrategies;
     }
@@ -330,6 +331,11 @@ public class BEASTContext {
 
     //*** handle BEAST 2 objects ***//
 
+    /**
+     * Note: if return RealParameter, must use {@link #getAsRealParameter} not getBEASTObject.
+     * @param node  LPhy object
+     * @return      the beast object mapped to the given LPhy object
+     */
     public BEASTInterface getBEASTObject(GraphicalModelNode<?> node) {
 
         // Q=jukesCantor(), rateMatrix.getMeanRate() is null
@@ -739,10 +745,11 @@ public class BEASTContext {
     }
 
     private boolean isExcludedGenerator(Generator generator) {
-        if (Exclusion.isExcludedGenerator(generator))
+        if (LPhyBEASTExt.isExcludedGenerator(generator))
             return true;
         for (Class<? extends Generator> gCls : excludedGeneratorClasses)
-            if (generator.getClass().isAssignableFrom(gCls))
+            // if generator.getClass() is either the same as, or is a superclass or superinterface of, gCls.
+            if (gCls.isAssignableFrom(generator.getClass()))
                 return true;
         return false;
     }
@@ -770,10 +777,12 @@ public class BEASTContext {
     }
 
     private boolean isExcludedValue(Value value) {
-        if (Exclusion.isExcludedValue(value))
+        if (LPhyBEASTExt.isExcludedValue(value)) // takes Value
             return true;
-        for (Class<? extends Value> vCls : excludedValueClasses)
-            if (value.getClass().isAssignableFrom(vCls))
+        for (Class vCls : excludedValueTypes)
+            // compare the wrapped value's class.
+            // if vCls is either the same as, or is a superclass or superinterface of value.getType().
+            if (vCls.isAssignableFrom(value.getType()))
                 return true;
         return false;
     }

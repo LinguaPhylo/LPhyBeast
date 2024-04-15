@@ -4,17 +4,15 @@ import beast.base.evolution.datatype.DataType;
 import jebl.evolution.sequences.SequenceType;
 import lphy.base.evolution.datatype.Binary;
 import lphy.base.evolution.datatype.Continuous;
+import lphy.base.function.io.ReadFasta;
+import lphy.base.function.io.ReadNexus;
 import lphy.core.model.Generator;
-import lphy.core.model.Value;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
 import lphybeast.tobeast.generators.*;
 import lphybeast.tobeast.values.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -100,12 +98,18 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
 
     @Override
     public List<Class<? extends Generator>> getExcludedGenerator() {
-        return new ArrayList<>();
+        return List.of(
+                ReadNexus.class, ReadFasta.class
+        );
     }
 
     @Override
-    public List<Class<? extends Value>> getExcludedValue() {
-        return new ArrayList<>();
+    public List<Class> getExcludedValueType() {
+        // For a complex logic, or arrays, use isExcludedValue
+        return List.of(String.class, // ignore all String: d = nexus(file="Dengue4.nex");
+                HashMap.class, TreeMap.class,
+                SequenceType.class // ignore all data types
+        );
     }
 
 

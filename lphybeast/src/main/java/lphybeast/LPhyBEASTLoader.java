@@ -64,7 +64,7 @@ public class LPhyBEASTLoader {
     /**
      * {@link Value}
      */
-    public List<Class<? extends Value>> excludedValueClasses;
+    public List<Class> excludedValueTypes;
     /**
      * Not {@link DefaultTreeOperatorStrategy}
      */
@@ -140,7 +140,7 @@ public class LPhyBEASTLoader {
         dataTypeMap = new ConcurrentHashMap<>();
 
         excludedGeneratorClasses = new ArrayList<>();
-        excludedValueClasses = new ArrayList<>();
+        excludedValueTypes = new ArrayList<>();
 
         newTreeOperatorStrategies = new ArrayList<>();
 
@@ -176,7 +176,7 @@ public class LPhyBEASTLoader {
                     registerDataTypes(dataTypeMap);
 
                     excludedGeneratorClasses.addAll(ext.getExcludedGenerator());
-                    excludedValueClasses.addAll(ext.getExcludedValue());
+                    excludedValueTypes.addAll(ext.getExcludedValueType());
 
                     if ( ! (ext.getTreeOperatorStrategy() instanceof DefaultTreeOperatorStrategy) )
                         newTreeOperatorStrategies.add(ext.getTreeOperatorStrategy());
@@ -187,7 +187,7 @@ public class LPhyBEASTLoader {
             System.out.println("Load " + generatorToBEASTMap.size() + " GeneratorToBEAST = " + generatorToBEASTMap);
             System.out.println("Map " + dataTypeMap.size() + " data type(s) = " + dataTypeMap);
             System.out.println("Exclude " + excludedGeneratorClasses.size() + " extra Generator(s) = " + excludedGeneratorClasses);
-            System.out.println("Exclude " + excludedValueClasses.size() + " extra Value(s) = " + excludedValueClasses);
+            System.out.println("Exclude " + excludedValueTypes.size() + " extra Value(s) = " + excludedValueTypes);
             System.out.println("Load " + newTreeOperatorStrategies.size() + " new Tree Operator Strategies = " + newTreeOperatorStrategies);
 
         } catch (ServiceConfigurationError serviceError) {
