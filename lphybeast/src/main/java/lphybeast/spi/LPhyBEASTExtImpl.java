@@ -2,16 +2,40 @@ package lphybeast.spi;
 
 import beast.base.evolution.datatype.DataType;
 import jebl.evolution.sequences.SequenceType;
+import lphy.base.distribution.DiscretizedGamma;
+import lphy.base.distribution.RandomComposition;
+import lphy.base.distribution.Sample;
+import lphy.base.distribution.WeightedDirichlet;
 import lphy.base.evolution.datatype.Binary;
 import lphy.base.evolution.datatype.Continuous;
+import lphy.base.function.*;
+import lphy.base.function.alignment.*;
+import lphy.base.function.datatype.BinaryDatatypeFunction;
+import lphy.base.function.datatype.NucleotidesFunction;
+import lphy.base.function.datatype.StandardDatatypeFunction;
 import lphy.base.function.io.ReadFasta;
 import lphy.base.function.io.ReadNexus;
+import lphy.base.function.io.WriteFasta;
+import lphy.base.function.taxa.*;
+import lphy.base.function.tree.ExtantTree;
+import lphy.base.function.tree.MigrationCount;
+import lphy.base.function.tree.NodeCount;
+import lphy.core.model.ExpressionNode;
 import lphy.core.model.Generator;
+import lphy.core.parser.function.ExpressionNodeWrapper;
+import lphy.core.parser.function.MapFunction;
+import lphy.core.parser.function.MethodCall;
+import lphy.core.simulator.Simulate;
+import lphy.core.vectorization.array.ArrayFunction;
+import lphy.core.vectorization.operation.ElementsAt;
+import lphy.core.vectorization.operation.Range;
+import lphy.core.vectorization.operation.RangeList;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
 import lphybeast.tobeast.generators.*;
 import lphybeast.tobeast.values.*;
 
+import java.util.Map;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -99,7 +123,28 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
     @Override
     public List<Class<? extends Generator>> getExcludedGenerator() {
         return List.of(
-                ReadNexus.class, ReadFasta.class
+                ReadNexus.class, ReadFasta.class, WriteFasta.class, // IO
+                // Taxa and sites
+                NTaxaFunction.class, NCharFunction.class, TaxaFunction.class, CreateTaxa.class,
+                SpeciesTaxa.class, TaxaAgesFromFunction.class,
+                CopySites.class, MissingSites.class, SelectSitesByMissingFraction.class, InvariableSites.class,
+                VariableSites.class,
+                DiscretizedGamma.class,
+                // Tree
+                NodeCount.class, ExtractTrait.class, ExtantTree.class,
+                MigrationMatrix.class, MigrationCount.class,
+                // distribution
+                WeightedDirichlet.class,
+                // utils
+                MapFunction.class, ConcatArray.class, ARange.class, Range.class, RangeList.class,
+                ElementsAt.class, Rep.class, RepArray.class, Sort.class, Unique.class,
+                Get.class, Length.class, Select.class, Intersect.class,
+                RandomComposition.class, SumBoolean.class,
+                // sequence typs
+                NucleotidesFunction.class, StandardDatatypeFunction.class, BinaryDatatypeFunction.class,
+                // lphy
+                MethodCall.class, Simulate.class, Sample.class, ArrayFunction.class,
+                ExpressionNode.class, ExpressionNodeWrapper.class
         );
     }
 
