@@ -1,5 +1,7 @@
 package lphybeast;
 
+import lphy.base.evolution.alignment.Alignment;
+import lphy.base.evolution.tree.TimeTree;
 import lphy.core.codebuilder.CanonicalCodeBuilder;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.Value;
@@ -9,9 +11,11 @@ import lphy.core.simulator.Sampler;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Main class to set up a simulation or simulations.
@@ -58,9 +62,8 @@ public class LPhyBeast implements Runnable {
         repTot = 1;
         loader = null;
         try {
-            lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd, 0, false, false);
-            lPhyBeastConfig.setChainLength(chainLength);
-            lPhyBeastConfig.setPreBurnin(preBurnin);
+            lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd, null, null, false);
+            lPhyBeastConfig.setMCMCConfig(chainLength, preBurnin, -1);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -73,6 +76,7 @@ public class LPhyBeast implements Runnable {
             throw new IllegalArgumentException("Illegal inputs : inPath = " + lPhyBeastConfig.inPath +
                     ", outPath = " + lPhyBeastConfig.outPath + ", rep = " + repTot + ", chainLength = " +
                     lPhyBeastConfig.getChainLength() + ", preBurnin = " + lPhyBeastConfig.getPreBurnin());
+
         try {
             run(repTot);
         } catch (IOException e) {
@@ -130,11 +134,143 @@ public class LPhyBeast implements Runnable {
         NamedRandomValueSimulator simulator = new NamedRandomValueSimulator();
         // constants are inputted by user for Macro
         final String[] constants = lPhyBeastConfig.getLphyConst();
-        // must provide File lphyFile, int numReplicates, Long seed
-        Map<Integer, List<Value>> allReps = simulator.simulateAndLog(lphyFile, filePathNoExt,
-                1, constants, null, null);
+        // Ignoring the logging ability for the given lphy random variables
+        final String[] varNotLog = lPhyBeastConfig.getVarNotLog();
 
-        LPhyParserDictionary parserDict = simulator.getParserDictionary();
+        LPhyParserDictionary parserDict;
+        // check if it is model misspecification test
+        Path lphyM1 = lPhyBeastConfig.getModel1File();
+        if (lphyM1 == null) { // normal lphybeast run
+            // must provide File lphyFile, int numReplicates, Long seed
+            Map<Integer, List<Value>> allReps = simulator.simulateAndLog(lphyFile, filePathNoExt,
+                    1, constants, varNotLog, null);
+
+            parserDict = simulator.getParserDictionary();
+
+        } else { // model misspecification test
+            // simulateAndLog and simulate use the same sampler, it can sample different lphy scripts.
+            // the former has logging, the latter no logging.
+            Map<Integer, List<Value>> allRepsM1 = simulator.simulateAndLog(lphyM1.toFile(), filePathNoExt+"_m1",
+                    1, constants, varNotLog, null);
+
+            LPhyParserDictionary parserDictM1 = simulator.getParserDictionary();
+
+            // this has no logging, but must provide File lphyFile, int numReplicates, Long seed
+            Map<Integer, List<Value>> allRepsM2 = simulator.simulate(lphyFile,
+                    1, constants, varNotLog, null);
+
+            parserDict = simulator.getParserDictionary();
+
+            //TODO log M2 XML
+            //String xml = dictToBEASTXML(parserDict, filePathNoExt);
+
+            /*
+             * Swapping the value of Value<Alignment> in lphy dict is easier than
+             * swapping sequences between two beast2 alignment.
+             * Note: it will be matter when swapping sequences between two beast2 alignments
+             * without ensuring the taxa in the same order.
+             */
+
+            // pull out all Alignment and TimeTree
+            List<Value<?>> alignmentsM1 = parserDictM1.getNamedValuesByType(Alignment.class);
+            List<Value<?>> alignmentsM2 = parserDict.getNamedValuesByType(Alignment.class);
+
+            List<Value<?>> timeTreesM1 = parserDictM1.getNamedValuesByType(TimeTree.class);
+            List<Value<?>> timeTreesM2 = parserDict.getNamedValuesByType(TimeTree.class);
+
+            // TODO: assuming all alignments and trees in M1 must be in M2 with the same ID.
+            for (Value v1 : alignmentsM1) {
+
+                Alignment a1 = (Alignment) v1.value();
+                boolean processed = false;
+
+                for (Value v2 : alignmentsM2) {
+
+                    if (v1.getId().equals(v2.getId())) {
+                        // fail if there is data clamping
+                        if (parserDictM1.isClamped(v1.getId()))
+                            throw new IllegalArgumentException("Model misspecification test does not support data clamping ! " +
+                                    "Clamped alignment : " + v1.getId());
+
+                        Alignment a2 = (Alignment) v2.value();
+
+                        // validate all pairs of alignments to have the same taxa and sites
+                        // Objects.equals(@Nullable, @Nullable)
+                        if (!Objects.equals(a1.nchar(), a2.nchar()))
+                            throw new IllegalArgumentException("Alignments must has the same length during model misspecification test ! " +
+                                "\nModel 1 alignment " + v1.getId() + " nchar = " + a1.nchar() +
+                                "\nModel 2 alignment " + v2.getId() + " nchar = " + a2.nchar());
+                        String taxaNames1 = Arrays.stream(a1.getTaxaNames()).sorted().collect(Collectors.joining(","));
+                        String taxaNames2 = Arrays.stream(a2.getTaxaNames()).sorted().collect(Collectors.joining(","));
+                        if (! taxaNames1.equals(taxaNames2))
+                            throw new IllegalArgumentException("Taxa names must be same during model misspecification test ! " +
+                                    "\nModel 1 alignment " + v1.getId() + " has taxa : " + taxaNames1 +
+                                    "\nModel 2 alignment " + v2.getId() + " has taxa : " + taxaNames2);
+
+                        // replace the value inside Value, otherwise it will break Graph
+                        v2.setValue(v1.value());
+
+                        parserDict.getModelDictionary().put(v2.getId(), v2);
+                        // TODO not sure this set will be used, but this add another D
+//                        parserDict.getModelValues().add(v2);
+
+                        processed = true;
+                        break;
+                    }
+
+                } // End for loop
+
+                if (!processed)
+                    // TODO waring instead ?
+                    throw new IllegalArgumentException("Model 1 alignment " + v1.getId() + " does not exist in model 2 !");
+
+            }
+
+            for (Value v1 : timeTreesM1) {
+
+                TimeTree t1 = (TimeTree) v1.value();
+                boolean processed = false;
+
+                for (Value v2 : timeTreesM2) {
+
+                    if (v1.getId().equals(v2.getId())) {
+                        // fail if there is data clamping
+                        if (parserDictM1.isClamped(v1.getId()))
+                            throw new IllegalArgumentException("Model misspecification test does not support data clamping ! " +
+                                    "Clamped alignment : " + v1.getId());
+
+                        TimeTree t2 = (TimeTree) v2.value();
+
+                        // validate all pairs of alignments to have the same taxa and sites
+                        // Objects.equals(@Nullable, @Nullable)
+                        if (!Objects.equals(t1.n(), t2.n()))
+                            throw new IllegalArgumentException("TimeTree must has the same tips during model misspecification test ! " +
+                                    "\nModel 1 TimeTree " + v1.getId() + " n tips = " + t1.n() +
+                                    "\nModel 2 TimeTree " + v2.getId() + " n tips = " + t2.n());
+
+                        // replace the value inside Value, otherwise it will break Graph
+                        v2.setValue(v1.value());
+
+                        parserDict.getModelDictionary().put(v2.getId(), v2);
+                        // TODO not sure this set will be used, but this add another D
+//                        parserDict.getModelValues().add(v2);
+
+                        processed = true;
+                        break;
+                    }
+
+                } // End for loop
+
+                if (!processed)
+                    // TODO waring instead ?
+                    throw new IllegalArgumentException("Model 1 TimeTree " + v1.getId() + " does not exist in model 2 !");
+
+            }
+
+        } // parserDict is the final result to XML
+
+//TODO        LoggerUtils.log.info("Replace alignment(s) : " +  + "\n, replace time tree(s) : " + + "\n");
+
         // create XML string from reader, given file name and MCMC setting
         String xml = dictToBEASTXML(parserDict, filePathNoExt);
 

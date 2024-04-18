@@ -61,6 +61,12 @@ public class LPhyBeastCMD implements Callable<Integer> {
                     "but no ';' at the last: e.g. -D \"n=12;L=100\" or -D n=20")
     String[] lphyConst = null;
 
+    @CommandLine.Option(names = {"-No", "--notlog"}, split = ";",
+            description = "Ignoring the logging ability for the given lphy random variables (id or its canonical version), " +
+                    "multiple id must be quoted and split by ';', but no ';' at the last: e.g. -No \"D;psi\" or -No D. " +
+                    "The last means the alignment D defined in the lphy script will not be logged.")
+    String[] varNotLog = null;
+
     @Option(names = {"-cca", "--compressConstantAlignments"},
             description = "Compress the alignment only having constants sites into " +
                     "a FilterAlignment with weights on each constant pattern.\n" +
@@ -80,6 +86,16 @@ public class LPhyBeastCMD implements Callable<Integer> {
                     "(for package development, e.g. -vf /pkg1/version.xml,/pkg2/version.xml,/pkg3/version.xml)")
     String[] versionFiles = null;
 
+    // model misspecification test: https://github.com/LinguaPhylo/LPhyBeast/issues/137
+    @Option(names = {"-m1", "--model1"},     description = "File of the 1st LPhy script, " +
+            "which is used for model misspecification test to simulate data (alignment, taxa dates, and species) " +
+            "that will apply to the model defined by the 2nd LPhy script.")
+    Path model1File = null;
+//    @Option(names = {"-m1xml", "--model1xml"}, defaultValue = "false",
+//            description = "logging the BEAST XML created by the 1st LPhy script.")
+//    boolean logm1xm; //TODO
+
+
 //    @Option(names = {"-d", "--data"},
 //            description = "Select the alignment given ID (e.g. random variable name) to compress constant sites, " +
 //                    "but leave the rest unselected alignment(s) unchanged.")
@@ -87,6 +103,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
 
 //    @Option(names = {"-lal", "--logAlignments"},
 //            description = "Log all alignments including the intermediate process generated in the LPhy script.")
+    @Deprecated
     boolean logAllAlignments = false;
 
     public static void main(String[] args) {
@@ -125,12 +142,12 @@ public class LPhyBeastCMD implements Callable<Integer> {
         try {
             // define config for the run
             LPhyBeastConfig lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd,
-                    compressConstantAlignment, logAllAlignments, logunicode);
-            lPhyBeastConfig.setPreBurnin(preBurnin);
-            lPhyBeastConfig.setChainLength(chainLength);
-            lPhyBeastConfig.setLogEvery(logEvery);
+                    lphyConst, varNotLog, logunicode);
+            lPhyBeastConfig.setMCMCConfig(chainLength, preBurnin, logEvery);
             // replace lphy constants
-            lPhyBeastConfig.setLphyConst(lphyConst);
+            lPhyBeastConfig.setCompressConstantAlignment(compressConstantAlignment);
+            // model misspecification test
+            lPhyBeastConfig.setModelMisspec(model1File, false);
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);

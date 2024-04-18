@@ -4,6 +4,7 @@ import lphy.core.io.UserDir;
 import lphy.core.logger.LoggerUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,18 +18,20 @@ public class LPhyBeastConfig {
     public final Path outPath;
 //    public final Path wd;//TODO currently using UserDir.set/getUserDir
 
-//    Compress the alignment only having constants sites into
-//    a FilterAlignment with weights on each constant pattern.
-//    If 0, as default, ignore this function;
-//    If 1, then compress constants sites, where every state is compared;
-//    If 2, then compress constants sites, but ignoring the unknown state or gap.
-    final public int compressConstantAlignment;
+    /**
+     * Compress the alignment only having constants sites into
+     * a FilterAlignment with weights on each constant pattern.
+     * If 0, as default, ignore this function;
+     * If 1, then compress constants sites, where every state is compared;
+     * If 2, then compress constants sites, but ignoring the unknown state or gap.
+     */
+    public int compressConstantAlignment = 0;
 
     /**
      * use LPhy simulate function instead
      */
     @Deprecated
-    final public boolean logAllAlignments;
+    public boolean logAllAlignments = false;
 
     /**
      * has default value, and can be changed
@@ -45,8 +48,14 @@ public class LPhyBeastConfig {
     private int repId = -1; // >=0 for multi-outputs
 
     private boolean logunicode;
-
+    // Replace the constant value in the lphy script
     private String[] lphyConst;
+    // Ignoring the logging ability for the given lphy random variables
+    private String[] varNotLog;
+
+    // model misspecification test
+    private Path model1File = null;
+    public boolean logm1xl = false;
 
     /**
      * The configuration to create a BEAST 2 XML.
@@ -59,18 +68,20 @@ public class LPhyBeastConfig {
      *                 and output to the user.dir.
      * @param wd       Use to set user.dir. If null,
      *                 then set user.dir to the parent folder of lphy script.
+     * @param lphyConst    constants inputted by user using macro
      */
-    public LPhyBeastConfig(Path infile, Path outfile, Path wd,
-                           int compressConstantAlignment, boolean logAllAlignments,
+    public LPhyBeastConfig(Path infile, Path outfile, Path wd, String[] lphyConst, String[] varNotLog,
                            boolean logunicode)
-            throws IOException {
+            throws FileNotFoundException {
 
-        this.compressConstantAlignment = compressConstantAlignment;
-        this.logAllAlignments = logAllAlignments;
+        // Replace the constant value in the lphy script
+        this.lphyConst = lphyConst;
+        // Ignoring the logging ability for the given lphy random variables
+        this.varNotLog = varNotLog;
         this.logunicode = logunicode;
 
         if (infile == null || !infile.toFile().exists())
-            throw new IOException("Cannot find LPhy script file ! " + (infile != null ? infile.toAbsolutePath() : null));
+            throw new FileNotFoundException("Cannot find LPhy script file ! " + (infile != null ? infile.toAbsolutePath() : null));
         String fileName = infile.getFileName().toString();
         if (!fileName.endsWith(".lphy"))
             throw new IllegalArgumentException("Invalid LPhy file: the postfix has to be '.lphy'");
@@ -152,30 +163,32 @@ public class LPhyBeastConfig {
         return str.substring(0, str.lastIndexOf("."));
     }
 
+    /**
+     * If not using this setter, the default is 1 million chain length, and auto-detect the preBurnin,
+     * the logEvery is calculated by getChainLength() / NUM_OF_SAMPLES.
+     * @param chainLength  chainLength   The total chain length of MCMC.
+     * @param preBurnin    The number of burnin samples taken before entering the main loop of MCMC.
+     *                     If < 0, then use the default, which will be automatically assigned to all state nodes size * 10.
+     * @param logEvery     The frequency to log. If < 0, then use the default,
+     *                     which is calculated by getChainLength() / NUM_OF_SAMPLES.
+     */
+    public void setMCMCConfig(long chainLength, int preBurnin, long logEvery) {
+        this.chainLength = chainLength;
+        if (preBurnin > 0) this.preBurnin = preBurnin;
+        if (logEvery > 0) this.logEvery = logEvery;
+    }
+
     public int getPreBurnin() {
         return preBurnin;
     }
-
-    public void setPreBurnin(int preBurnin) {
-        this.preBurnin = preBurnin;
-    }
-
     public long getChainLength() {
         return chainLength;
-    }
-
-    public void setChainLength(long chainLength) {
-        this.chainLength = chainLength;
     }
 
     public long getLogEvery() {
         if (logEvery > 0) return logEvery;
         // Will throw an ArithmeticException in case of overflow.
         return getChainLength() / NUM_OF_SAMPLES;
-    }
-
-    public void setLogEvery(long logEvery) {
-        this.logEvery = logEvery;
     }
 
     public int getRepId() {
@@ -193,6 +206,10 @@ public class LPhyBeastConfig {
         return logunicode;
     }
 
+    public void setCompressConstantAlignment(int compressConstantAlignment) {
+        this.compressConstantAlignment = compressConstantAlignment;
+    }
+
     public String[] getLphyConst() {
         return lphyConst;
 //        if (lphyConst == null) return null;
@@ -205,7 +222,25 @@ public class LPhyBeastConfig {
 //                .toArray(String[]::new);
     }
 
-    public void setLphyConst(String[] lphyConst) {
-        this.lphyConst = lphyConst;
+    public String[] getVarNotLog() {
+        return varNotLog;
+    }
+
+    public void setModelMisspec(Path model1File, boolean logm1xm) throws IOException {
+        // same path treatment as inpth, model1File can be null
+        if (model1File != null) {
+            if (!model1File.toFile().exists())
+                throw new FileNotFoundException("Cannot find LPhy script file ! " + model1File.toAbsolutePath());
+
+            // If the given path is a relative path, it will return a path concatenating user.dir before the relative path.
+            // Otherwise, it returns the given path.
+            this.model1File = UserDir.getUserPath(model1File);
+        }
+
+        this.logm1xl = logm1xm;
+    }
+
+    public Path getModel1File() {
+        return model1File;
     }
 }
