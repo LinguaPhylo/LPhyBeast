@@ -78,6 +78,8 @@ public class LPhyBeastConfig {
         this.lphyConst = lphyConst;
         // Ignoring the logging ability for the given lphy random variables
         this.varNotLog = varNotLog;
+        // whether to log IDs in unicode. If false as default,
+        // the original ID in unicode will be converted to canonical letters for Windows users.
         this.logunicode = logunicode;
 
         if (infile == null || !infile.toFile().exists())
