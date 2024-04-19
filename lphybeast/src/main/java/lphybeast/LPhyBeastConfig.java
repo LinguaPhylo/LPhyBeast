@@ -55,7 +55,7 @@ public class LPhyBeastConfig {
 
     // model misspecification test
     private Path model1File = null;
-    public boolean logm1xl = false;
+    public boolean logm2xml = false;
 
     /**
      * The configuration to create a BEAST 2 XML.
@@ -226,7 +226,7 @@ public class LPhyBeastConfig {
         return varNotLog;
     }
 
-    public void setModelMisspec(Path model1File, boolean logm1xm) throws IOException {
+    public void setModelMisspec(Path model1File, boolean logm2xml) throws IOException {
         // same path treatment as inpth, model1File can be null
         if (model1File != null) {
             if (!model1File.toFile().exists())
@@ -237,7 +237,7 @@ public class LPhyBeastConfig {
             this.model1File = UserDir.getUserPath(model1File);
         }
 
-        this.logm1xl = logm1xm;
+        this.logm2xml = logm2xml;
     }
 
     public Path getModel1File() {

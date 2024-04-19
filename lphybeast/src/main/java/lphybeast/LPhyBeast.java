@@ -150,8 +150,8 @@ public class LPhyBeast implements Runnable {
         } else { // model misspecification test
             // simulateAndLog and simulate use the same sampler, it can sample different lphy scripts.
             // the former has logging, the latter no logging.
-            Map<Integer, List<Value>> allRepsM1 = simulator.simulateAndLog(lphyM1.toFile(), filePathNoExt+"_m1",
-                    1, constants, varNotLog, null);
+            Map<Integer, List<Value>> allRepsM1 = simulator.simulateAndLog(lphyM1.toFile(),
+                    filePathNoExt+"_misspc", 1, constants, varNotLog, null);
 
             LPhyParserDictionary parserDictM1 = simulator.getParserDictionary();
 
@@ -161,8 +161,16 @@ public class LPhyBeast implements Runnable {
 
             parserDict = simulator.getParserDictionary();
 
-            //TODO log M2 XML
-            //String xml = dictToBEASTXML(parserDict, filePathNoExt);
+            // log M2 XML
+            if (lPhyBeastConfig.logm2xml) {
+                // due to Windows logging unicode issue, BEASTContext calls updateIDs(value) to update IDs
+                // keep this line here, so IDs will be same between m1 and m2
+                String xml1 = dictToBEASTXML(parserDictM1, filePathNoExt+"_m1");
+                // log m2 XML
+                String xml2 = dictToBEASTXML(parserDict, filePathNoExt+"_m2");
+                Path outPath2 = Path.of(filePathNoExt+"_m2.xml");
+                writeXMLToFile(outPath2, xml2);
+            }
 
             /*
              * Swapping the value of Value<Alignment> in lphy dict is easier than
@@ -274,6 +282,10 @@ public class LPhyBeast implements Runnable {
         // create XML string from reader, given file name and MCMC setting
         String xml = dictToBEASTXML(parserDict, filePathNoExt);
 
+        writeXMLToFile(outPath, xml);
+    }
+
+    private void writeXMLToFile(Path outPath, String xml) throws IOException {
         FileWriter fileWriter = new FileWriter(Objects.requireNonNull(outPath).toFile());
         PrintWriter writer = new PrintWriter(fileWriter);
         writer.println(xml);

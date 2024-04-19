@@ -91,9 +91,9 @@ public class LPhyBeastCMD implements Callable<Integer> {
             "which is used for model misspecification test to simulate data (alignment, taxa dates, and species) " +
             "that will apply to the model defined by the 2nd LPhy script.")
     Path model1File = null;
-//    @Option(names = {"-m1xml", "--model1xml"}, defaultValue = "false",
-//            description = "logging the BEAST XML created by the 1st LPhy script.")
-//    boolean logm1xm; //TODO
+    @Option(names = {"-m2xml", "--model2xml"}, defaultValue = "false",
+            description = "logging the BEAST XML created by the 2nd LPhy script to analyse data.")
+    boolean logm2xml;
 
 
 //    @Option(names = {"-d", "--data"},
@@ -147,7 +147,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
             // replace lphy constants
             lPhyBeastConfig.setCompressConstantAlignment(compressConstantAlignment);
             // model misspecification test
-            lPhyBeastConfig.setModelMisspec(model1File, false);
+            lPhyBeastConfig.setModelMisspec(model1File, logm2xml);
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);
