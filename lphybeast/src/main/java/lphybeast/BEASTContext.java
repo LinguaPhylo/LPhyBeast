@@ -784,11 +784,14 @@ public class BEASTContext {
         // value.value() is array
         if (valueType.isArray()) {
             Class componentClass;
-            if (value.value() instanceof Object[] objects)
+            if (value.value() instanceof Object[] objects) {
+                // this can be used to exclude String[][]
+                if (LPhyBEASTExt.isExcludedValue(objects[0]))
+                    return true;
                 // Object[] can be different classes, such as TimeTreeNode[],
                 // getComponentType() only returns Object.
                 componentClass = objects[0].getClass();
-            else
+            } else
                 componentClass = valueType.getComponentType();
 
             for (Class vCls : excludedValueTypes) {

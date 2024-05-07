@@ -58,7 +58,11 @@ public interface LPhyBEASTExt {
      * @see LPhyBEASTExtImpl#getExcludedValueType()
      */
     static boolean isExcludedValue(Value<?> val) {
-        Object ob = val.value();
+        return isExcludedValue(val.value());
+    }
+
+    // this can be used to exclude String[][]
+    static boolean isExcludedValue(Object ob) {
         // TODO better solution about array ?
         return ob instanceof String[] || // ignore all String, e.g. d = nexus(file="Dengue4.nex"), in a vector
                 // exclude the value returned by taxa (and ages) functions
