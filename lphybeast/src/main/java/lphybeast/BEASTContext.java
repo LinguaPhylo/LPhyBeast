@@ -779,11 +779,22 @@ public class BEASTContext {
     private boolean isExcludedValue(Value value) {
         if (LPhyBEASTExt.isExcludedValue(value)) // takes Value
             return true;
-        for (Class vCls : excludedValueTypes) {
-            // compare the wrapped value's class.
-            // if vCls is either the same as, or is a superclass or superinterface of value.getType().
-            if (vCls != null && vCls.isAssignableFrom(value.getType()))
-                return true;
+        Class valueType = value.getType();
+        // value.value() is array
+        if (valueType.isArray()) {
+            Class componentClass = valueType.getComponentType();
+            for (Class vCls : excludedValueTypes) {
+                // if vCls is either the same as, or is a superclass or superinterface of value.getType().
+                if (vCls != null && vCls.isAssignableFrom(componentClass))
+                    return true;
+            }
+        } else {
+            for (Class vCls : excludedValueTypes) {
+                // compare the wrapped value's class.
+                // if vCls is either the same as, or is a superclass or superinterface of value.getType().
+                if (vCls != null && vCls.isAssignableFrom(valueType))
+                    return true;
+            }
         }
         return false;
     }
