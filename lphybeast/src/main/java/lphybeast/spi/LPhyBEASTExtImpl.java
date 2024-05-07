@@ -6,6 +6,7 @@ import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.distribution.RandomComposition;
 import lphy.base.distribution.Sample;
 import lphy.base.distribution.WeightedDirichlet;
+import lphy.base.evolution.alignment.FastaAlignment;
 import lphy.base.evolution.datatype.Binary;
 import lphy.base.evolution.datatype.Continuous;
 import lphy.base.function.*;
@@ -153,6 +154,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
         // For a complex logic, or arrays, use isExcludedValue
         return List.of(String.class, // ignore all String: d = nexus(file="Dengue4.nex");
                 HashMap.class, TreeMap.class,
+                FastaAlignment.class, // for fasta format
                 SequenceType.class // ignore all data types
         );
     }
