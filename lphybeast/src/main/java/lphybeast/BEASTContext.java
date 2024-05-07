@@ -776,13 +776,21 @@ public class BEASTContext {
         return beastValue;
     }
 
+    // handle the classes in excludedValueTypes, and also their types in an array.
     private boolean isExcludedValue(Value value) {
         if (LPhyBEASTExt.isExcludedValue(value)) // takes Value
             return true;
         Class valueType = value.getType();
         // value.value() is array
         if (valueType.isArray()) {
-            Class componentClass = valueType.getComponentType();
+            Class componentClass;
+            if (value.value() instanceof Object[] objects)
+                // Object[] can be different classes, such as TimeTreeNode[],
+                // getComponentType() only returns Object.
+                componentClass = objects[0].getClass();
+            else
+                componentClass = valueType.getComponentType();
+
             for (Class vCls : excludedValueTypes) {
                 // if vCls is either the same as, or is a superclass or superinterface of value.getType().
                 if (vCls != null && vCls.isAssignableFrom(componentClass))
