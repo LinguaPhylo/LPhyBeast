@@ -105,6 +105,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 VectorizedFunctionToBEAST.class,
                 WeightedDirichletToBEAST.class,
                 YuleToBEAST.class,
+
                 ExpMarkovChainToBEAST.class );
     }
 
