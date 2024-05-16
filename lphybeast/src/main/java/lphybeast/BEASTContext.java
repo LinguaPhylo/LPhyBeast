@@ -625,7 +625,7 @@ public class BEASTContext {
      */
     private void createBEASTObjects() {
 
-        List<Value<?>> sinks = parserDictionary.getModelSinks();
+        List<Value<?>> sinks = parserDictionary.getDataModelSinks();
 
         for (Value<?> value : sinks) {
             createBEASTValueObjects(value);
@@ -1035,7 +1035,7 @@ public class BEASTContext {
     }
 
     private boolean generatorOfSink(Generator g) {
-        for (Value<?> var : parserDictionary.getModelSinks()) {
+        for (Value<?> var : parserDictionary.getDataModelSinks()) {
             if (var.getGenerator() == g) {
                 return true;
             }
@@ -1194,7 +1194,7 @@ public class BEASTContext {
     public Value getOutput(Generator generator) {
 
         final Value[] outputValue = new Value[1];
-        for (Value value : parserDictionary.getModelSinks()) {
+        for (Value value : parserDictionary.getDataModelSinks()) {
 
             ValueCreator.traverseGraphicalModel(value, new GraphicalModelNodeVisitor() {
                 @Override
