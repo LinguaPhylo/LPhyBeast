@@ -139,8 +139,8 @@ public class LPhyBeast implements Runnable {
 
         LPhyParserDictionary parserDict;
         // check if it is model misspecification test
-        Path lphyM1 = lPhyBeastConfig.getModel1File();
-        if (lphyM1 == null) { // normal lphybeast run
+        Path lphyM2 = lPhyBeastConfig.getModel2File();
+        if (lphyM2 == null) { // normal lphybeast run
             // must provide File lphyFile, int numReplicates, Long seed
             Map<Integer, List<Value>> allReps = simulator.simulateAndLog(lphyFile, filePathNoExt,
                     1, constants, varNotLog, null);
@@ -149,27 +149,29 @@ public class LPhyBeast implements Runnable {
 
         } else { // model misspecification test
             // simulateAndLog and simulate use the same sampler, it can sample different lphy scripts.
-            // the former has logging, the latter no logging.
-            Map<Integer, List<Value>> allRepsM1 = simulator.simulateAndLog(lphyM1.toFile(),
-                    filePathNoExt+"_misspc", 1, constants, varNotLog, null);
-
-            LPhyParserDictionary parserDictM1 = simulator.getParserDictionary();
-
-            // this has no logging, but must provide File lphyFile, int numReplicates, Long seed
-            Map<Integer, List<Value>> allRepsM2 = simulator.simulate(lphyFile,
+            // M1 from File lphyFile, int numReplicates, Long seed
+            Map<Integer, List<Value>> allRepsM1 = simulator.simulate(lphyFile,
                     1, constants, varNotLog, null);
-
+            // original parserDict is M1
             parserDict = simulator.getParserDictionary();
 
-            // log M2 XML
-            if (lPhyBeastConfig.logm2xml) {
+            // here is M2 using the file lphyM2
+            Map<Integer, List<Value>> allRepsM2 = simulator.simulateAndLog(lphyM2.toFile(),
+                    filePathNoExt+"_misspc", 1, constants, varNotLog, null);
+            LPhyParserDictionary parserDictM2 = simulator.getParserDictionary();
+
+            // log two XMLs:  Alignment1-Model1 and A2M2
+            if (lPhyBeastConfig.log_orignal_xmls) {
                 // due to Windows logging unicode issue, BEASTContext calls updateIDs(value) to update IDs
                 // keep this line here, so IDs will be same between m1 and m2
-                String xml1 = dictToBEASTXML(parserDictM1, filePathNoExt+"_m1");
+                String xml1str = dictToBEASTXML(parserDict, filePathNoExt+"_a1m1");
+                Path outFilePath1 = Path.of(filePathNoExt+"_a1m1.xml");
                 // log m2 XML
-                String xml2 = dictToBEASTXML(parserDict, filePathNoExt+"_m2");
-                Path outPath2 = Path.of(filePathNoExt+"_m2.xml");
-                writeXMLToFile(outPath2, xml2);
+                String xml2str = dictToBEASTXML(parserDictM2, filePathNoExt+"_a2m2");
+                Path outFilePath2 = Path.of(filePathNoExt+"_a2m2.xml");
+
+                writeXMLToFile(outFilePath1, xml1str);
+                writeXMLToFile(outFilePath2, xml2str);
             }
 
             /*
@@ -180,11 +182,11 @@ public class LPhyBeast implements Runnable {
              */
 
             // pull out all Alignment and TimeTree
-            List<Value<?>> alignmentsM1 = parserDictM1.getNamedValuesByType(Alignment.class);
-            List<Value<?>> alignmentsM2 = parserDict.getNamedValuesByType(Alignment.class);
+            List<Value<?>> alignmentsM1 = parserDict.getNamedValuesByType(Alignment.class);
+            List<Value<?>> alignmentsM2 = parserDictM2.getNamedValuesByType(Alignment.class);
 
-            List<Value<?>> timeTreesM1 = parserDictM1.getNamedValuesByType(TimeTree.class);
-            List<Value<?>> timeTreesM2 = parserDict.getNamedValuesByType(TimeTree.class);
+            List<Value<?>> timeTreesM1 = parserDict.getNamedValuesByType(TimeTree.class);
+            List<Value<?>> timeTreesM2 = parserDictM2.getNamedValuesByType(TimeTree.class);
 
             // TODO: assuming all alignments and trees in M1 must be in M2 with the same ID.
             for (Value v1 : alignmentsM1) {
@@ -196,7 +198,7 @@ public class LPhyBeast implements Runnable {
 
                     if (v1.getId().equals(v2.getId())) {
                         // fail if there is data clamping
-                        if (parserDictM1.isClamped(v1.getId()))
+                        if (parserDictM2.isClamped(v1.getId()))
                             throw new IllegalArgumentException("Model misspecification test does not support data clamping ! " +
                                     "Clamped alignment : " + v1.getId());
 
@@ -243,7 +245,7 @@ public class LPhyBeast implements Runnable {
 
                     if (v1.getId().equals(v2.getId())) {
                         // fail if there is data clamping
-                        if (parserDictM1.isClamped(v1.getId()))
+                        if (parserDictM2.isClamped(v1.getId()))
                             throw new IllegalArgumentException("Model misspecification test does not support data clamping ! " +
                                     "Clamped alignment : " + v1.getId());
 

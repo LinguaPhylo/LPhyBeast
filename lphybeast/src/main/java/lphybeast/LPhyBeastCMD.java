@@ -90,13 +90,14 @@ public class LPhyBeastCMD implements Callable<Integer> {
     String[] versionFiles = null;
 
     // model misspecification test: https://github.com/LinguaPhylo/LPhyBeast/issues/137
-    @Option(names = {"-m1", "--model1"},     description = "File of the 1st LPhy script, " +
-            "which is used for model misspecification test to simulate data (alignment, taxa dates, and species) " +
-            "that will apply to the model defined by the 2nd LPhy script.")
-    Path model1File = null;
-    @Option(names = {"-m2xml", "--model2xml"}, defaultValue = "false",
-            description = "logging the BEAST XML created by the 2nd LPhy script to analyse data.")
-    boolean logm2xml;
+    @Option(names = {"-m2", "--model2"},     description = "File of the 2nd LPhy script, " +
+            "which provides the model for model mis-specification test. " +
+            "The simulated data (alignment, taxa dates, and species) " +
+            "will be replaced by the data generated from the 1st LPhy script (given by the positional argument).")
+    Path model2File = null;
+    @Option(names = {"-lgX", "--logOriginalXmls"}, defaultValue = "false",
+            description = "logging both original BEAST XML created by two LPhy scripts for model mis-specification.")
+    boolean log_orignal_xmls;
 
 
 //    @Option(names = {"-d", "--data"},
@@ -150,7 +151,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
             // replace lphy constants
             lPhyBeastConfig.setCompressConstantAlignment(compressConstantAlignment);
             // model misspecification test
-            lPhyBeastConfig.setModelMisspec(model1File, logm2xml);
+            lPhyBeastConfig.setModelMisspec(model2File, log_orignal_xmls);
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);

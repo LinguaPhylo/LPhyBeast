@@ -54,8 +54,8 @@ public class LPhyBeastConfig {
     private String[] varNotLog;
 
     // model misspecification test
-    private Path model1File = null;
-    public boolean logm2xml = false;
+    private Path model2File = null;
+    public boolean log_orignal_xmls = false;
 
     /**
      * The configuration to create a BEAST 2 XML.
@@ -228,21 +228,21 @@ public class LPhyBeastConfig {
         return varNotLog;
     }
 
-    public void setModelMisspec(Path model1File, boolean logm2xml) throws IOException {
-        // same path treatment as inpth, model1File can be null
-        if (model1File != null) {
-            if (!model1File.toFile().exists())
-                throw new FileNotFoundException("Cannot find LPhy script file ! " + model1File.toAbsolutePath());
+    public void setModelMisspec(Path model2File, boolean log_orignal_xmls) throws IOException {
+        // same path treatment as inpth, model2File can be null
+        if (model2File != null) {
+            if (!model2File.toFile().exists())
+                throw new FileNotFoundException("Cannot find LPhy script file ! " + model2File.toAbsolutePath());
 
             // If the given path is a relative path, it will return a path concatenating user.dir before the relative path.
             // Otherwise, it returns the given path.
-            this.model1File = UserDir.getUserPath(model1File);
+            this.model2File = UserDir.getUserPath(model2File);
         }
 
-        this.logm2xml = logm2xml;
+        this.log_orignal_xmls = log_orignal_xmls;
     }
 
-    public Path getModel1File() {
-        return model1File;
+    public Path getModel2File() {
+        return model2File;
     }
 }
