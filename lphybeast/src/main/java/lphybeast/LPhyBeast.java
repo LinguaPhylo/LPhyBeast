@@ -137,7 +137,7 @@ public class LPhyBeast implements Runnable {
         // Ignoring the logging ability for the given lphy random variables
         final String[] varNotLog = lPhyBeastConfig.getVarNotLog();
 
-        LPhyParserDictionary parserDict;
+        LPhyParserDictionary parserDictFinal;
         // check if it is model misspecification test
         Path lphyM2 = lPhyBeastConfig.getModel2File();
         if (lphyM2 == null) { // normal lphybeast run
@@ -145,7 +145,7 @@ public class LPhyBeast implements Runnable {
             Map<Integer, List<Value>> allReps = simulator.simulateAndLog(lphyFile, filePathNoExt,
                     1, constants, varNotLog, null);
 
-            parserDict = simulator.getParserDictionary();
+            parserDictFinal = simulator.getParserDictionary();
 
         } else { // model misspecification test
             // simulateAndLog and simulate use the same sampler, it can sample different lphy scripts.
@@ -153,7 +153,7 @@ public class LPhyBeast implements Runnable {
             Map<Integer, List<Value>> allRepsM1 = simulator.simulate(lphyFile,
                     1, constants, varNotLog, null);
             // original parserDict is M1
-            parserDict = simulator.getParserDictionary();
+            LPhyParserDictionary parserDictM1 = simulator.getParserDictionary();
 
             // here is M2 using the file lphyM2
             Map<Integer, List<Value>> allRepsM2 = simulator.simulateAndLog(lphyM2.toFile(),
@@ -164,7 +164,7 @@ public class LPhyBeast implements Runnable {
             if (lPhyBeastConfig.log_orignal_xmls) {
                 // due to Windows logging unicode issue, BEASTContext calls updateIDs(value) to update IDs
                 // keep this line here, so IDs will be same between m1 and m2
-                String xml1str = dictToBEASTXML(parserDict, filePathNoExt+"_a1m1");
+                String xml1str = dictToBEASTXML(parserDictM1, filePathNoExt+"_a1m1");
                 Path outFilePath1 = Path.of(filePathNoExt+"_a1m1.xml");
                 // log m2 XML
                 String xml2str = dictToBEASTXML(parserDictM2, filePathNoExt+"_a2m2");
@@ -182,10 +182,10 @@ public class LPhyBeast implements Runnable {
              */
 
             // pull out all Alignment and TimeTree
-            List<Value<?>> alignmentsM1 = parserDict.getNamedValuesByType(Alignment.class);
+            List<Value<?>> alignmentsM1 = parserDictM1.getNamedValuesByType(Alignment.class);
             List<Value<?>> alignmentsM2 = parserDictM2.getNamedValuesByType(Alignment.class);
 
-            List<Value<?>> timeTreesM1 = parserDict.getNamedValuesByType(TimeTree.class);
+            List<Value<?>> timeTreesM1 = parserDictM1.getNamedValuesByType(TimeTree.class);
             List<Value<?>> timeTreesM2 = parserDictM2.getNamedValuesByType(TimeTree.class);
 
             // TODO: assuming all alignments and trees in M1 must be in M2 with the same ID.
@@ -220,9 +220,9 @@ public class LPhyBeast implements Runnable {
                         // replace the value inside Value, otherwise it will break Graph
                         v2.setValue(v1.value());
 
-                        parserDict.getModelDictionary().put(v2.getId(), v2);
+                        parserDictM2.getModelDictionary().put(v2.getId(), v2);
                         // TODO not sure this set will be used, but this add another D
-//                        parserDict.getModelValues().add(v2);
+//                        parserDictM2.getModelValues().add(v2);
 
                         processed = true;
                         break;
@@ -261,9 +261,9 @@ public class LPhyBeast implements Runnable {
                         // replace the value inside Value, otherwise it will break Graph
                         v2.setValue(v1.value());
 
-                        parserDict.getModelDictionary().put(v2.getId(), v2);
+                        parserDictM2.getModelDictionary().put(v2.getId(), v2);
                         // TODO not sure this set will be used, but this add another D
-//                        parserDict.getModelValues().add(v2);
+//                        parserDictM2.getModelValues().add(v2);
 
                         processed = true;
                         break;
@@ -277,12 +277,14 @@ public class LPhyBeast implements Runnable {
 
             }
 
-        } // parserDict is the final result to XML
+            parserDictFinal = parserDictM2;
+
+        } // parserDictM2 is the final result to XML
 
 //TODO        LoggerUtils.log.info("Replace alignment(s) : " +  + "\n, replace time tree(s) : " + + "\n");
 
         // create XML string from reader, given file name and MCMC setting
-        String xml = dictToBEASTXML(parserDict, filePathNoExt);
+        String xml = dictToBEASTXML(parserDictFinal, filePathNoExt);
 
         writeXMLToFile(outPath, xml);
     }
