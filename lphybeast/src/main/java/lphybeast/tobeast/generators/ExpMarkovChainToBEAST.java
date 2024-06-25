@@ -11,6 +11,9 @@ import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.SliceFactory;
 
+import static lphy.base.distribution.ExpMarkovChain.firstValueParamName;
+import static lphy.base.distribution.ExpMarkovChain.initialMeanParamName;
+
 public class ExpMarkovChainToBEAST implements GeneratorToBEAST<ExpMarkovChain, MarkovChainDistribution> {
     @Override
     public MarkovChainDistribution generatorToBEAST(ExpMarkovChain generator, BEASTInterface value, BEASTContext context) {
@@ -19,7 +22,7 @@ public class ExpMarkovChainToBEAST implements GeneratorToBEAST<ExpMarkovChain, M
         mcd.setInputValue("shape", 1.0);
         mcd.setInputValue("parameter", value);
 
-        Value<Double> firstValue = generator.getFirstValue();
+        Value firstValue = generator.getParams().get(firstValueParamName);
         if (firstValue != null) {
             BEASTInterface firstV = context.getBEASTObject(firstValue);
             // rm firstValue from maps
@@ -36,7 +39,8 @@ public class ExpMarkovChainToBEAST implements GeneratorToBEAST<ExpMarkovChain, M
             context.putBEASTObject(dist, prior);
 
         } else {
-            mcd.setInputValue("initialMean", context.getBEASTObject(generator.getInitialMean()));
+            Value initialMean = generator.getParams().get(initialMeanParamName);
+            mcd.setInputValue("initialMean", context.getBEASTObject(initialMean));
         }
         mcd.initAndValidate();
 
