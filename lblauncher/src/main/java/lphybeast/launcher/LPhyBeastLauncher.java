@@ -36,7 +36,7 @@ public class LPhyBeastLauncher extends JFrame {
 
         final int MAX_WIDTH = 800;
         final int MAX_HEIGHT = 900;
-        LPhyAppConfig.setFrameLocation(this, MAX_WIDTH, MAX_HEIGHT);
+        LPhyAppConfig.setFrameLocation(this, MAX_WIDTH, MAX_HEIGHT, 0);
 
         // setOut before LauncherPanel to catch more System.out
         final JTextPane soutPane = new JTextPane();
