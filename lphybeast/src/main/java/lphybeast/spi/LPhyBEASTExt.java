@@ -5,6 +5,7 @@ import jebl.evolution.sequences.SequenceType;
 import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.evolution.Taxa;
 import lphy.base.evolution.alignment.Alignment;
+import lphy.base.evolution.coalescent.PopulationFunction;
 import lphy.base.evolution.tree.TimeTree;
 import lphy.core.model.Generator;
 import lphy.core.model.Value;
@@ -67,7 +68,16 @@ public interface LPhyBEASTExt {
         return ob instanceof String[] || // ignore all String, e.g. d = nexus(file="Dengue4.nex"), in a vector
                 // exclude the value returned by taxa (and ages) functions
                 ( ob instanceof Taxa && !(ob instanceof Alignment) ) ||
-                ob instanceof TimeTree[];
+                ob instanceof TimeTree[] ||
+                isSVSPopFunc(ob);
+    }
+
+    static boolean isSVSPopFunc(Object ob) {
+        if ( ob instanceof PopulationFunction[] ||
+                (ob instanceof Object[] obAr && obAr[0] instanceof PopulationFunction) ) {
+            return true;
+        }
+        return false;
     }
 
     /**
