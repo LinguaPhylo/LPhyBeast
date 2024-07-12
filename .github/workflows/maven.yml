@@ -21,15 +21,12 @@ jobs:
 
     steps:
       # must under LPhyBeast folder, otherwise build will fail
-      - name: Checkout main
+      - name: Checkout LPhyBeast
         uses: actions/checkout@v4
-        with:
-          path: LPhyBeast
       - name: Checkout LPhy
         uses: actions/checkout@v4
         with:
           repository: LinguaPhylo/linguaPhylo
-          path: linguaPhylo
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
