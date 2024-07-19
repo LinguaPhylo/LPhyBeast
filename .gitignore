@@ -6,6 +6,10 @@
 /.idea/
 /.gradle/
 
+# build files
+**/target/**
+*.class
+
 # BlueJ files
 *.ctxt
 
