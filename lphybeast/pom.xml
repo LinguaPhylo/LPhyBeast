@@ -5,54 +5,58 @@
         <artifactId>lphybeast-root</artifactId>
         <version>${revision}</version>
     </parent>
-
+    <name>lphybeast</name>
     <artifactId>lphybeast</artifactId>
-
-    <properties>
-        <beastVersion>2.7.6</beastVersion>
-    </properties>
 
     <dependencies>
         <dependency>
             <groupId>io.github.linguaphylo</groupId>
             <artifactId>lphy-base</artifactId>
-            <version>1.6.0-SNAPSHOT</version>
+            <version>${lphy.vision}</version>
         </dependency>
 
+        <!--  previous version 23.6.1-jre has 3 vulnerabilities found by IntelliJ  -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.2.1-jre</version>
+        </dependency>
+
+        <!--  all beast 2  -->
         <dependency>
             <groupId>beast2</groupId>
             <artifactId>beast-base</artifactId>
-            <version>${beastVersion}</version>
+            <version>${beast.version}</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/BEAST.base-${beastVersion}.jar</systemPath>
+            <systemPath>${project.basedir}/lib/BEAST.base-${beast.version}.jar</systemPath>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>beast2</groupId>-->
 <!--            <artifactId>beast-base</artifactId>-->
-<!--            <version>${beastVersion}</version>-->
+<!--            <version>${beast.version}</version>-->
 <!--            <classifier>source</classifier>-->
-<!--            <systemPath>${project.basedir}/lib/BEAST.base-${beastVersion}.src.jar</systemPath>-->
+<!--            <systemPath>${project.basedir}/lib/BEAST.base-${beast.version}.src.jar</systemPath>-->
 <!--        </dependency>-->
         <dependency>
             <groupId>beast2</groupId>
             <artifactId>beast-app</artifactId>
-            <version>${beastVersion}</version>
+            <version>${beast.version}</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/BEAST.app-${beastVersion}.jar</systemPath>
+            <systemPath>${project.basedir}/lib/BEAST.app-${beast.version}.jar</systemPath>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>beast2</groupId>-->
 <!--            <artifactId>beast-app</artifactId>-->
-<!--            <version>${beastVersion}</version>-->
+<!--            <version>${beast.version}</version>-->
 <!--            <classifier>source</classifier>-->
-<!--            <systemPath>${project.basedir}/lib/BEAST.app-${beastVersion}.src.jar</systemPath>-->
+<!--            <systemPath>${project.basedir}/lib/BEAST.app-${beast.version}.src.jar</systemPath>-->
 <!--        </dependency>-->
         <dependency>
             <groupId>beast2</groupId>
             <artifactId>beast-launcher</artifactId>
-            <version>${beastVersion}</version>
+            <version>${beast.version}</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/launcher-${beastVersion}.jar</systemPath>
+            <systemPath>${project.basedir}/lib/launcher-${beast.version}.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -105,13 +109,6 @@
             <systemPath>${project.basedir}/lib/nashorn.jar</systemPath>
         </dependency>
 
-       <!--  previous version 23.6.1-jre has 3 vulnerabilities found by IntelliJ  -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>33.2.1-jre</version>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -135,7 +132,7 @@
                 <version>3.7.1</version>
                 <configuration>
                     <descriptors>
-                        <descriptor>src/assembly/assembly.xml</descriptor>
+                        <descriptor>src/assembly/lphybeast-assembly.xml</descriptor>
                     </descriptors>
                     <outputDirectory>${project.build.directory}</outputDirectory>
                     <appendAssemblyId>false</appendAssemblyId>

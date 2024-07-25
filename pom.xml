@@ -8,7 +8,6 @@
         <version>1.6.0-SNAPSHOT</version>
     </parent>
 
-<!--    <groupId>io.github.linguaphylo</groupId>-->
     <artifactId>lphybeast-root</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
@@ -17,6 +16,8 @@
     <url>https://linguaphylo.github.io/</url>
 
     <properties>
+        <lphy.vision>1.6.0-SNAPSHOT</lphy.vision>
+        <beast.version>2.7.6</beast.version>
         <!-- https://maven.apache.org/maven-ci-friendly.html -->
         <!-- LPhyBeast version-->
         <revision>1.2.0-SNAPSHOT</revision>
