@@ -18,8 +18,7 @@
     <properties>
         <lphy.vision>1.6.0-SNAPSHOT</lphy.vision>
         <beast.version>2.7.6</beast.version>
-        <!-- https://maven.apache.org/maven-ci-friendly.html -->
-        <!-- LPhyBeast version-->
+        <!-- project.version : https://maven.apache.org/maven-ci-friendly.html -->
         <revision>1.2.0-SNAPSHOT</revision>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
