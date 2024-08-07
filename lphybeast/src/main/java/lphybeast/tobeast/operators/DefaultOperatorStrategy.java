@@ -32,7 +32,7 @@ import java.util.*;
 import static lphybeast.BEASTContext.getOperatorWeight;
 
 /**
- * A class to create all operators
+ * A class to create all default operators
  * @author Walter Xie
  * @author Alexei Drommand
  */
@@ -77,7 +77,15 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
      * @return  a list of {@link Operator}.
      */
     public List<Operator> createOperators() {
+        List<Operator> operators = createStandardOperators(context);
 
+        operators.addAll(context.getExtraOperators());
+        operators.sort(Comparator.comparing(BEASTObject::getID));
+        return operators;
+    }
+
+    // operators before BEAST 2.7
+    private List<Operator> createStandardOperators(BEASTContext context) {
         List<Operator> operators = new ArrayList<>();
 
         Set<StateNode> skipOperators = context.getSkipOperators();
@@ -102,9 +110,6 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                 }
             }
         }
-
-        operators.addAll(context.getExtraOperators());
-        operators.sort(Comparator.comparing(BEASTObject::getID));
 
         return operators;
     }

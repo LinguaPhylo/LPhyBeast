@@ -14,7 +14,7 @@ import static lphybeast.BEASTContext.getOperatorWeight;
  * Defines a family of tree operators.
  * @author Walter Xie
  */
-public interface TreeOperatorStrategy {
+public interface TreeOperatorStrategy extends BICESPSTreeOperatorStractegy {
 
     // choose the strategy which defines the family of operators
     boolean applyStrategyToTree(Tree tree, BEASTContext context);
@@ -36,7 +36,7 @@ public interface TreeOperatorStrategy {
 
     // static creator, so could use context.addSkipOperator((Tree) tree)
     // combining with context.addExtraOperator(
-    // TODO improve the design not to use static ?
+    @Deprecated
     static Operator createTreeScaleOperator(Tree tree, BEASTContext context) {
         TreeOperatorStrategy treeOperatorStrategy = context.resolveTreeOperatorStrategy(tree);
         Operator operator = treeOperatorStrategy.getScaleOperator();
@@ -119,7 +119,14 @@ public interface TreeOperatorStrategy {
     default List<Operator> createTreeOperators(Tree tree, BEASTContext context) {
         List<Operator> operators = new ArrayList<>();
 
-        operators.add(createTreeScaleOperator(tree, context));
+        // replace tree scale operator with more efficient BICESPS operators
+        if (context.resolveTreeOperatorStrategy(tree) instanceof StandardTreeOperatorStrategy)
+            operators.add(createTreeScaleOperator(tree, context));
+        else { // default
+            operators.add(BICESPSTreeOperatorStractegy.createBICEPSEpochTop(tree, context));
+            operators.add(BICESPSTreeOperatorStractegy.createBICEPSEpochAll(tree, context));
+            operators.add(BICESPSTreeOperatorStractegy.createBICEPSTreeFlex(tree, context));
+        }
         operators.add(createRootHeightOperator(tree, context));
         operators.add(createExchangeOperator(tree, context, true));
         operators.add(createExchangeOperator(tree, context, false));
