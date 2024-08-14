@@ -1,17 +1,9 @@
-<package name='LPhyBeastExt' version='0.3.0'>
-    <depends on='lphybeast' atleast='1.1.0'/>
-
-    <depends on='Mascot' atleast='3.0.0'
-             description="Marginal approximation of the structured coalescent"
-             projectURL="https://taming-the-beast.org/tutorials/Mascot-Tutorial/"/>
+<package name='lphybeast-mm' version='0.3.0'>
+    <depends on='lphybeast' atleast='1.2.0'/>
 
     <depends on='MM' atleast='1.2.1'
              projectURL="https://github.com/CompEvol/morph-models"
              description="Enables models of morphological character evolution"/>
-
-    <depends on='SA' atleast='2.1.0'
-             projectURL="https://github.com/CompEvol/sampled-ancestors"
-             description="Sampled ancestor trees"/>
 
     <!-- add BEAST2 service below  -->
 

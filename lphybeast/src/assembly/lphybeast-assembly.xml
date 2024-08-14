@@ -40,7 +40,7 @@
     </fileSets>
     <files>
         <file>
-            <source>../version.xml</source>
+            <source>version.xml</source>
         </file>
         <file>
             <source>../README.md</source>

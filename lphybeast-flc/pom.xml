@@ -6,12 +6,13 @@
         <version>${revision}</version>
     </parent>
     <artifactId>lphybeast-flc</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>io.github.linguaphylo</groupId>
             <artifactId>lphybeast</artifactId>
-            <version>${project.version}</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
