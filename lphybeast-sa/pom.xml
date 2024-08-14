@@ -1,0 +1,37 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.github.linguaphylo</groupId>
+        <artifactId>lphybeast-root</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>lphybeast-sa</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.linguaphylo</groupId>
+            <artifactId>lphybeast</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>beast2</groupId>
+            <artifactId>sa</artifactId>
+            <version>2.1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/SA.v2.1.0.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.linguaphylo</groupId>
+            <artifactId>lphybeast</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
+</project>
