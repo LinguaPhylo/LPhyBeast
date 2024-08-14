@@ -5,7 +5,6 @@ import lphybeast.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -30,10 +29,7 @@ class FossilBirthDeathTreeToBEASTTest {
     public void setUp() {
         // load ../LPhyBeast/version.xml
         Path lphybeastDir = Paths.get(UserDir.getUserDir().toAbsolutePath().getParent().toString(),
-                "..","LPhyBeast");
-        if (!Files.exists(lphybeastDir))
-            throw new IllegalArgumentException("Cannot locate LPhyBeast Dir : " + lphybeastDir);
-
+                "..","LPhyBeast", "lphybeast");
         TestUtils.loadServices(lphybeastDir.toString());
         // load sa/version.xml
         Path parentDir = UserDir.getUserDir().toAbsolutePath();
