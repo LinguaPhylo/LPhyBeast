@@ -1,4 +1,4 @@
-package lphybeast.tobeast.generators;
+package flc.lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.alignment.Taxon;

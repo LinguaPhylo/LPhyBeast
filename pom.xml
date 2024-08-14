@@ -33,6 +33,7 @@
 <!--        <module>../linguaPhylo/lphy-base</module>-->
         <module>lphybeast</module>
 <!--        <module>lblauncher</module>-->
+        <module>lphybeast-flc</module>
         <module>lphybeast-mascot</module>
         <module>lphybeast-mm</module>
         <module>lphybeast-sa</module>
