@@ -6,6 +6,7 @@ import beast.base.inference.Operator;
 import lphybeast.BEASTContext;
 
 /**
+ * This creates all standard operators used before BEAST 2.7.
  * @author Walter Xie
  * @author Alexei Drommand
  */
@@ -48,4 +49,13 @@ public class StandardTreeOperatorStrategy implements TreeOperatorStrategy {
         return "standard tree operator strategy";
     }
 
+    @Override
+    public Operator getBICEPSEpochTopOrAll() {
+        throw new UnsupportedOperationException("Not supported before BEAST 2.7 !");
+    }
+
+    @Override
+    public Operator getBICEPSTreeFlex() {
+        throw new UnsupportedOperationException("Not supported before BEAST 2.7 !");
+    }
 }
