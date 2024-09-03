@@ -1,0 +1,16 @@
+<package name='lphybeast-sa' version='0.3.0'>
+    <depends on='lphybeast' atleast='1.2.0'/>
+
+    <depends on='SA' atleast='2.1.0'
+             projectURL="https://github.com/CompEvol/sampled-ancestors"
+             description="Sampled ancestor trees"/>
+
+    <!-- add BEAST2 service below  -->
+
+    <service type="lphybeast.spi.LPhyBEASTExt">
+        <provider classname="sa.lphybeast.spi.SALBImpl"/>
+<!--   only for unit tests     -->
+    </service>
+
+</package>
+

@@ -1,0 +1,16 @@
+<package name='lphybeast-flc' version='0.0.1'>
+    <depends on='lphybeast' atleast='1.2.0'/>
+
+    <depends on='flc' atleast='1.2.0'
+             description="Flexible local clock model"
+             projectURL="https://github.com/4ment/flc"/>
+
+    <!-- add BEAST2 service below  -->
+
+    <service type="lphybeast.spi.LPhyBEASTExt">
+        <provider classname="flc.lphybeast.spi.FLCLBImpl"/>
+<!--   only for unit tests     -->
+    </service>
+
+</package>
+

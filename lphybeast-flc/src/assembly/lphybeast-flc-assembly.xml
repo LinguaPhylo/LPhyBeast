@@ -1,7 +1,7 @@
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 http://maven.apache.org/xsd/assembly-2.2.0.xsd">
-    <id>lphybeast-assembly</id>
+    <id>lphybeast-flc-assembly</id>
     <formats>
         <format>dir</format>
         <format>zip</format>
@@ -13,7 +13,7 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>io.github.linguaphylo:lphybeast</include>
+                <include>io.github.linguaphylo:lphybeast-flc</include>
             </includes>
 
             <sources>
@@ -31,19 +31,9 @@
             </sources>
         </moduleSet>
     </moduleSets>
-    <fileSets>
-        <fileSet>
-            <directory>bin</directory>
-            <outputDirectory>bin</outputDirectory>
-            <fileMode>0755</fileMode> <!-- Sets the file mode to executable -->
-        </fileSet>
-    </fileSets>
     <files>
         <file>
             <source>version.xml</source>
-        </file>
-        <file>
-            <source>../README.md</source>
         </file>
         <file>
             <source>../LICENSE</source>
@@ -54,21 +44,9 @@
         <dependencySet>
             <outputDirectory>/lib</outputDirectory>
             <includes>
-                <include>io.github.linguaphylo:lphybeast</include>
+                <include>io.github.linguaphylo:lphybeast-flc</include>
             </includes>
             <useTransitiveDependencies>false</useTransitiveDependencies>
-        </dependencySet>
-        <!-- Dependency set for guava with useTransitiveDependencies set to true -->
-        <dependencySet>
-            <outputDirectory>/lib</outputDirectory>
-            <includes>
-                <include>com.google.*</include>
-                <include>org.checkerframework:checker-qual</include>
-                <!-- LPhy already has it -->
-                <include>info.picocli:picocli</include>
-            </includes>
-            <!-- useTransitiveDependencies true is not working -->
-            <useTransitiveDependencies>true</useTransitiveDependencies>
         </dependencySet>
     </dependencySets>
 

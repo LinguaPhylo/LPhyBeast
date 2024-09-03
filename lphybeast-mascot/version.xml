@@ -1,0 +1,16 @@
+<package name='lphybeast-mascot' version='0.3.0'>
+    <depends on='lphybeast' atleast='1.2.0'/>
+
+    <depends on='Mascot' atleast='3.0.0'
+             description="Marginal approximation of the structured coalescent"
+             projectURL="https://taming-the-beast.org/tutorials/Mascot-Tutorial/"/>
+
+    <!-- add BEAST2 service below  -->
+
+    <service type="lphybeast.spi.LPhyBEASTExt">
+        <provider classname="mascot.lphybeast.spi.MascotLBImpl"/>
+<!--   only for unit tests     -->
+    </service>
+
+</package>
+

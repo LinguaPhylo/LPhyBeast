@@ -22,6 +22,7 @@ import consoperators.SmallPulley;
 import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.distribution.LogNormal;
 import lphy.base.evolution.branchrate.LocalBranchRates;
+import lphy.base.evolution.branchrate.LocalClock;
 import lphy.base.evolution.likelihood.PhyloCTMC;
 import lphy.base.evolution.substitutionmodel.RateMatrix;
 import lphy.base.evolution.tree.TimeTree;
@@ -195,6 +196,8 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
                 }
 
             } else if (generator instanceof LocalBranchRates) {
+                treeLikelihood.setInputValue("branchRateModel", context.getBEASTObject(generator));
+            } else if (generator instanceof LocalClock) {
                 treeLikelihood.setInputValue("branchRateModel", context.getBEASTObject(generator));
             } else {
                 throw new UnsupportedOperationException("Only localBranchRates and lognormally distributed branchRates currently supported for LPhyBEAST !");

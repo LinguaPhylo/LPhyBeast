@@ -3,6 +3,7 @@ package lphybeast;
 import lphy.core.io.UserDir;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -18,15 +19,18 @@ public class TestUtils {
     private TestUtils() { }
 
     /**
-     * user.dir/../version.xml
+     * user.dir/version.xml
      */
     public static void loadServices() {
-        loadServices(UserDir.getUserDir().toAbsolutePath().getParent().toString());
+        // folder: LPhyBeast/lphybeast
+        loadServices(UserDir.getUserDir().toAbsolutePath().toString());
     }
 
     public static void loadServices(String parentDir) {
         // TODO better way?
         Path vfPath = Paths.get(parentDir, "version.xml");
+        if (!Files.exists(vfPath))
+            throw new IllegalArgumentException("Can't find LPhyBeast version.xml under dir : " + vfPath);
         LPhyBEASTLoader.addBEAST2Services(new String[]{vfPath.toAbsolutePath().toString()});
     }
 

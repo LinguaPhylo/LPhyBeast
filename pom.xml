@@ -17,8 +17,8 @@
 
     <properties>
         <lphy.vision>1.6.0-SNAPSHOT</lphy.vision>
-        <beast.version>2.7.6</beast.version>
-        <!-- project.version : https://maven.apache.org/maven-ci-friendly.html -->
+        <beast.version>2.7.7</beast.version>
+        <!-- parent.version : https://maven.apache.org/maven-ci-friendly.html -->
         <revision>1.2.0-SNAPSHOT</revision>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -33,6 +33,11 @@
 <!--        <module>../linguaPhylo/lphy-base</module>-->
         <module>lphybeast</module>
 <!--        <module>lblauncher</module>-->
+        <module>lphybeast-flc</module>
+        <module>lphybeast-mascot</module>
+        <module>lphybeast-mm</module>
+        <module>lphybeast-sa</module>
+        <module>lphybeast-ext-dist</module>
     </modules>
 
     <build>
@@ -55,5 +60,16 @@
         </pluginManagement>
     </build>
 
+    <!-- https://maven.apache.org/plugins/maven-jar-plugin/examples/create-test-jar.html-->
+<!--    <dependencies>-->
+<!--        <dependency>-->
+<!--            <groupId>io.github.linguaphylo</groupId>-->
+<!--            <artifactId>lphybeast</artifactId>-->
+<!--            <version>${lphybeast.version}</version>-->
+<!--            <classifier>tests</classifier>-->
+<!--            <type>test-jar</type>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
+<!--    </dependencies>-->
 
 </project>
