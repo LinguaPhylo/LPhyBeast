@@ -97,4 +97,13 @@ public class SATreeOperatorStrategy implements TreeOperatorStrategy {
         return "sampled-ancestor tree operator strategy";
     }
 
+    @Override
+    public Operator getBICEPSEpochTopOrAll() {
+        throw new UnsupportedOperationException("Not supported in SA !");
+    }
+
+    @Override
+    public Operator getBICEPSTreeFlex() {
+        throw new UnsupportedOperationException("Not supported in SA !");
+    }
 }
