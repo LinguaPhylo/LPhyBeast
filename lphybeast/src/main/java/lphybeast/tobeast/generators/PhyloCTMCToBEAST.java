@@ -281,6 +281,8 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         return siteModel;
     }
 
+    //*** operators which require information across different models ***//
+
     private static void addRelaxedClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates, BEASTContext context) {
 
         double tWindowSize = tree.getRoot().getHeight() / 10.0;
