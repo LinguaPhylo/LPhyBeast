@@ -1013,6 +1013,15 @@ public class BEASTContext {
         return posterior;
     }
 
+    public Prior getPrior(Function param) {
+        for (BEASTInterface beastInterface : elements.keySet()) {
+            if (beastInterface instanceof Prior prior && prior.m_x.get().equals(param) ) {
+                return prior;
+            }
+        }
+        return null;
+    }
+
     private void logOrignalAlignment(GenericTreeLikelihood treeLikelihood) {
         Alignment alignment = treeLikelihood.dataInput.get();
         String algXML = new XMLProducer().toXML(alignment);

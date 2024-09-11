@@ -1,24 +1,30 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
+import beast.base.core.Function;
+import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.branchratemodel.StrictClockModel;
 import beast.base.evolution.branchratemodel.UCRelaxedClockModel;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.UserDataType;
 import beast.base.evolution.likelihood.GenericTreeLikelihood;
 import beast.base.evolution.likelihood.ThreadedTreeLikelihood;
+import beast.base.evolution.operator.AdaptableOperatorSampler;
+import beast.base.evolution.operator.Exchange;
+import beast.base.evolution.operator.kernel.BactrianScaleOperator;
 import beast.base.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
+import beast.base.inference.StateNode;
+import beast.base.inference.distribution.LogNormalDistributionModel;
+import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.distribution.Prior;
+import beast.base.inference.operator.kernel.BactrianRandomWalkOperator;
 import beast.base.inference.parameter.RealParameter;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
 import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModelLogger;
-import consoperators.BigPulley;
-import consoperators.InConstantDistanceOperator;
-import consoperators.SimpleDistance;
-import consoperators.SmallPulley;
+import beastlabs.evolution.tree.RNNIMetric;
 import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.distribution.LogNormal;
 import lphy.base.distribution.UCLNMean1;
@@ -36,6 +42,12 @@ import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.loggers.TraitTreeLogger;
 import lphybeast.tobeast.operators.DefaultOperatorStrategy;
+import orc.consoperators.InConstantDistanceOperator;
+import orc.consoperators.SimpleDistance;
+import orc.consoperators.SmallPulley;
+import orc.consoperators.UcldScalerOperator;
+import orc.ner.NEROperator_dAE_dBE_dCE;
+import orc.operators.SampleFromPriorOperator;
 
 import java.util.Map;
 
@@ -184,7 +196,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
                 treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
 
                 if (skipBranchOperators == false) {
-                    addRelaxedClockOperators(tree, relaxedClockModel, context);
+                    addORCOperators(tree, relaxedClockModel, context);
                 }
 
             } else if (generator instanceof IID &&
@@ -206,7 +218,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
                 treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
 
                 if (skipBranchOperators == false) {
-                    addRelaxedClockOperators(tree, relaxedClockModel, context);
+                    addORCOperators(tree, relaxedClockModel, context);
                 }
 
             } else if (generator instanceof LocalBranchRates) {
@@ -295,58 +307,222 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         return siteModel;
     }
 
-    //*** operators which require information across different models ***//
+    /**
+     * Assume ORCRates and ORCsigma are StateNode.
+     * TODO uclnMean operator ?
+     */
+    private static void addORCOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, BEASTContext context) {
+        // assume rates to Tree is 1 to 1 mapping, when setting ID
+        RealParameter rates = relaxedClockModel.rateInput.get();
+
+        ParametricDistribution distr = relaxedClockModel.getDistribution();
+        // get ORCsigma from LogNormal
+        Function orcSigma;
+        if (distr instanceof LogNormalDistributionModel logNDistr) {
+            orcSigma = logNDistr.SParameterInput.get();
+        } else throw new UnsupportedOperationException("LPhyBeast only supports LogNormal distribution for relaxed model in ORC !");
+
+        /**
+         * Skip ORCRates and ORCsigma operators created from the default.
+         * All operators insider AdaptableOperatorSampler use weight 1.0
+         */
+        context.addSkipOperator(rates);
+        if (orcSigma instanceof StateNode stateNode) {
+            context.addSkipOperator(stateNode);
+
+            // 1.1 ORCucldStdevScaler
+            UcldScalerOperator ucldScalerOperator = new UcldScalerOperator();
+            ucldScalerOperator.initByName("rates", rates, "distr", distr, "stdev", orcSigma,
+                    "weight", 1.0, "scaleFactor", 0.5);
+            ucldScalerOperator.setID("ORCucldStdevScaler." + stateNode.getID());
+
+            // 1.2 ORCUcldStdevRandomWalk
+            BactrianRandomWalkOperator randomWalkOperator = new BactrianRandomWalkOperator();
+            randomWalkOperator.initByName("parameter", orcSigma,
+                    "weight", 1.0, "scaleFactor", 0.1);
+            randomWalkOperator.setID("ORCUcldStdevRandomWalk." + stateNode.getID());
+
+            // 1.3 ORCUcldStdevScale
+            BactrianScaleOperator scaleOperator = new BactrianScaleOperator();
+            scaleOperator.initByName("parameter", orcSigma, "upper", 10.0,  // TODO why 10.0?
+                    "weight", 1.0, "scaleFactor", 0.5);
+            scaleOperator.setID("ORCUcldStdevScale." + stateNode.getID());
+
+            Prior sigmaPrior = context.getPrior(orcSigma);
+            if (sigmaPrior == null) throw new IllegalArgumentException("Cannot find BEAST prior of " + orcSigma + " !");
+
+            // 1.4 ORCSampleFromPriorOperator_sigma
+            SampleFromPriorOperator sampleFromPriorOperator = new SampleFromPriorOperator();
+            sampleFromPriorOperator.initByName("parameter", orcSigma, "prior2", sigmaPrior, "weight", 1.0);
+            sampleFromPriorOperator.setID("ORCSampleFromPriorOperator." + stateNode.getID());
+
+            // 1. ORCsigma
+            AdaptableOperatorSampler sigmaAOSampler = new AdaptableOperatorSampler();
+            // weight="3.0"
+            sigmaAOSampler.initByName("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()) / 5,
+                    // <parameter idref="ORCsigma"/>
+                    "parameter", orcSigma, "operator", ucldScalerOperator, "operator", randomWalkOperator,
+                    "operator", scaleOperator, "operator", sampleFromPriorOperator);
+            sigmaAOSampler.setID("ORCAdaptableOperatorSampler." + stateNode.getID());
+
+            context.addExtraOperator(sigmaAOSampler);
+        } else throw new IllegalArgumentException("ORCsigma should be StateNode !");
+
+        // 2. rates_root
+        SimpleDistance simpleDistance = getSimpleDistance(tree, relaxedClockModel, rates);
+        SmallPulley smallPulley = getSmallPulley(tree, relaxedClockModel, rates);
+
+        AdaptableOperatorSampler ratesRootAOSampler = new AdaptableOperatorSampler();
+        // <parameter idref="ORCRates"/>   <tree idref="Tree"/>
+        ratesRootAOSampler.initByName("weight", 1.0, "parameter", rates, "tree", tree,
+                "operator", simpleDistance, "operator", smallPulley);
+        ratesRootAOSampler.setID("ORCAdaptableOperatorSampler.ratesRoot." + rates.getID());
+
+        context.addExtraOperator(ratesRootAOSampler);
+
+        // 3. rates_internal
+        InConstantDistanceOperator inConstantDistanceOperator =
+                getInConstantDistanceOperator(tree, relaxedClockModel, rates);
+
+        BactrianRandomWalkOperator randomWalkOperator2 = new BactrianRandomWalkOperator();
+        randomWalkOperator2.initByName("parameter", rates,
+                "weight", 1.0, "scaleFactor", 0.1);
+        randomWalkOperator2.setID("ORCUcldStdevRandomWalk." + rates.getID());
+
+        // 1.3 ORCUcldStdevScale
+        BactrianScaleOperator scaleOperator2 = new BactrianScaleOperator();
+        scaleOperator2.initByName("parameter", rates, "upper", 10.0,  // TODO why 10.0?
+                "weight", 1.0, "scaleFactor", 0.5);
+        scaleOperator2.setID("ORCUcldStdevScale." + rates.getID());
+
+        Prior ratesPrior = context.getPrior(rates);
+        if (ratesPrior == null) throw new IllegalArgumentException("Cannot find BEAST prior of " + rates + " !");
+
+        // 1.4 ORCSampleFromPriorOperator_rates
+        SampleFromPriorOperator sampleFromPriorOperator2 = new SampleFromPriorOperator();
+        sampleFromPriorOperator2.initByName("parameter", rates, "prior2", ratesPrior, "weight", 1.0);
+        sampleFromPriorOperator2.setID("ORCSampleFromPriorOperator." + rates.getID());
+
+        AdaptableOperatorSampler ratesInternalAOSampler = new AdaptableOperatorSampler();
+        // weight="20.0"
+        ratesInternalAOSampler.initByName("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()),
+                // <parameter idref="ORCRates"/> <tree idref="Tree"/>
+                "parameter", rates, "tree", tree, "operator", inConstantDistanceOperator,
+                "operator", randomWalkOperator2, "operator", scaleOperator2, "operator", sampleFromPriorOperator2);
+        ratesInternalAOSampler.setID("ORCAdaptableOperatorSampler.ratesInternal." + rates.getID());
+
+        context.addExtraOperator(ratesInternalAOSampler);
+
+        // 4. NER
+        // ORCNER_Exchange
+        Exchange exchange = new Exchange();
+        exchange.initByName("tree", tree, "weight", 1.0);
+        exchange.setID("ORCNER_Exchange.NER." + tree.getID());
+        // ORCNER_dAE_dBE_dCE
+        NEROperator_dAE_dBE_dCE nerOperator = new NEROperator_dAE_dBE_dCE();
+        nerOperator.initByName("rates", rates, "tree", tree, "weight", 1.0);
+        nerOperator.setID("NEROperator.NER." + tree.getID());
+        // RNNIMetric taxonset="@TaxonSet"
+        RNNIMetric rnniMetric = new RNNIMetric();
+        TaxonSet taxonSet = tree.getTaxonset();
+        rnniMetric.initByName("taxonset", taxonSet);
+        nerOperator.setID("RNNIMetric.NER." + tree.getID());
+
+        AdaptableOperatorSampler nerAOSampler = new AdaptableOperatorSampler();
+        // weight="10.0"
+        nerAOSampler.initByName("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()) / 2,
+                // <tree idref="Tree"/>
+                "tree", tree, "operator", exchange, "operator", nerOperator, "metric", rnniMetric);
+        nerAOSampler.setID("ORCAdaptableOperatorSampler.NER." + rates.getID());
+
+        context.addExtraOperator(nerAOSampler);
+
+    }
+
+    private static InConstantDistanceOperator getInConstantDistanceOperator(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates) {
+        double tWindowSize = tree.getRoot().getHeight() / 10.0;
+
+        InConstantDistanceOperator inConstDistOperator = new InConstantDistanceOperator();
+        inConstDistOperator.initByName("clockModel", relaxedClockModel, "tree", tree, "rates", rates,
+                "twindowSize", tWindowSize, "weight", 1.0);
+//        inConstantDistanceOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
+        inConstDistOperator.setID(relaxedClockModel.getID() + ".inConstantDistanceOperator");
+        return inConstDistOperator;
+    }
+
+    private static SmallPulley getSmallPulley(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates) {
+        SmallPulley smallPulley = new SmallPulley();
+        smallPulley.initByName("clockModel", relaxedClockModel, "tree", tree, "rates", rates,
+                "dwindowSize", 0.1, "weight", 1.0);
+//        smallPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+        smallPulley.setID(relaxedClockModel.getID() + ".smallPulley");
+        smallPulley.initAndValidate();
+        return smallPulley;
+    }
+
+    private static SimpleDistance getSimpleDistance(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates) {
+        double tWindowSize = tree.getRoot().getHeight() / 10.0;
+
+        SimpleDistance simpleDistance = new SimpleDistance();
+        simpleDistance.initByName("clockModel", relaxedClockModel, "tree", tree, "rates", rates,
+                "twindowSize", tWindowSize, "weight", 1.0);
+//        simpleDistance.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+        simpleDistance.setID(relaxedClockModel.getID() + ".simpleDistance");
+        simpleDistance.initAndValidate();
+        return simpleDistance;
+    }
+
 
     /**
      * @deprecated this will be replaced by ORC soon
      */
     @Deprecated
-    private static void addRelaxedClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, BEASTContext context) {
-
-        RealParameter rates = relaxedClockModel.rateInput.get();
-
-        double tWindowSize = tree.getRoot().getHeight() / 10.0;
-
-        InConstantDistanceOperator inConstantDistanceOperator = new InConstantDistanceOperator();
-        inConstantDistanceOperator.setInputValue("clockModel", relaxedClockModel);
-        inConstantDistanceOperator.setInputValue("tree", tree);
-        inConstantDistanceOperator.setInputValue("rates", rates);
-        inConstantDistanceOperator.setInputValue("twindowSize", tWindowSize);
-        inConstantDistanceOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
-        inConstantDistanceOperator.setID(relaxedClockModel.getID() + ".inConstantDistanceOperator");
-        inConstantDistanceOperator.initAndValidate();
-        context.addExtraOperator(inConstantDistanceOperator);
-
-        SimpleDistance simpleDistance = new SimpleDistance();
-        simpleDistance.setInputValue("clockModel", relaxedClockModel);
-        simpleDistance.setInputValue("tree", tree);
-        simpleDistance.setInputValue("rates", rates);
-        simpleDistance.setInputValue("twindowSize", tWindowSize);
-        simpleDistance.setInputValue("weight", BEASTContext.getOperatorWeight(2));
-        simpleDistance.setID(relaxedClockModel.getID() + ".simpleDistance");
-        simpleDistance.initAndValidate();
-        context.addExtraOperator(simpleDistance);
-
-        BigPulley bigPulley = new BigPulley();
-        bigPulley.setInputValue("tree", tree);
-        bigPulley.setInputValue("rates", rates);
-        bigPulley.setInputValue("twindowSize", tWindowSize);
-        bigPulley.setInputValue("dwindowSize", 0.1);
-        bigPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
-        bigPulley.setID(relaxedClockModel.getID() + ".bigPulley");
-        bigPulley.initAndValidate();
-        context.addExtraOperator(bigPulley);
-
-        SmallPulley smallPulley = new SmallPulley();
-        smallPulley.setInputValue("clockModel", relaxedClockModel);
-        smallPulley.setInputValue("tree", tree);
-        smallPulley.setInputValue("rates", rates);
-        smallPulley.setInputValue("dwindowSize", 0.1);
-        smallPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
-        smallPulley.setID(relaxedClockModel.getID() + ".smallPulley");
-        smallPulley.initAndValidate();
-        context.addExtraOperator(smallPulley);
-    }
+//    private static void addRelaxedClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, BEASTContext context) {
+//
+//        RealParameter rates = relaxedClockModel.rateInput.get();
+//
+//        double tWindowSize = tree.getRoot().getHeight() / 10.0;
+//
+//        InConstantDistanceOperator inConstantDistanceOperator = new InConstantDistanceOperator();
+//        inConstantDistanceOperator.setInputValue("clockModel", relaxedClockModel);
+//        inConstantDistanceOperator.setInputValue("tree", tree);
+//        inConstantDistanceOperator.setInputValue("rates", rates);
+//        inConstantDistanceOperator.setInputValue("twindowSize", tWindowSize);
+//        inConstantDistanceOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
+//        inConstantDistanceOperator.setID(relaxedClockModel.getID() + ".inConstantDistanceOperator");
+//        inConstantDistanceOperator.initAndValidate();
+//        context.addExtraOperator(inConstantDistanceOperator);
+//
+//        SimpleDistance simpleDistance = new SimpleDistance();
+//        simpleDistance.setInputValue("clockModel", relaxedClockModel);
+//        simpleDistance.setInputValue("tree", tree);
+//        simpleDistance.setInputValue("rates", rates);
+//        simpleDistance.setInputValue("twindowSize", tWindowSize);
+//        simpleDistance.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+//        simpleDistance.setID(relaxedClockModel.getID() + ".simpleDistance");
+//        simpleDistance.initAndValidate();
+//        context.addExtraOperator(simpleDistance);
+//
+//        BigPulley bigPulley = new BigPulley();
+//        bigPulley.setInputValue("tree", tree);
+//        bigPulley.setInputValue("rates", rates);
+//        bigPulley.setInputValue("twindowSize", tWindowSize);
+//        bigPulley.setInputValue("dwindowSize", 0.1);
+//        bigPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+//        bigPulley.setID(relaxedClockModel.getID() + ".bigPulley");
+//        bigPulley.initAndValidate();
+//        context.addExtraOperator(bigPulley);
+//
+//        SmallPulley smallPulley = new SmallPulley();
+//        smallPulley.setInputValue("clockModel", relaxedClockModel);
+//        smallPulley.setInputValue("tree", tree);
+//        smallPulley.setInputValue("rates", rates);
+//        smallPulley.setInputValue("dwindowSize", 0.1);
+//        smallPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+//        smallPulley.setID(relaxedClockModel.getID() + ".smallPulley");
+//        smallPulley.initAndValidate();
+//        context.addExtraOperator(smallPulley);
+//    }
 
     @Override
     public Class<PhyloCTMC> getGeneratorClass() {
