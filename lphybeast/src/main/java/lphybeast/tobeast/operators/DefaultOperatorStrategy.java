@@ -4,6 +4,9 @@ import beast.base.core.BEASTInterface;
 import beast.base.core.BEASTObject;
 import beast.base.core.Function;
 import beast.base.evolution.operator.kernel.BactrianScaleOperator;
+import beast.base.evolution.substitutionmodel.Frequencies;
+import beast.base.evolution.substitutionmodel.HKY;
+import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.Operator;
 import beast.base.inference.StateNode;
@@ -15,6 +18,7 @@ import beast.base.inference.operator.kernel.BactrianUpDownOperator;
 import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
+import beastlabs.core.util.Slice;
 import com.google.common.collect.Multimap;
 import lphy.base.distribution.Dirichlet;
 import lphy.base.distribution.RandomComposition;
@@ -30,6 +34,7 @@ import lphybeast.BEASTContext;
 import java.util.*;
 
 import static lphybeast.BEASTContext.getOperatorWeight;
+import static lphybeast.BEASTContext.getOperatorWeightCubeRoot;
 
 /**
  * A class to create all default operators
@@ -135,14 +140,39 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                 Double[] value = (Double[]) variable.value();
                 operator = getDeltaExchangeOperator();
                 operator.setInputValue("parameter", parameter);
-                operator.setInputValue("weight", getOperatorWeight(parameter.getDimension() - 1));
+
+                double w = getOperatorWeight(parameter.getDimension() - 1);
+//                Set<BEASTInterface> outputs = parameter.getOutputs();
+//                // parameters to site model easier to converge
+//                if (!outputs.isEmpty()) {
+//                    if (outputs.stream().anyMatch(obj -> obj instanceof Frequencies)) {
+//                        // frequencies
+//                        w = getOperatorWeightCubeRoot(parameter.getDimension() - 1);
+//                    }
+//                    // TODO ESS worse ?
+//                }
+                operator.setInputValue("weight", w);
+
                 operator.setInputValue("delta", 1.0 / value.length);
                 operator.initAndValidate();
                 operator.setID(parameter.getID() + ".deltaExchange");
             } else {
                 operator = getScaleOperator();
                 operator.setInputValue("parameter", parameter);
-                operator.setInputValue("weight", getOperatorWeight(parameter.getDimension()));
+
+                double w = getOperatorWeight(parameter.getDimension());
+//                Set<BEASTInterface> outputs = parameter.getOutputs();
+//                if (!outputs.isEmpty()) {
+//                    // SubstitutionModel parameters, e.g. kappa
+//                    if (outputs.stream().anyMatch(obj -> obj instanceof SubstitutionModel)  // no slice
+//                            || (outputs.stream().anyMatch(obj -> obj instanceof Slice slice // with slice
+//                                  && slice.getOutputs().stream().anyMatch(obj2 -> obj2 instanceof SubstitutionModel))) ) {
+//                        w = getOperatorWeightCubeRoot(parameter.getDimension());
+//                    }
+//                    // TODO ESS worse ?
+//                }
+                operator.setInputValue("weight", w);
+
                 operator.setInputValue("scaleFactor", 0.75);
                 operator.initAndValidate();
                 operator.setID(parameter.getID() + ".scale");

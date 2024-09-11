@@ -904,6 +904,10 @@ public class BEASTContext {
         return getOperatorWeight(size, 0.7);
     }
 
+    public static double getOperatorWeightCubeRoot(int size) {
+        return getOperatorWeight(size, 0.33);
+    }
+
     /**
      * Decide which strategy to create tree operators, given a tree.
      * @param tree   a tree

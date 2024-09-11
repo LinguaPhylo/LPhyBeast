@@ -7,6 +7,7 @@ import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.UserDataType;
 import beast.base.evolution.likelihood.GenericTreeLikelihood;
 import beast.base.evolution.likelihood.ThreadedTreeLikelihood;
+import beast.base.evolution.operator.AdaptableOperatorSampler;
 import beast.base.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
@@ -15,10 +16,9 @@ import beast.base.inference.parameter.RealParameter;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
 import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModelLogger;
-import consoperators.BigPulley;
-import consoperators.InConstantDistanceOperator;
-import consoperators.SimpleDistance;
-import consoperators.SmallPulley;
+import orc.consoperators.InConstantDistanceOperator;
+import orc.consoperators.SimpleDistance;
+import orc.consoperators.SmallPulley;
 import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.distribution.LogNormal;
 import lphy.base.evolution.branchrate.LocalBranchRates;
@@ -169,10 +169,19 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
         treeLikelihood.setInputValue("tree", tree);
 
+        // get clock rate, if relaxed clock, it is used as the mean rate
+        Value<Number> clockRate = phyloCTMC.getClockRate();
+        RealParameter clockRatePara;
+        if (clockRate != null) {
+            clockRatePara = context.getAsRealParameter(clockRate);
+        } else {
+            clockRatePara =  BEASTContext.createRealParameter(1.0);
+        }
+
+        // branch rates
         Value<Double[]> branchRates = phyloCTMC.getBranchRates();
-
+        // relaxed clock or local clock
         if (branchRates != null) {
-
             Generator generator = branchRates.getGenerator();
             if (generator instanceof IID &&
                     ((IID<?>) generator).getBaseDistribution() instanceof LogNormal) {
@@ -184,6 +193,10 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
                 RealParameter beastBranchRates = context.getAsRealParameter(branchRates);
 
+                // clock.rate="@ORCucldMean" => PhyloCTMC(..., mu = ORCucldMean) ?
+                if (clockRate != null)
+                    relaxedClockModel.setInputValue("clock.rate", clockRatePara);
+
                 relaxedClockModel.setInputValue("rates", beastBranchRates);
                 relaxedClockModel.setInputValue("tree", tree);
                 relaxedClockModel.setInputValue("distr", logNormalPrior.distInput.get());
@@ -192,7 +205,8 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
                 treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
 
                 if (skipBranchOperators == false) {
-                    addRelaxedClockOperators(tree, relaxedClockModel, beastBranchRates, context);
+//                    addRelaxedClockOperators(tree, relaxedClockModel, beastBranchRates, context);
+                    addORCOperators(tree, relaxedClockModel, beastBranchRates, context);
                 }
 
             } else if (generator instanceof LocalBranchRates) {
@@ -205,15 +219,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
         } else {
             StrictClockModel clockModel = new StrictClockModel();
-            Value<Number> clockRate = phyloCTMC.getClockRate();
 
-            RealParameter clockRatePara;
-            if (clockRate != null) {
-                clockRatePara = context.getAsRealParameter(clockRate);
-
-            } else {
-                clockRatePara =  BEASTContext.createRealParameter(1.0);
-            }
             clockModel.setInputValue("clock.rate", clockRatePara);
             treeLikelihood.setInputValue("branchRateModel", clockModel);
 
@@ -222,7 +228,6 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             }
         }
     }
-
 
     /**
      * @param phyloCTMC the phyloCTMC object
@@ -281,14 +286,84 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         return siteModel;
     }
 
+<<<<<<< Updated upstream
     //*** operators which require information across different models ***//
 
     /**
      * @deprecated this will be replaced by ORC soon
      */
     @Deprecated
+=======
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
     private static void addRelaxedClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates, BEASTContext context) {
+=======
+    //*** operators which require information across different models ***//
 
+    private static void addORCOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates, BEASTContext context) {
+        // 1. ORCsigma
+        AdaptableOperatorSampler sigma = new AdaptableOperatorSampler();
+        sigma.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
+//        sigma.setInputValue("parameter", ORCsigma);
+>>>>>>> Stashed changes
+
+        // TODO ORCucldStdevScaler
+        // ORCUcldStdevRandomWalk
+        // ORCUcldStdevScale
+        // ORCSampleFromPriorOperator_sigma
+
+        sigma.initAndValidate();
+
+        context.addExtraOperator(sigma);
+
+        // 2. rates_root
+        AdaptableOperatorSampler ratesRoot = new AdaptableOperatorSampler();
+        ratesRoot.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+        ratesRoot.setInputValue("parameter", rates);
+        ratesRoot.setInputValue("tree", tree);
+
+        SimpleDistance simpleDistance = getSimpleDistance(tree, relaxedClockModel, rates);
+        SmallPulley smallPulley = getSmallPulley(tree, relaxedClockModel, rates);
+        ratesRoot.setInputValue("operator", simpleDistance);
+        ratesRoot.setInputValue("operator", smallPulley);
+        ratesRoot.initAndValidate();
+
+        context.addExtraOperator(ratesRoot);
+
+        // 3. rates_internal
+        AdaptableOperatorSampler ratesInternal = new AdaptableOperatorSampler();
+        ratesInternal.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
+        ratesInternal.setInputValue("parameter", rates);
+        ratesInternal.setInputValue("tree", tree);
+
+        InConstantDistanceOperator inConstantDistanceOperator =
+                getInConstantDistanceOperator(tree, relaxedClockModel, rates);
+        ratesInternal.setInputValue("operator", inConstantDistanceOperator);
+
+        //TODO ORCInternalnodesOperator
+        // ORCRatesRandomWalk
+        // ORCRatesScale
+        // ORCSampleFromPriorOperator
+
+        ratesInternal.initAndValidate();
+
+        context.addExtraOperator(ratesInternal);
+
+        // 4. NER
+        AdaptableOperatorSampler ner = new AdaptableOperatorSampler();
+//        ner.setInputValue("weight", ?);
+        ner.setInputValue("tree", tree);
+
+        //TODO ORCNER_Exchange
+        // ORCNER_dAE_dBE_dCE
+        // RNNIMetric
+
+        ner.initAndValidate();
+
+        context.addExtraOperator(ner);
+    }
+
+    private static InConstantDistanceOperator getInConstantDistanceOperator(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates) {
         double tWindowSize = tree.getRoot().getHeight() / 10.0;
 
         InConstantDistanceOperator inConstantDistanceOperator = new InConstantDistanceOperator();
@@ -296,41 +371,87 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         inConstantDistanceOperator.setInputValue("tree", tree);
         inConstantDistanceOperator.setInputValue("rates", rates);
         inConstantDistanceOperator.setInputValue("twindowSize", tWindowSize);
-        inConstantDistanceOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
+        inConstantDistanceOperator.setInputValue("weight", 1);
         inConstantDistanceOperator.setID(relaxedClockModel.getID() + ".inConstantDistanceOperator");
         inConstantDistanceOperator.initAndValidate();
-        context.addExtraOperator(inConstantDistanceOperator);
+        return inConstantDistanceOperator;
+    }
+
+    private static SimpleDistance getSimpleDistance(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates) {
+        double tWindowSize = tree.getRoot().getHeight() / 10.0;
 
         SimpleDistance simpleDistance = new SimpleDistance();
         simpleDistance.setInputValue("clockModel", relaxedClockModel);
         simpleDistance.setInputValue("tree", tree);
         simpleDistance.setInputValue("rates", rates);
         simpleDistance.setInputValue("twindowSize", tWindowSize);
-        simpleDistance.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+        simpleDistance.setInputValue("weight", 1);
         simpleDistance.setID(relaxedClockModel.getID() + ".simpleDistance");
         simpleDistance.initAndValidate();
-        context.addExtraOperator(simpleDistance);
+        return simpleDistance;
+    }
 
-        BigPulley bigPulley = new BigPulley();
-        bigPulley.setInputValue("tree", tree);
-        bigPulley.setInputValue("rates", rates);
-        bigPulley.setInputValue("twindowSize", tWindowSize);
-        bigPulley.setInputValue("dwindowSize", 0.1);
-        bigPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
-        bigPulley.setID(relaxedClockModel.getID() + ".bigPulley");
-        bigPulley.initAndValidate();
-        context.addExtraOperator(bigPulley);
-
+    private static SmallPulley getSmallPulley(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates) {
         SmallPulley smallPulley = new SmallPulley();
         smallPulley.setInputValue("clockModel", relaxedClockModel);
         smallPulley.setInputValue("tree", tree);
         smallPulley.setInputValue("rates", rates);
         smallPulley.setInputValue("dwindowSize", 0.1);
-        smallPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+        smallPulley.setInputValue("weight", 1);
         smallPulley.setID(relaxedClockModel.getID() + ".smallPulley");
         smallPulley.initAndValidate();
-        context.addExtraOperator(smallPulley);
+        return smallPulley;
     }
+
+
+    /**
+     * @deprecated this will be replaced by ORC soon
+     */
+    @Deprecated
+//    private static void addRelaxedClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates, BEASTContext context) {
+//
+//        double tWindowSize = tree.getRoot().getHeight() / 10.0;
+//
+//        InConstantDistanceOperator inConstantDistanceOperator = new InConstantDistanceOperator();
+//        inConstantDistanceOperator.setInputValue("clockModel", relaxedClockModel);
+//        inConstantDistanceOperator.setInputValue("tree", tree);
+//        inConstantDistanceOperator.setInputValue("rates", rates);
+//        inConstantDistanceOperator.setInputValue("twindowSize", tWindowSize);
+//        inConstantDistanceOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
+//        inConstantDistanceOperator.setID(relaxedClockModel.getID() + ".inConstantDistanceOperator");
+//        inConstantDistanceOperator.initAndValidate();
+//        context.addExtraOperator(inConstantDistanceOperator);
+//
+//        SimpleDistance simpleDistance = new SimpleDistance();
+//        simpleDistance.setInputValue("clockModel", relaxedClockModel);
+//        simpleDistance.setInputValue("tree", tree);
+//        simpleDistance.setInputValue("rates", rates);
+//        simpleDistance.setInputValue("twindowSize", tWindowSize);
+//        simpleDistance.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+//        simpleDistance.setID(relaxedClockModel.getID() + ".simpleDistance");
+//        simpleDistance.initAndValidate();
+//        context.addExtraOperator(simpleDistance);
+//
+//        BigPulley bigPulley = new BigPulley();
+//        bigPulley.setInputValue("tree", tree);
+//        bigPulley.setInputValue("rates", rates);
+//        bigPulley.setInputValue("twindowSize", tWindowSize);
+//        bigPulley.setInputValue("dwindowSize", 0.1);
+//        bigPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+//        bigPulley.setID(relaxedClockModel.getID() + ".bigPulley");
+//        bigPulley.initAndValidate();
+//        context.addExtraOperator(bigPulley);
+//
+//        SmallPulley smallPulley = new SmallPulley();
+//        smallPulley.setInputValue("clockModel", relaxedClockModel);
+//        smallPulley.setInputValue("tree", tree);
+//        smallPulley.setInputValue("rates", rates);
+//        smallPulley.setInputValue("dwindowSize", 0.1);
+//        smallPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+//        smallPulley.setID(relaxedClockModel.getID() + ".smallPulley");
+//        smallPulley.initAndValidate();
+//        context.addExtraOperator(smallPulley);
+//    }
 
     @Override
     public Class<PhyloCTMC> getGeneratorClass() {

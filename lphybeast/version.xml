@@ -10,7 +10,7 @@
     <depends on='SSM' atleast='1.2.0'
              description="Standard Nucleotide Substitution Models"
              projectURL="https://github.com/BEAST2-Dev/substmodels/"/>
-    <depends on='FastRelaxedClockLogNormal' atleast='1.2.0'/>
+    <depends on='ORC' atleast='1.2.0'/>
     <depends on='bdtree' atleast='0.0.1'/>
 
     <!-- add BEAST2 service below  -->
