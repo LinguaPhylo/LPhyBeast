@@ -6,7 +6,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>lphybeast-ext-dist</artifactId>
+    <artifactId>lphybeast-ext</artifactId>
 
     <dependencies>
         <dependency>
@@ -39,7 +39,7 @@
                     <outputDirectory>${project.build.directory}</outputDirectory>
                     <appendAssemblyId>false</appendAssemblyId>
                     <!--  lphybeast-ext  -->
-                    <finalName>${project.parent.artifactId}-${project.version}</finalName>
+                    <finalName>${project.artifactId}-${project.version}</finalName>
                 </configuration>
                 <executions>
                     <execution>
