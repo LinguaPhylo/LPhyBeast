@@ -109,8 +109,8 @@ public class H3N2TutorialTest {
                 xml.contains("A/Waikato/5/2000|CY011960|2000.661202|New_Zealand=New_Zealand") &&
                 xml.contains("<typeTrait"), "Trait set" );
 
-        // 7 ScaleOperator, incl. tree
-        assertEquals(7, xml.split("BactrianScaleOperator", -1).length - 1, "BactrianScaleOperator" );
+        // 6 ScaleOperator, Tree scaled is replaced by BICEPS
+        assertEquals(6, xml.split("BactrianScaleOperator", -1).length - 1, "BactrianScaleOperator" );
 
         assertTrue(xml.contains("Exchange") && xml.contains("BactrianSubtreeSlide") &&
                 xml.contains("BactrianNodeOperator") && xml.contains("WilsonBalding"), "Tree Operator" );

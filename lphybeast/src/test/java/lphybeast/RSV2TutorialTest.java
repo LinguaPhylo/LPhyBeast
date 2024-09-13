@@ -87,8 +87,8 @@ public class RSV2TutorialTest {
         // 3 TreeLikelihood
         assertEquals(3,xml.split("ThreadedTreeLikelihood", -1).length - 1, "Tree Likelihood" );
 
-        // 5 ScaleOperator, incl. tree
-        assertEquals(5, xml.split("BactrianScaleOperator", -1).length - 1, "BactrianScaleOperator" );
+        // 4 ScaleOperator, Tree scaled is replaced by BICEPS
+        assertEquals(4, xml.split("BactrianScaleOperator", -1).length - 1, "BactrianScaleOperator" );
 
         assertTrue(xml.contains("Exchange") && xml.contains("BactrianSubtreeSlide") && xml.contains("BactrianNodeOperator") &&
                 xml.contains("WilsonBalding"), "Tree Operator" );
