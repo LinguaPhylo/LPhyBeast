@@ -7,22 +7,23 @@
     </parent>
 
     <artifactId>lphybeast-ext</artifactId>
+    <version>${lphybeastext.version}</version>
 
     <dependencies>
         <dependency>
             <groupId>io.github.linguaphylo</groupId>
             <artifactId>lphybeast-mascot</artifactId>
-            <version>${project.version}</version>
+            <version>${lphybeastext.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.linguaphylo</groupId>
             <artifactId>lphybeast-mm</artifactId>
-            <version>${project.version}</version>
+            <version>${lphybeastext.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.linguaphylo</groupId>
             <artifactId>lphybeast-sa</artifactId>
-            <version>${project.version}</version>
+            <version>${lphybeastext.version}</version>
         </dependency>
     </dependencies>
 

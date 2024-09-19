@@ -7,6 +7,7 @@
     </parent>
 
     <artifactId>lphybeast-sa</artifactId>
+    <version>${lphybeastext.version}</version>
 
     <dependencies>
         <dependency>
@@ -26,7 +27,7 @@
         <dependency>
             <groupId>io.github.linguaphylo</groupId>
             <artifactId>lphybeast</artifactId>
-            <version>${project.version}</version>
+            <version>${parent.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
