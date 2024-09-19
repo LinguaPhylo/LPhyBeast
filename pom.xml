@@ -16,10 +16,10 @@
     <url>https://linguaphylo.github.io/</url>
 
     <properties>
-        <lphy.vision>1.6.0-SNAPSHOT</lphy.vision>
+        <lphy.vision>1.6.0</lphy.vision>
         <beast.version>2.7.7</beast.version>
         <!-- parent.version : https://maven.apache.org/maven-ci-friendly.html -->
-        <revision>1.2.0-SNAPSHOT</revision>
+        <revision>1.2.0</revision>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
