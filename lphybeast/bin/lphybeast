@@ -95,7 +95,7 @@ if [ -z "$LPHY_LIB" ]; then
   LPHY_LIB="$LPHY_DIR/lib"
 fi
 # set to specific path in script
-#LPHY_LIB="/Applications/BEAST 2.7.5/lphystudio-1.4.3/lib"
+#LPHY_LIB="/Applications/lphystudio-1.6.0/lib"
 
 if [ ! -d "$LPHY_LIB" ]; then
   echo "Error: Invalid LPhy library path : $LPHY_LIB !"

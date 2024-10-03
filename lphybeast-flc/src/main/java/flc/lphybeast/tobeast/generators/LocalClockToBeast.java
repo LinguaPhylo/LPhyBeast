@@ -19,18 +19,6 @@ import java.util.List;
 
 public class LocalClockToBeast implements GeneratorToBEAST<LocalClock, FlexibleLocalClockModel> {
     public FlexibleLocalClockModel generatorToBEAST(LocalClock localClock, BEASTInterface value, BEASTContext context) {
-    /* <branchRateModel spec='mf.beast.evolution.branchratemodel.FlexibleLocalClockModel' id="branchRates"
-                     tree='@Tree.t:fluA'>
-        <rootClockModel id="rate.old"
-                        spec="mf.beast.evolution.branchratemodel.StrictLineageClockModel" clock.rate="@clockRate.old">
-        </rootClockModel>
-
-        <cladeClockModel id="rate.new"
-                         spec="mf.beast.evolution.branchratemodel.StrictCladeModel" taxonset="@taxonset.new"
-                   includeStem="true" clock.rate="@clockRate.new">
-        </cladeClockModel>
-    </branchRateModel>
-    * */
         FlexibleLocalClockModel flc = new FlexibleLocalClockModel();
 
         Value<Double> rootRate = localClock.getRootRate();
@@ -40,6 +28,7 @@ public class LocalClockToBeast implements GeneratorToBEAST<LocalClock, FlexibleL
         Value<Object[]> clades = localClock.getClades();
         Value<Double[]> cladeRates = localClock.getCladeRates();
         Value<Boolean> includeStem = localClock.getIncludeStem();
+        Value<TimeTree> tree = localClock.getTree();
 
         StrictCladeModel cladeModel = new StrictCladeModel();
         // TODO: current FLC fix assumes one clade model
@@ -62,12 +51,13 @@ public class LocalClockToBeast implements GeneratorToBEAST<LocalClock, FlexibleL
             );
         }
 
-        Value<TimeTree> tree = localClock.getTree();
+
 
         flc.initByName(
                 "rootClockModel", rootCladeModel,
                 "cladeClockModel", cladeModel,
-                "tree", context.getBEASTObject(tree).toString()
+                // get tree id to link the correct tree
+                "tree", context.getBEASTObject(tree.getId())
         );
 
 

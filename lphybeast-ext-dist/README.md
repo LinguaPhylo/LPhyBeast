@@ -1,11 +1,15 @@
-# Multi-module Project Release
+# LPhyBeastExt
 
-Two options:
+The project to host some LPhyBeast extensions, to reduce the weight of LPhyBeast core.
 
-1. create the release in one of module
+Using this LPhyBeast extension, you do not need any extra LPhy extension. 
+The required LPhy models have been released in the LPhy core.
 
-See [lphybeast](https://github.com/LinguaPhylo/LPhyBeast/blob/2461d72fa783240912723e1740e21065723c4d8d/lphybeast/src/assembly/lphybeast-assembly.xml).
+## LPhyBeast Extensions 
 
-2. create a module, e.g. dist, for the release
+The BEAST 2 package extended from the core project [LPhyBeast](https://github.com/LinguaPhylo/LPhyBeast), which includes:
 
-See [this module](src/assembly/lphybeast-ext-assembly.xml)
+- [Mascot](https://github.com/nicfel/Mascot/) LPhyBeast extension;
+- [MM](https://github.com/CompEvol/morph-models) LPhyBeast extension;
+- [SA](https://github.com/CompEvol/sampled-ancestors) LPhyBeast extension.
+

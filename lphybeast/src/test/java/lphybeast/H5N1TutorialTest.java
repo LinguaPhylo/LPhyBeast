@@ -123,8 +123,8 @@ public class H5N1TutorialTest {
 
         assertTrue(xml.contains("BitFlipOperator") && xml.contains("parameter=\"@I\""), "I.bitFlip Operator" );
 
-        // 6 ScaleOperator, incl. tree
-        assertEquals(6, xml.split("BactrianScaleOperator", -1).length - 1,
+        // 5 ScaleOperator, Tree scaled is replaced by BICEPS
+        assertEquals(5, xml.split("BactrianScaleOperator", -1).length - 1,
                 "BactrianScaleOperator" );
 
         assertTrue(xml.contains("Exchange") && xml.contains("BactrianSubtreeSlide") &&

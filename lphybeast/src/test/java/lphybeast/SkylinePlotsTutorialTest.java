@@ -82,8 +82,8 @@ public class SkylinePlotsTutorialTest {
                 xml.contains("name=\"S\">2.0</parameter>"),  "gamma shape prior" );
         assertTrue(xml.contains("gammaCategoryCount=\"4\"") && xml.contains("shape=\"@gamma\""), "SiteModel" );
 
-        // 4 ScaleOperator, incl. tree
-        assertEquals(4, xml.split("BactrianScaleOperator", -1).length - 1,
+        // 3 ScaleOperator, Tree scaled is replaced by BICEPS
+        assertEquals(3, xml.split("BactrianScaleOperator", -1).length - 1,
                 "BactrianScaleOperator" );
 
         assertTrue(xml.contains("Exchange") && xml.contains("BactrianSubtreeSlide") &&

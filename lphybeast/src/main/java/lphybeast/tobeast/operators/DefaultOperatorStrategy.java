@@ -24,10 +24,7 @@ import lphy.base.distribution.Dirichlet;
 import lphy.base.distribution.RandomComposition;
 import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.logger.LoggerUtils;
-import lphy.core.model.GenerativeDistribution;
-import lphy.core.model.GraphicalModelNode;
-import lphy.core.model.RandomVariable;
-import lphy.core.model.Value;
+import lphy.core.model.*;
 import lphy.core.vectorization.IID;
 import lphybeast.BEASTContext;
 
@@ -156,6 +153,16 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                 operator.setInputValue("delta", 1.0 / value.length);
                 operator.initAndValidate();
                 operator.setID(parameter.getID() + ".deltaExchange");
+
+            } else if (supportNegativeValues(generativeDistribution)) {
+                // any distribution with support in negative values, e.g. Normal, Laplace.
+                operator = getRandomWalkOperator();
+                operator.setInputValue("parameter", parameter);
+                operator.setInputValue("weight", getOperatorWeight(parameter.getDimension()));
+                operator.setInputValue("scaleFactor", 0.75);
+                operator.initAndValidate();
+                operator.setID(parameter.getID() + ".randomWalk");
+
             } else {
                 operator = getScaleOperator();
                 operator.setInputValue("parameter", parameter);
@@ -183,6 +190,18 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
             LoggerUtils.log.severe("No LPhy random variable associated with beast state node " + parameter.getID());
             return null;
         }
+    }
+
+    // for RandomWalkOperator
+    public static boolean supportNegativeValues(GenerativeDistribution generativeDistribution) {
+        if ( generativeDistribution instanceof GenerativeDistribution1D<?> oneD) {
+            Object[] bounds = oneD.getDomainBounds();
+            if ( bounds[0] instanceof Number lower && bounds[1] instanceof Number upper ) {
+                return lower.doubleValue() < 0 && upper.doubleValue() > 0;
+            }
+            return false;
+        }
+        return false;
     }
 
     public Operator createBEASTOperator(IntegerParameter parameter) {

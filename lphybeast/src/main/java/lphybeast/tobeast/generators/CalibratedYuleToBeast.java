@@ -2,7 +2,6 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.speciation.CalibratedYuleModel;
-import beast.base.inference.parameter.RealParameter;
 import lphy.base.evolution.birthdeath.CalibratedYule;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
@@ -14,9 +13,7 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
         CalibratedYuleModel calibratedYuleModel = new CalibratedYuleModel();
 
         calibratedYuleModel.setInputValue("tree", value);
-
-        RealParameter birthRate = context.getAsRealParameter(generator.getBirthRate());
-        calibratedYuleModel.setInputValue("birthRate", birthRate);
+        calibratedYuleModel.setInputValue("birthRate", context.getAsRealParameter(generator.getBirthRate()));
 
         calibratedYuleModel.initAndValidate();
 
