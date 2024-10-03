@@ -127,7 +127,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 ReadNexus.class, ReadFasta.class, WriteFasta.class, // IO
                 // Taxa and sites
                 NTaxaFunction.class, NCharFunction.class, TaxaFunction.class, CreateTaxa.class,
-                SpeciesTaxa.class, TaxaAgesFromFunction.class,
+                SpeciesTaxa.class, TaxaAgesFromFunction.class, RemoveTaxa.class,
                 CopySites.class, MissingSites.class, SelectSitesByMissingFraction.class, InvariableSites.class,
                 VariableSites.class,
                 DiscretizedGamma.class,
