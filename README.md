@@ -13,30 +13,8 @@ express and communicate BEAST2 analyses.
 ## Setup and usage
 
 LPhyBEAST is implemented as an application in the BEAST 2 package "lphybeast". 
-But you need to add the extra repository
-`https://raw.githubusercontent.com/CompEvol/CBAN/master/packages-extra.xml`
-to the Package Manager to view it.
-Follow the [instruction](https://linguaphylo.github.io/setup/) to set up,
-and then use the script `lphybeast` to create the XML:
+The installation guide and usage instructions are available in the [User Manual](https://linguaphylo.github.io/setup/#lphybeast-installation). 
 
-A simple usage of LPhyBEAST to create `RSV2.xml` given 
-the LPhy script [RSV2.lphy](https://github.com/LinguaPhylo/linguaPhylo/blob/master/tutorials/RSV2.lphy).
-
-```bash
-$BEAST_FOLDER/bin/lphybeast tutorials/RSV2.lphy
-```
-
-Create 10 BEAST 2 XMLs for a simple 
-[HKY+Coalescent](https://github.com/LinguaPhylo/linguaPhylo/blob/master/examples/hkyCoalescent.lphy) 
-simulation study:
-
-
-```bash
-$BEAST_FOLDER/bin/lphybeast -r 10 examples/hkyCoalescent
-```
-
-More scripts are available in 
-[linguaPhylo/examples](https://github.com/LinguaPhylo/linguaPhylo/tree/master/examples).
 
 ## Tutorials
 
