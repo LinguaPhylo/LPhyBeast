@@ -176,8 +176,6 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             if (generator instanceof UCLN ucln) {
 
                 UCRelaxedClockModel relaxedClockModel = (UCRelaxedClockModel) context.getBEASTObject(generator);
-                relaxedClockModel.setID(branchRates.getCanonicalId());
-
                 treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
 
                 if (skipBranchOperators == false) {
