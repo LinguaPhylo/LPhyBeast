@@ -10,7 +10,6 @@ import beast.base.evolution.likelihood.ThreadedTreeLikelihood;
 import beast.base.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
-import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.RealParameter;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
@@ -20,7 +19,7 @@ import consoperators.InConstantDistanceOperator;
 import consoperators.SimpleDistance;
 import consoperators.SmallPulley;
 import lphy.base.distribution.DiscretizedGamma;
-import lphy.base.distribution.LogNormal;
+import lphy.base.distribution.UCLN;
 import lphy.base.evolution.branchrate.LocalBranchRates;
 import lphy.base.evolution.branchrate.LocalClock;
 import lphy.base.evolution.likelihood.PhyloCTMC;
@@ -174,25 +173,15 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         if (branchRates != null) {
 
             Generator generator = branchRates.getGenerator();
-            if (generator instanceof IID &&
-                    ((IID<?>) generator).getBaseDistribution() instanceof LogNormal) {
+            if (generator instanceof UCLN ucln) {
 
-                // simpleRelaxedClock.lphy
-                UCRelaxedClockModel relaxedClockModel = new UCRelaxedClockModel();
+                UCRelaxedClockModel relaxedClockModel = (UCRelaxedClockModel) context.getBEASTObject(generator);
+                relaxedClockModel.setID(branchRates.getCanonicalId());
 
-                Prior logNormalPrior = (Prior) context.getBEASTObject(generator);
-
-                RealParameter beastBranchRates = context.getAsRealParameter(branchRates);
-
-                relaxedClockModel.setInputValue("rates", beastBranchRates);
-                relaxedClockModel.setInputValue("tree", tree);
-                relaxedClockModel.setInputValue("distr", logNormalPrior.distInput.get());
-                relaxedClockModel.setID(branchRates.getCanonicalId() + ".model");
-                relaxedClockModel.initAndValidate();
                 treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
 
                 if (skipBranchOperators == false) {
-                    addRelaxedClockOperators(tree, relaxedClockModel, beastBranchRates, context);
+                    addRelaxedClockOperators(tree, relaxedClockModel, context);
                 }
 
             } else if (generator instanceof LocalBranchRates) {
@@ -287,7 +276,9 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
      * @deprecated this will be replaced by ORC soon
      */
     @Deprecated
-    private static void addRelaxedClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, RealParameter rates, BEASTContext context) {
+    private static void addRelaxedClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, BEASTContext context) {
+
+        RealParameter rates = relaxedClockModel.rateInput.get();
 
         double tWindowSize = tree.getRoot().getHeight() / 10.0;
 

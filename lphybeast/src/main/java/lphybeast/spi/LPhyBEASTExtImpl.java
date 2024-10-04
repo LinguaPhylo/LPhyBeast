@@ -100,6 +100,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
 //                StructuredCoalescentToMascot.class,
                 TreeLengthToBEAST.class,
                 TN93ToBEAST.class,
+                UCLNRelaxedClockToBEAST.class,
                 UniformToBEAST.class,
                 VectorizedDistributionToBEAST.class,
                 VectorizedFunctionToBEAST.class,
