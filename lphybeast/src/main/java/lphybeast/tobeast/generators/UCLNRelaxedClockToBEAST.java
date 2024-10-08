@@ -5,16 +5,20 @@ import beast.base.evolution.branchratemodel.UCRelaxedClockModel;
 import beast.base.inference.distribution.LogNormalDistributionModel;
 import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.RealParameter;
-import lphy.base.distribution.UCLN;
+import lphy.base.distribution.UCLNMean1;
+import lphy.base.evolution.likelihood.PhyloCTMC;
 import lphy.base.evolution.tree.TimeTree;
 import lphy.core.model.GraphicalModelNode;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
-public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLN, UCRelaxedClockModel> {
+/**
+ * For ORC package.
+ */
+public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRelaxedClockModel> {
     @Override
-    public UCRelaxedClockModel generatorToBEAST(UCLN ucln, BEASTInterface value, BEASTContext context) {
+    public UCRelaxedClockModel generatorToBEAST(UCLNMean1 ucln, BEASTInterface value, BEASTContext context) {
 
         UCRelaxedClockModel ucRelaxedClockModel = new UCRelaxedClockModel();
 
@@ -26,11 +30,19 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLN, UCRelaxed
         logNormDist.initAndValidate();
         ucRelaxedClockModel.setInputValue("distr", logNormDist);
 
-        // UclnMean
-        ucRelaxedClockModel.setInputValue("clock.rate", context.getAsRealParameter(ucln.getUclnMean()));
-
         Value<TimeTree> tree = ucln.getTree();
         ucRelaxedClockModel.setInputValue("tree", context.getBEASTObject(tree));
+
+        // set clock.rate to UclnMean
+        for (GraphicalModelNode treeOut : tree.getOutputs()) {
+            if (treeOut instanceof PhyloCTMC phyloCTMC) {
+                Value mu = phyloCTMC.getClockRate();
+                if (mu != null) // BEAST clock.rate default to 1.0
+                    ucRelaxedClockModel.setInputValue("clock.rate", context.getAsRealParameter(mu));
+//                else
+//                    ucRelaxedClockModel.setInputValue("clock.rate", new RealParameter("1.0"));
+            }
+        }
 
         if (value instanceof RealParameter rates) {
             ucRelaxedClockModel.setInputValue("rates", rates);
@@ -53,7 +65,7 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLN, UCRelaxed
     }
 
     @Override
-    public Class<UCLN> getGeneratorClass() { return UCLN.class; }
+    public Class<UCLNMean1> getGeneratorClass() { return UCLNMean1.class; }
 
     @Override
     public Class<UCRelaxedClockModel> getBEASTClass() {

@@ -10,6 +10,7 @@ import beast.base.evolution.likelihood.ThreadedTreeLikelihood;
 import beast.base.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
+import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.RealParameter;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
@@ -19,12 +20,14 @@ import consoperators.InConstantDistanceOperator;
 import consoperators.SimpleDistance;
 import consoperators.SmallPulley;
 import lphy.base.distribution.DiscretizedGamma;
-import lphy.base.distribution.UCLN;
+import lphy.base.distribution.LogNormal;
+import lphy.base.distribution.UCLNMean1;
 import lphy.base.evolution.branchrate.LocalBranchRates;
 import lphy.base.evolution.branchrate.LocalClock;
 import lphy.base.evolution.likelihood.PhyloCTMC;
 import lphy.base.evolution.substitutionmodel.RateMatrix;
 import lphy.base.evolution.tree.TimeTree;
+import lphy.core.logger.LoggerUtils;
 import lphy.core.model.Generator;
 import lphy.core.model.RandomVariable;
 import lphy.core.model.Value;
@@ -173,9 +176,33 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         if (branchRates != null) {
 
             Generator generator = branchRates.getGenerator();
-            if (generator instanceof UCLN ucln) {
+            if (generator instanceof UCLNMean1 ucln) {
 
+                // UCLNRelaxedClockToBEAST: the mean of log-normal distr on branch rates in real space
+                // must be fixed to 1.
                 UCRelaxedClockModel relaxedClockModel = (UCRelaxedClockModel) context.getBEASTObject(generator);
+                treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
+
+                if (skipBranchOperators == false) {
+                    addRelaxedClockOperators(tree, relaxedClockModel, context);
+                }
+
+            } else if (generator instanceof IID &&
+                    ((IID<?>) generator).getBaseDistribution() instanceof LogNormal) {
+                LoggerUtils.log.warning("To use ORC package, please use UCLN_Mean1 in your lphy script !");
+
+                // simpleRelaxedClock.lphy
+                UCRelaxedClockModel relaxedClockModel = new UCRelaxedClockModel();
+
+                Prior logNormalPrior = (Prior) context.getBEASTObject(generator);
+
+                RealParameter beastBranchRates = context.getAsRealParameter(branchRates);
+
+                relaxedClockModel.setInputValue("rates", beastBranchRates);
+                relaxedClockModel.setInputValue("tree", tree);
+                relaxedClockModel.setInputValue("distr", logNormalPrior.distInput.get());
+                relaxedClockModel.setID(branchRates.getCanonicalId() + ".model");
+                relaxedClockModel.initAndValidate();
                 treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
 
                 if (skipBranchOperators == false) {
