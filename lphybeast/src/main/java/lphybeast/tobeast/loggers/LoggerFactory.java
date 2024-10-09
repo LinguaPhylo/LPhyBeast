@@ -60,10 +60,23 @@ public class LoggerFactory implements LoggerHelper {
         List<TreeInterface> trees = getTrees();
         boolean multipleTrees = trees.size() > 1;
         for (TreeInterface tree : trees) {
-            TreeLoggerHelper treeLogger = new TreeLoggerCreator(tree);
-            treeLogger.setFileName(logFileStem, multipleTrees);
+            boolean create = true;
+            // if there is already a special Tree Logger, e.g. TreeWithMetaDataLogger, for this tree,
+            // then do not log it using normal Tree Logger
+            for (LoggerHelper loggerHelper : context.getExtraLoggers()) {
+                if (loggerHelper instanceof TreeLoggerHelper treeLoggerHelper) {
+                    TreeInterface extraTree = treeLoggerHelper.getTree();
+                    if (extraTree.equals(tree))
+                        create = false;
+                }
+            }
 
-            loggers.add(treeLogger.createLogger(logEvery, elements));
+            if (create) {
+                TreeLoggerHelper treeLogger = new TreeLoggerCreator(tree);
+                treeLogger.setFileName(logFileStem, multipleTrees);
+
+                loggers.add(treeLogger.createLogger(logEvery, elements));
+            }
         }
 
         // extraLoggers, create a seperated logger each time
@@ -117,6 +130,11 @@ public class LoggerFactory implements LoggerHelper {
             nonTrees.addAll(context.getExtraLoggables());
         }
 
+        // rm loggable if it is in skipLoggables
+        for (Loggable loggable : context.getSkipLoggables()) {
+            nonTrees.remove(loggable);
+        }
+
 //        for (Loggable loggable : extraLoggables) {
 //            // fix StructuredCoalescent log
 //            if (loggable instanceof Constant) {
@@ -168,13 +186,14 @@ public class LoggerFactory implements LoggerHelper {
             this.tree = tree;
         }
 
+        @Deprecated
         private boolean logMetaData() {
             TreeInterface tree = getTree();
             Map<BEASTInterface, GraphicalModelNode<?>> BEASTToLPHYMap = context.getBEASTToLPHYMap();
             GraphicalModelNode graphicalModelNode = BEASTToLPHYMap.get(tree);
             Generator generator = ((RandomVariable) graphicalModelNode).getGenerator();
 
-            // TODO more general?
+            //TODO it'd better to use MetaDataTreeLogger
             return generator instanceof SkylineCoalescent ||
                     generator instanceof StructuredCoalescent;
         }

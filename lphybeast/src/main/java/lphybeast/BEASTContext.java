@@ -1126,6 +1126,10 @@ public class BEASTContext {
         return extraLoggables;
     }
 
+    public List<Loggable> getSkipLoggables() {
+        return skipLoggables;
+    }
+
     public List<LoggerHelper> getExtraLoggers() {
         return extraLoggers;
     }
@@ -1137,6 +1141,10 @@ public class BEASTContext {
      */
     public void addExtraLoggable(Loggable loggable) {
         extraLoggables.add(loggable);
+    }
+
+    public void addSkipLoggable(Loggable loggable) {
+        skipLoggables.add(loggable);
     }
 
     /**

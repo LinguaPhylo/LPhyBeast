@@ -15,6 +15,8 @@ import static java.lang.Math.toIntExact;
 
 /**
  * Log branch rates with tree.
+ * This is for the scenario that cannot use {@link LoggerFactory.TreeLoggerCreator},
+ * which relies on the generator of lphy's tree.
  * @see TreeWithMetaDataLogger
  * @author Walter Xie
  */
@@ -25,8 +27,14 @@ public class MetaDataTreeLogger implements TreeLoggerHelper {
     final TreeInterface tree;
     String fileName;
 
+    /**
+     * create Tree Logger, using TreeWithMetaDataLogger
+     * @param branchRateModel   can be null, if so, no branchratemodel=""
+     * @param tree              cannot be null
+     * @param context           central config
+     */
     public MetaDataTreeLogger(BranchRateModel branchRateModel, TreeInterface tree, BEASTContext context) {
-        this.branchRateModel = Objects.requireNonNull(branchRateModel);
+        this.branchRateModel = branchRateModel;
         this.tree = Objects.requireNonNull(tree);
         this.context = context;
     }
@@ -41,7 +49,8 @@ public class MetaDataTreeLogger implements TreeLoggerHelper {
 
         TreeWithMetaDataLogger treeWithMetaDataLogger = new TreeWithMetaDataLogger();
         treeWithMetaDataLogger.setInputValue("tree", tree);
-        treeWithMetaDataLogger.setInputValue("branchratemodel", branchRateModel);
+        if (branchRateModel != null)
+            treeWithMetaDataLogger.setInputValue("branchratemodel", branchRateModel);
 
         logger.setInputValue("log", treeWithMetaDataLogger);
         logger.initAndValidate();

@@ -49,6 +49,7 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
             }
         }
 
+        GraphicalModelNode branchRates = context.getGraphicalModelNode(value);
         if (value instanceof RealParameter rates) {
             ucRelaxedClockModel.setInputValue("rates", rates);
 
@@ -56,16 +57,17 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
             Prior ratesPrior = BEASTContext.createPrior(logNormDist, rates);
             context.addBEASTObject(ratesPrior, ucln);
 
+            // rm rates from log
+            context.addSkipLoggable(rates);
+            // replaced by <log id="" ... branchratemodel="@" tree="@"/>
+            RateStatistic rateStatistic = LoggerUtils.createRateStatistic("RatesStat." + branchRates.getUniqueId(), ucRelaxedClockModel, beastTree);
+            context.addExtraLoggable(rateStatistic);
+            
         } else throw new IllegalArgumentException("Value sampled from LPhy UCLN should be mapped to RealParameter ! " + value);
 
         ucRelaxedClockModel.initAndValidate();
-        GraphicalModelNode branchRates = context.getGraphicalModelNode(value);
         // in case to duplicate with RandomValue id also called "branchRates"
         ucRelaxedClockModel.setID(branchRates.getUniqueId() + ".model");
-
-        //TODO rm rates from log, replaced by <log id="" ... branchratemodel="@" tree="@"/>
-        RateStatistic rateStatistic = LoggerUtils.createRateStatistic("RatesStat." + branchRates.getUniqueId(), ucRelaxedClockModel, beastTree);
-        context.addExtraLoggable(rateStatistic);
 
         // Extra Logger <log ... branchratemodel="@..." tree="@..."/>
         MetaDataTreeLogger metaDataTreeLogger = new MetaDataTreeLogger(ucRelaxedClockModel, beastTree, context);
