@@ -1,7 +1,9 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
+import beast.base.evolution.RateStatistic;
 import beast.base.evolution.branchratemodel.UCRelaxedClockModel;
+import beast.base.evolution.tree.TreeInterface;
 import beast.base.inference.distribution.LogNormalDistributionModel;
 import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.RealParameter;
@@ -12,6 +14,8 @@ import lphy.core.model.GraphicalModelNode;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
+import lphybeast.tobeast.LoggerUtils;
+import lphybeast.tobeast.loggers.MetaDataTreeLogger;
 
 /**
  * For ORC package.
@@ -31,7 +35,8 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
         ucRelaxedClockModel.setInputValue("distr", logNormDist);
 
         Value<TimeTree> tree = ucln.getTree();
-        ucRelaxedClockModel.setInputValue("tree", context.getBEASTObject(tree));
+        TreeInterface beastTree = (TreeInterface) context.getBEASTObject(tree);
+        ucRelaxedClockModel.setInputValue("tree", beastTree);
 
         // set clock.rate to UclnMean
         for (GraphicalModelNode treeOut : tree.getOutputs()) {
@@ -58,8 +63,13 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
         // in case to duplicate with RandomValue id also called "branchRates"
         ucRelaxedClockModel.setID(branchRates.getUniqueId() + ".model");
 
-        //TODO rm rates from log, replaced by
-        // <log id="ORCRatesStat" spec="beast.base.evolution.RateStatistic" branchratemodel="@OptimisedRelaxedClock" tree="@Tree"/>
+        //TODO rm rates from log, replaced by <log id="" ... branchratemodel="@" tree="@"/>
+        RateStatistic rateStatistic = LoggerUtils.createRateStatistic("RatesStat." + branchRates.getUniqueId(), ucRelaxedClockModel, beastTree);
+        context.addExtraLoggable(rateStatistic);
+
+        // Extra Logger <log ... branchratemodel="@..." tree="@..."/>
+        MetaDataTreeLogger metaDataTreeLogger = new MetaDataTreeLogger(ucRelaxedClockModel, beastTree, context);
+        context.addExtraLogger(metaDataTreeLogger);
 
         return ucRelaxedClockModel;
     }

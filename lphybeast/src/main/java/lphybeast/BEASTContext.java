@@ -105,6 +105,8 @@ public class BEASTContext {
     //*** operators ***//
     // a list of extra loggables in 3 default loggers: parameter logger, screen logger, tree logger.
     private List<Loggable> extraLoggables = new ArrayList<>();
+    // a list of extra loggables in 3 default loggers: parameter logger, screen logger, tree logger.
+    private List<Loggable> skipLoggables = new ArrayList<>();
     // helper to create extra loggers from extensions
     private List<LoggerHelper> extraLoggers = new ArrayList<>();
 
