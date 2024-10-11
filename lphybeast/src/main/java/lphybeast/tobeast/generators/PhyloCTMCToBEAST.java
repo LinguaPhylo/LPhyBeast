@@ -183,15 +183,26 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
         treeLikelihood.setInputValue("tree", tree);
 
+        Value<Number> clockRateValue = phyloCTMC.getClockRate();
+        // clock.rate
+        RealParameter clockRateParam = getClockRateParam(clockRateValue, context);
+        // updown op when estimating clock.rate
+        if (clockRateValue instanceof RandomVariable && timeTreeValue instanceof RandomVariable && skipBranchOperators == false) {
+            DefaultOperatorStrategy.addUpDownOperator(tree, clockRateParam, context);
+        }
+
+        // relaxed or local clock
         Value<Double[]> branchRates = phyloCTMC.getBranchRates();
 
         if (branchRates != null) {
-
+            /**
+             * 1. Use ORC package (relaxed clock) where UCLNMean1 is used in LPhy
+             * 2. Keep the alternative option to use IID LogNormal on branch rates in LPhy, but XML is not recommended.
+             */
             Generator generator = branchRates.getGenerator();
             if (generator instanceof UCLNMean1 ucln) {
 
-                // UCLNRelaxedClockToBEAST: the mean of log-normal distr on branch rates in real space
-                // must be fixed to 1.
+                // UCLNRelaxedClockToBEAST: the mean of log-normal distr on branch rates in real space is fixed to 1.
                 UCRelaxedClockModel relaxedClockModel = (UCRelaxedClockModel) context.getBEASTObject(generator);
                 treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
 
@@ -231,24 +242,22 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
         } else {
             StrictClockModel clockModel = new StrictClockModel();
-            Value<Number> clockRate = phyloCTMC.getClockRate();
-
-            RealParameter clockRatePara;
-            if (clockRate != null) {
-                clockRatePara = context.getAsRealParameter(clockRate);
-
-            } else {
-                clockRatePara =  BEASTContext.createRealParameter(1.0);
-            }
-            clockModel.setInputValue("clock.rate", clockRatePara);
+            clockModel.setInputValue("clock.rate", clockRateParam);
             treeLikelihood.setInputValue("branchRateModel", clockModel);
-
-            if (clockRate instanceof RandomVariable && timeTreeValue instanceof RandomVariable && skipBranchOperators == false) {
-                DefaultOperatorStrategy.addUpDownOperator(tree, clockRatePara, context);
-            }
         }
+
     }
 
+    private static RealParameter getClockRateParam(Value<Number> clockRateValue, BEASTContext context) {
+        RealParameter clockRateParam;
+        if (clockRateValue != null) {
+            clockRateParam = context.getAsRealParameter(clockRateValue);
+
+        } else {
+            clockRateParam =  BEASTContext.createRealParameter(1.0);
+        }
+        return clockRateParam;
+    }
 
     /**
      * @param phyloCTMC the phyloCTMC object
@@ -327,7 +336,10 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
          * All operators insider AdaptableOperatorSampler use weight 1.0
          */
         context.addSkipOperator(rates);
-        if (orcSigma instanceof StateNode stateNode) {
+
+        Prior sigmaPrior = context.getPrior(orcSigma);
+        // if ORCsigma is estimated, then add operators
+        if (orcSigma instanceof StateNode stateNode && sigmaPrior != null) {
             context.addSkipOperator(stateNode);
 
             // 1.1 ORCucldStdevScaler
@@ -348,9 +360,6 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
                     "weight", 1.0, "scaleFactor", 0.5);
             scaleOperator.setID("ORCUcldStdevScale." + stateNode.getID());
 
-            Prior sigmaPrior = context.getPrior(orcSigma);
-            if (sigmaPrior == null) throw new IllegalArgumentException("Cannot find BEAST prior of " + orcSigma + " !");
-
             // 1.4 ORCSampleFromPriorOperator_sigma
             SampleFromPriorOperator sampleFromPriorOperator = new SampleFromPriorOperator();
             sampleFromPriorOperator.initByName("parameter", orcSigma, "prior2", sigmaPrior, "weight", 1.0);
@@ -366,7 +375,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             sigmaAOSampler.setID("ORCAdaptableOperatorSampler." + stateNode.getID());
 
             context.addExtraOperator(sigmaAOSampler);
-        } else throw new IllegalArgumentException("ORCsigma should be StateNode !");
+        }
 
         // 2. rates_root
         SimpleDistance simpleDistance = getSimpleDistance(tree, relaxedClockModel, rates);
@@ -418,6 +427,9 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         Exchange exchange = new Exchange();
         exchange.initByName("tree", tree, "weight", 1.0);
         exchange.setID("ORCNER_Exchange.NER." + tree.getID());
+
+        //TODO disable <operator id="YuleModelNarrow" spec="Exchange" tree="@Tree" weight="0.0"/>
+
         // ORCNER_dAE_dBE_dCE
         NEROperator_dAE_dBE_dCE nerOperator = new NEROperator_dAE_dBE_dCE();
         nerOperator.initByName("rates", rates, "tree", tree, "weight", 1.0);

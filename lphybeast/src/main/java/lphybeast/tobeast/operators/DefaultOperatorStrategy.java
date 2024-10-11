@@ -75,13 +75,13 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
      */
     public List<Operator> createOperators() {
         List<Operator> operators = createStandardOperators(context);
-
+        // extra operators
         operators.addAll(context.getExtraOperators());
         operators.sort(Comparator.comparing(BEASTObject::getID));
         return operators;
     }
 
-    // operators before BEAST 2.7
+    // operators handled by lphybeast framework
     private List<Operator> createStandardOperators(BEASTContext context) {
         List<Operator> operators = new ArrayList<>();
 

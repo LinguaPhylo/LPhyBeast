@@ -26,14 +26,6 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
 
         UCRelaxedClockModel ucRelaxedClockModel = new UCRelaxedClockModel();
 
-        LogNormalDistributionModel logNormDist = new LogNormalDistributionModel();
-        // Note: the mean of log-normal distr on branch rates in real space must be fixed to 1.
-        logNormDist.setInputValue("M", new RealParameter("1.0"));
-        logNormDist.setInputValue("meanInRealSpace", "true");
-        logNormDist.setInputValue("S", context.getAsRealParameter(ucln.getUclnSigma()));
-        logNormDist.initAndValidate();
-        ucRelaxedClockModel.setInputValue("distr", logNormDist);
-
         Value<TimeTree> tree = ucln.getTree();
         TreeInterface beastTree = (TreeInterface) context.getBEASTObject(tree);
         ucRelaxedClockModel.setInputValue("tree", beastTree);
@@ -52,6 +44,13 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
         GraphicalModelNode branchRates = context.getGraphicalModelNode(value);
         if (value instanceof RealParameter rates) {
             ucRelaxedClockModel.setInputValue("rates", rates);
+
+            LogNormalDistributionModel logNormDist = new LogNormalDistributionModel();
+            // Note: the mean of log-normal distr on branch rates in real space must be fixed to 1.
+            logNormDist.initByName("M", new RealParameter("1.0"), "meanInRealSpace", "true",
+                    "S", context.getAsRealParameter(ucln.getUclnSigma()));
+            logNormDist.setID("LogNormalDistr." + branchRates.getUniqueId());
+            ucRelaxedClockModel.setInputValue("distr", logNormDist);
 
             // branch rates LogNormal prior, which is same LogNormal as UCLN
             Prior ratesPrior = BEASTContext.createPrior(logNormDist, rates);
