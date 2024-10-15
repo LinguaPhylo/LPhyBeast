@@ -57,6 +57,12 @@ public class LPhyBeastConfig {
     private Path model2File = null;
     public boolean log_orignal_xmls = false;
 
+    // nested sampling
+    public boolean ns = false;
+    int particleCount;
+    int subChainLength;
+    int nsThreads;
+
     /**
      * The configuration to create a BEAST 2 XML.
      * Handle the input file path, output file path, and user.dir.
@@ -244,5 +250,24 @@ public class LPhyBeastConfig {
 
     public Path getModel2File() {
         return model2File;
+    }
+
+    public void setNS(boolean ns, int particleCount, int subChainLength, int nsThreads ) {
+        this.ns = ns;
+        this.particleCount = particleCount;
+        this.subChainLength = subChainLength;
+        this.nsThreads = nsThreads;
+    }
+
+    public int getParticleCount() {
+        return particleCount;
+    }
+
+    public int getSubChainLength() {
+        return subChainLength;
+    }
+
+    public int getNsThreads() {
+        return nsThreads;
     }
 }

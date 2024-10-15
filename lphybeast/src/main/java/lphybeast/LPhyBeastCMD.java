@@ -99,6 +99,19 @@ public class LPhyBeastCMD implements Callable<Integer> {
             description = "logging both original BEAST XML created by two LPhy scripts for model mis-specification.")
     boolean log_orignal_xmls;
 
+    // TODO nested sampling
+//    @Option(names = {"-NS", "--nestedSampling"}, defaultValue = "false",
+//            description = "Create XML for nested sampling.")
+//    boolean ns;
+//    @Option(names = {"-p", "--particleCount"}, defaultValue = "100",
+//            description = "The number of particles (also known as active points).")
+//    int particleCount;
+//    @Option(names = {"-sl", "--subChainLength"}, defaultValue = "5000",
+//            description = "The length of MCMC chain used to generate a new point.")
+//    int subChainLength;
+//    @Option(names = {"-NSth", "--nsThreads"}, defaultValue = "1",
+//            description = "The number of threads for nested sampling.")
+//    int nsThreads;
 
 //    @Option(names = {"-d", "--data"},
 //            description = "Select the alignment given ID (e.g. random variable name) to compress constant sites, " +
@@ -152,6 +165,8 @@ public class LPhyBeastCMD implements Callable<Integer> {
             lPhyBeastConfig.setCompressConstantAlignment(compressConstantAlignment);
             // model misspecification test
             lPhyBeastConfig.setModelMisspec(model2File, log_orignal_xmls);
+            // ns
+//            lPhyBeastConfig.setNS(ns, particleCount, subChainLength, nsThreads);
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);
