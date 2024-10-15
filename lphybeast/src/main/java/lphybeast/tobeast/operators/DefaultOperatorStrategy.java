@@ -3,6 +3,9 @@ package lphybeast.tobeast.operators;
 import beast.base.core.BEASTInterface;
 import beast.base.core.BEASTObject;
 import beast.base.core.Function;
+import beast.base.evolution.operator.AdaptableOperatorSampler;
+import beast.base.evolution.operator.Exchange;
+import beast.base.evolution.operator.TreeOperator;
 import beast.base.evolution.operator.kernel.BactrianScaleOperator;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.Operator;
@@ -74,16 +77,9 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
      * @return  a list of {@link Operator}.
      */
     public List<Operator> createOperators() {
-        List<Operator> operators = createStandardOperators(context);
-        // extra operators
-        operators.addAll(context.getExtraOperators());
-        operators.sort(Comparator.comparing(BEASTObject::getID));
-        return operators;
-    }
-
-    // operators handled by lphybeast framework
-    private List<Operator> createStandardOperators(BEASTContext context) {
         List<Operator> operators = new ArrayList<>();
+        // extra operators
+        List<Operator> extraOperators = context.getExtraOperators();
 
         Set<StateNode> skipOperators = context.getSkipOperators();
         for (StateNode stateNode : context.getState()) {
@@ -103,13 +99,59 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                     if (treeOperators.size() < 1)
                         throw new IllegalArgumentException("No operators are created by strategy " +
                                 treeOperatorStrategy.getName() + " !");
-                    operators.addAll(treeOperators);
+
+                    List<Operator> noDuplicatedOperators = getNoDuplicatedOperators(treeOperators, extraOperators);
+
+                    operators.addAll(noDuplicatedOperators);
                 }
             }
         }
 
+        // then add all extra
+        operators.addAll(extraOperators);
+        operators.sort(Comparator.comparing(BEASTObject::getID));
         return operators;
     }
+
+    /**
+     * It is expecting to remove the standard op, if an extra operator is same as a standard op,
+     * and they are both working on the same state node.
+     * But Operator cannot locate StateNode, so it is only working on TreeOperator at the moment.
+     */
+    private List<Operator> getNoDuplicatedOperators(List<Operator> operators, List<Operator> extraOperators) {
+        List<Operator> newOperators = new ArrayList<>();
+        for (Operator stdOp : operators) {
+            boolean add = true;
+            for (Operator extraOperator : extraOperators) {
+                // only consider extra operator could be AdaptableOperatorSampler, but standard op is not
+                for (Operator extra : getActualOperators(extraOperator)) {
+                    // same operators operate on the same tree
+                    if (stdOp instanceof TreeOperator stdTreeOP && extra instanceof TreeOperator extraTreeOP
+                            && stdTreeOP.getClass().equals(extraTreeOP.getClass())
+                            && stdTreeOP.treeInput.get().equals(extraTreeOP.treeInput.get())) {
+                        // narrow or wide Exchange
+                        if (stdOp instanceof Exchange exchange && extra instanceof Exchange exchange2
+                            && exchange2.isNarrowInput.get().equals(exchange.isNarrowInput.get())) {
+                            // cannot remove it from original list
+                            LoggerUtils.log.info("Skip the duplicated operator: " + stdOp + " for " + stdTreeOP.treeInput.get().getID());
+                            add = false;
+                        }
+                    }
+                }
+            }
+            // after the duplication check
+            if (add)
+                newOperators.add(stdOp);
+        }
+        return newOperators;
+    }
+
+    private List<Operator> getActualOperators(Operator operator) {
+        if (operator instanceof AdaptableOperatorSampler sampler)
+            return sampler.operatorsInput.get();
+        else return List.of(operator);
+    }
+
 
     //*** parameter operators ***//
 
