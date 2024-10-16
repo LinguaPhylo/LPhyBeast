@@ -100,6 +100,7 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                         throw new IllegalArgumentException("No operators are created by strategy " +
                                 treeOperatorStrategy.getName() + " !");
 
+                    // rm the tree operator (e.g. Narrow Exchange by ORC) duplicated to extraOperators
                     List<Operator> noDuplicatedOperators = getNoDuplicatedOperators(treeOperators, extraOperators);
 
                     operators.addAll(noDuplicatedOperators);
