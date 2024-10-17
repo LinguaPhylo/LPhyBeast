@@ -82,6 +82,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 GTRToBEAST.class,
                 HKYToBEAST.class,
                 IIDToBEAST.class,
+                InternalNodesIDToBEAST.class,
                 InverseGammaToBEAST.class,
                 JukesCantorToBEAST.class,
                 K80ToBEAST.class,
