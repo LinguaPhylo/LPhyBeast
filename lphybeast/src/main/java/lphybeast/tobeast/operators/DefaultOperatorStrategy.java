@@ -110,7 +110,9 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
 
         // then add all extra
         operators.addAll(extraOperators);
-        operators.sort(Comparator.comparing(BEASTObject::getID));
+        operators.sort(Comparator.comparing(BEASTObject::getID,
+                Comparator.nullsLast(String::compareTo) // Handle null IDs
+                ));
         return operators;
     }
 
