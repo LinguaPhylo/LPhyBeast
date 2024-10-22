@@ -25,6 +25,7 @@ import feast.function.Concatenate;
 import jebl.evolution.sequences.SequenceType;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.*;
+import lphy.core.parser.DataClampingUtils;
 import lphy.core.parser.LPhyParserDictionary;
 import lphy.core.parser.graphicalmodel.GraphicalModelNodeVisitor;
 import lphy.core.parser.graphicalmodel.ValueCreator;
@@ -626,7 +627,7 @@ public class BEASTContext {
      * Make a BEAST2 model from the current model in parser.
      */
     private void createBEASTObjects() {
-
+        // all sinks of the graphical model, including in the data block.
         List<Value<?>> sinks = parserDictionary.getDataModelSinks();
 
         for (Value<?> value : sinks) {
@@ -675,10 +676,19 @@ public class BEASTContext {
         }
 
         // now that the inputs are done we can do this one.
-        if (beastObjects.get(value) == null) {
+        // TODO && is not data clamping
+        if (beastObjects.get(value) == null && !skipValue(value)) {
             valueToBEAST(value);
         }
 
+    }
+
+    // if data is clamped, skip valueToBEAST for simulated value in the model block,
+    // so that the XML would create duplicated alignment blocks.
+    private boolean skipValue(Value<?> value) {
+        if (DataClampingUtils.isClamped(value.getCanonicalId(), parserDictionary))
+            return parserDictionary.getModelValues().contains(value);
+        return false;
     }
 
     private void traverseBEASTGeneratorObjects(Value<?> value, boolean modifyValues, boolean createGenerators, Set<Generator> visited) {
