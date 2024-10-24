@@ -149,6 +149,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         SiteModel siteModel = constructSiteModel(phyloCTMC, context);
         treeLikelihood.setInputValue("siteModel", siteModel);
 
+        treeLikelihood.setInputValue("useAmbiguities", true);
         treeLikelihood.initAndValidate();
         treeLikelihood.setID(alignment.getID() + ".treeLikelihood");
         // logging
