@@ -17,6 +17,8 @@ Login Troubleshooting https://docs.nesi.org.nz/General/FAQs/Login_Troubleshootin
 
 Make sure you can access your NeSI home folder before the next step.
 
+More training: https://docs.nesi.org.nz/Scientific_Computing/Training/Introduction_to_computing_on_the_NeSI_HPC_YouTube_Recordings/
+
 ## 2. Setup BEAST 2
 
 You need to install BEAST 2 and packages in your NeSI **home** folder. Here is the instruction:
@@ -83,5 +85,23 @@ module load Java/17
 srun /home/???/beast/bin/beast -beagle_SSE -seed SEED ../FILE
 ```
 
-- Parallel Execution https://docs.nesi.org.nz/Getting_Started/Next_Steps/Parallel_Execution/
-- Slurm https://docs.nesi.org.nz/Getting_Started/Cheat_Sheets/Slurm-Reference_Sheet/
+After modify the placeholders into your values, save it to a file, such as `test.sl`. Then use Slurm to submit the job:
+
+```bash
+sbatch test.sl
+```
+
+Check your job:
+
+```bash
+squeue --me
+```
+
+More Slurm commands: https://docs.nesi.org.nz/Getting_Started/Cheat_Sheets/Slurm-Reference_Sheet/
+
+### Parallel computing
+
+Parallel Execution https://docs.nesi.org.nz/Getting_Started/Next_Steps/Parallel_Execution/
+
+
+
