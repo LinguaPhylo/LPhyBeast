@@ -40,6 +40,13 @@ tar -xvzf BEAST.v2.7.7.Linux.x86.tgz
 ls
 ```
 
+Mac could [automatically extract](https://apple.stackexchange.com/questions/260152/why-does-tar-gz-automatically-extract-the-gzip-archive-when-i-download-it-in-sa) 
+the `.tgz` file into a `.tar` file. In this case, you can use the command below without `-z`:
+
+```bash
+tar -xvf BEAST.v2.7.7.Linux.x86.tar
+```
+
 iii. List or install BEAST 2 packages using [Package Manager](https://www.beast2.org/managing-packages/) from command line.
 
 ```bash
