@@ -103,5 +103,43 @@ More Slurm commands: https://docs.nesi.org.nz/Getting_Started/Cheat_Sheets/Slurm
 
 Parallel Execution https://docs.nesi.org.nz/Getting_Started/Next_Steps/Parallel_Execution/
 
+### Batch processing
 
+How to run 100 XMLs at one time? 
+You can directly use or modify the following bash script to submit many jobs at one time:
+
+```bash
+#!/usr/bin/env bash
+DIR=$1
+TEMPLATE=mytemplate
+
+# 1. create templates ready to submit
+for file in *.xml; do
+seed=$(( ( RANDOM % 10000 )  + 1 ))
+base=${file##*-} # after last -
+stem=${base%.*}
+sed "s/FILE/$file/g;s/PREFIX/$stem/g;s/SEED/$seed/g" ./${TEMPLATE} > $DIR/${stem}.sl
+echo "save to $DIR/$stem created from $file at seed $seed using template ${TEMPLATE}"
+done
+
+# 2. submit all templates
+cd $DIR
+echo "$PWD"
+for tmpfl in *.sl; do
+sbatch $tmpfl
+#  rm -f $tmpfl
+echo "submit job $tmpfl"
+sleep 1
+done
+cd ..
+```
+
+This script consists of two parts. 
+The first part generates a Slurm template `${stem}.sl` for each XML file and saves it in the directory `$DIR`. 
+The second part navigates to that directory and submits all the jobs.
+
+**Please note**: 
+- the logger section in each XML has to use different log file names and tree file names, otherwise they will be overwritten each other.
+- use `sleep 1` command between each job submission to prevent overwhelming the cluster 
+with too many simultaneous requests.
 
