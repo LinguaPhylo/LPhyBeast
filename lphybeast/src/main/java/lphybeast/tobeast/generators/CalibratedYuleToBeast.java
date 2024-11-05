@@ -6,6 +6,7 @@ import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.speciation.CalibratedYuleModel;
 import beast.base.evolution.speciation.CalibrationPoint;
 import beast.base.evolution.tree.MRCAPrior;
+import beast.base.evolution.tree.TreeInterface;
 import beast.base.inference.Distribution;
 import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.distribution.Prior;
@@ -20,6 +21,8 @@ import lphybeast.GeneratorToBEAST;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static lphybeast.tobeast.TaxaUtils.getTaxonSet;
 
 /**
  * Only supports single calibrations at the moment.
@@ -36,7 +39,7 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
 
         Value<Number[]> cladeMCRAAge = generator.getCladeMRCAAge();
 
-        Value calibrations = generator.getCladeTaxa();
+        Value cladeTaxa = generator.getCladeTaxa();
 
         // unwrapping first element from array
         // TODO handle multiple calibrations
@@ -54,32 +57,28 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
         if (priorGenerator instanceof GenerativeDistribution<?>) {
             // get the distribution for calibration
             Prior calibrationPrior = (Prior) context.getBEASTObject(priorGenerator);
-            //
             ParametricDistribution calibrationDistribution = calibrationPrior.distInput.get();
-
+            // remove the clade mrca age in the prior section
             context.removeBEASTObject(calibrationPrior);
 
-            if (Taxa.class.isAssignableFrom(calibrations.getType())) {
-                TaxonSet cladeTaxa = new TaxonSet();
-                ArrayList<Taxon> taxa = new ArrayList<>();
-                Taxa lphyTaxa = (Taxa) calibrations.value();
-                for (String tN : lphyTaxa.getTaxaNames()) {
-                    Taxon taxon = new Taxon(tN);
-                    taxa.add(taxon);
-                }
-                cladeTaxa.initByName("taxon", taxa);
+            // get TaxonSet for calibrations
+            // get taxa names
+            String[] cladeNames = new String[((Taxa) cladeTaxa.value()).length()];
+            int index = 0;
+            for (String name : ((Taxa) cladeTaxa.value()).getTaxaNames()) {
+                cladeNames[index++] = name;
+            }
 
+            TaxonSet cladeTaxonSet = getTaxonSet((TreeInterface) value, cladeNames);
 
-                CalibrationPoint calibrationPoint = new CalibrationPoint();
-                calibrationPoint.setInputValue("taxonset", cladeTaxa);
-                calibrationPoint.setInputValue("distr", calibrationDistribution);
-                calibrationPoint.initAndValidate();
+            CalibrationPoint calibrationPoint = new CalibrationPoint();
+            calibrationPoint.setInputValue("taxonset", cladeTaxonSet);
+            calibrationPoint.setInputValue("distr", calibrationDistribution);
+            calibrationPoint.initAndValidate();
 
-                calibratedYuleModel.setInputValue("calibrations", calibrationPoint);
-            } else
-                throw new UnsupportedOperationException();
-
-        }
+            calibratedYuleModel.setInputValue("calibrations", calibrationPoint);
+        } else
+            throw new UnsupportedOperationException();
 
         calibratedYuleModel.initAndValidate();
         return calibratedYuleModel;

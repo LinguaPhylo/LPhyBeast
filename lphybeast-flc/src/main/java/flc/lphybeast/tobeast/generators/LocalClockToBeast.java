@@ -3,6 +3,7 @@ package flc.lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.alignment.Taxon;
 import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.TreeInterface;
 import beast.base.inference.parameter.RealParameter;
 import lphy.base.evolution.branchrate.LocalClock;
 import lphy.base.evolution.tree.TimeTree;
@@ -16,6 +17,8 @@ import mf.beast.evolution.branchratemodel.StrictLineageClockModel;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static lphybeast.tobeast.TaxaUtils.getTaxonSet;
 
 public class LocalClockToBeast implements GeneratorToBEAST<LocalClock, FlexibleLocalClockModel> {
     public FlexibleLocalClockModel generatorToBEAST(LocalClock localClock, BEASTInterface value, BEASTContext context) {
@@ -34,24 +37,23 @@ public class LocalClockToBeast implements GeneratorToBEAST<LocalClock, FlexibleL
         // TODO: current FLC fix assumes one clade model
         // add multi clade model in the future
         Object[] cladesValue = clades.value();
+
         for (int i = 0; i < cladesValue.length; i++) {
             TimeTreeNode node = (TimeTreeNode) cladesValue[i];
-            TaxonSet cladeTaxa = new TaxonSet();
-            ArrayList<Taxon> taxa = new ArrayList<>();
             List<TimeTreeNode> leaves = node.getAllLeafNodes();
+            String[] cladeNames = new String[leaves.size()];
+
             for (int j = 0; j < leaves.size(); j++) {
-                Taxon taxon = new Taxon(leaves.get(j).getId());
-                taxa.add(taxon);
+                cladeNames[j] = leaves.get(j).getId();
             }
-            cladeTaxa.initByName("taxon", taxa);
+
+            TaxonSet cladeTaxonSet = getTaxonSet((TreeInterface) context.getBEASTObject(tree.getId()), cladeNames);
             cladeModel.initByName(
-                    "taxonset", cladeTaxa,
+                    "taxonset", cladeTaxonSet,
                     "clock.rate", cladeRates.value()[i].toString(),
                     "includeStem", includeStem.value()
             );
         }
-
-
 
         flc.initByName(
                 "rootClockModel", rootCladeModel,
