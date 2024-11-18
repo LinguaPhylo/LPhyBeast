@@ -36,7 +36,8 @@ public class InternalNodesIDToBEAST implements GeneratorToBEAST<InternalNodesID,
             // rm old beast obj
             Tree treeInternalNodesNoID = (Tree) context.getBEASTObject(lphyTreeInternalNodesNoID);
             context.removeBEASTObject(treeInternalNodesNoID);
-
+            // this creates a new YuleModel mapping in lphybeast
+            context.removeBEASTObject(treeDistribution);
             return treeDistribution;
 
         } else throw new IllegalArgumentException();
