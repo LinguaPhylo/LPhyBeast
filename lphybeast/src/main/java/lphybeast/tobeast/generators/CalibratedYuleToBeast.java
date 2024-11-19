@@ -37,13 +37,14 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
         calibratedYuleModel.setInputValue("birthRate", context.getAsRealParameter(generator.getBirthRate()));
 
 
-        Value<Number[]> cladeMCRAAge = generator.getCladeMRCAAge();
+        Value<Number[]> cladeMRCAAge = generator.getCladeMRCAAge();
 
         Value cladeTaxa = generator.getCladeTaxa();
 
-        // unwrapping first element from array
+        // unwrapping first element from array, only for parameter generated from distributions.
+        // cause error if constant number pass in
         // TODO handle multiple calibrations
-        BasicFunction tmp = (BasicFunction) cladeMCRAAge.getInputs().get(0);
+        BasicFunction tmp = (BasicFunction) cladeMRCAAge.getInputs().get(0);
 
         // cladeAgeValue
         Value cladeAgeValue = tmp.getParams().get("0");
