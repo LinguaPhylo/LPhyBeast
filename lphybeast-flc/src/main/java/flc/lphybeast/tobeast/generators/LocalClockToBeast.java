@@ -26,7 +26,12 @@ public class LocalClockToBeast implements GeneratorToBEAST<LocalClock, FlexibleL
 
         Value<Double> rootRate = localClock.getRootRate();
         StrictLineageClockModel rootCladeModel = new StrictLineageClockModel();
-        rootCladeModel.initByName("clock.rate", new RealParameter(rootRate.valueToString()));
+
+        RealParameter rootRateParameter = new RealParameter(rootRate.valueToString());
+        // specify the parameter has the upper bound at 1.0
+        rootRateParameter.setInputValue("upper", 1.0);
+
+        rootCladeModel.initByName("clock.rate", rootRateParameter);
 
         Value<Object[]> clades = localClock.getClades();
         Value<Double[]> cladeRates = localClock.getCladeRates();
