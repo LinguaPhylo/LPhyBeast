@@ -14,7 +14,7 @@ import lphy.base.evolution.coalescent.SkylineCoalescent;
 import lphy.base.evolution.coalescent.StructuredCoalescent;
 import lphy.core.model.Generator;
 import lphy.core.model.GraphicalModelNode;
-import lphy.core.model.RandomVariable;
+import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 
 import java.util.*;
@@ -191,7 +191,7 @@ public class LoggerFactory implements LoggerHelper {
             TreeInterface tree = getTree();
             Map<BEASTInterface, GraphicalModelNode<?>> BEASTToLPHYMap = context.getBEASTToLPHYMap();
             GraphicalModelNode graphicalModelNode = BEASTToLPHYMap.get(tree);
-            Generator generator = ((RandomVariable) graphicalModelNode).getGenerator();
+            Generator generator = ((Value) graphicalModelNode).getGenerator();
 
             //TODO it'd better to use MetaDataTreeLogger
             return generator instanceof SkylineCoalescent ||
