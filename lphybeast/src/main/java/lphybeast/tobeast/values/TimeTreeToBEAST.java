@@ -30,7 +30,10 @@ public class TimeTreeToBEAST implements ValueToBEAST<TimeTree, TreeParser> {
 
         TreeParser tree = new TreeParser();
         tree.setInputValue("newick", timeTree.toNewick(false));
+        // TODO seems IsLabelledNewick="true" causes the trouble when cares internal node index
         tree.setInputValue("IsLabelledNewick", true);
+        // IsLabelledNewick="true" Is the Newick tree labelled (alternatively contains node numbers).
+//        tree.setInputValue("IsLabelledNewick", false);
 
         TaxonSet taxa = new TaxonSet();
         List<Taxon> taxonList = context.createTaxonList(getTaxaNames(timeTree));
