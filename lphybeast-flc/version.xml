@@ -1,4 +1,4 @@
-<package name='lphybeast-flc' version='0.0.1'>
+<package name='lphybeast.flc' version='0.0.1'>
     <depends on='lphybeast' atleast='1.2.0'/>
 
     <depends on='flc' atleast='1.2.0'
