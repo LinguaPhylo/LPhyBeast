@@ -141,9 +141,10 @@ public class LPhyBeast implements Runnable {
         // check if it is model misspecification test
         Path lphyM2 = lPhyBeastConfig.getModel2File();
         if (lphyM2 == null) { // normal lphybeast run
-            // must provide File lphyFile, int numReplicates, Long seed
-            Map<Integer, List<Value>> allReps = simulator.simulateAndLog(lphyFile, filePathNoExt,
-                    1, constants, varNotLog, null);
+            // must provide File lphyFile, int numReplicates, Long seed.
+            // filePathNoExt + "_true" distinguish files containing true values and true trees.
+            Map<Integer, List<Value>> allReps = simulator.simulateAndLog(lphyFile,
+                    filePathNoExt + "_true", 1, constants, varNotLog, null);
 
             parserDictFinal = simulator.getParserDictionary();
 
