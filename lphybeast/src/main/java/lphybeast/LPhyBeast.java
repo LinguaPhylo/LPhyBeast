@@ -98,8 +98,15 @@ public class LPhyBeast implements Runnable {
                 // add _i after file stem
                 lPhyBeastConfig.setRepId(i);
 //                BufferedReader reader = lphyReader();
-                // need new reader
-                writeXMLFrom();
+                try {
+                    // need new reader
+                    writeXMLFrom();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("try replicate "  + i + " again ...");
+                    // try another simulation
+                    writeXMLFrom();
+                }
             }
         } else { // 1 simulation
 //            BufferedReader reader = lphyReader();
