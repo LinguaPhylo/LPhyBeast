@@ -75,6 +75,13 @@
         </dependency>
         <dependency>
             <groupId>beast2</groupId>
+            <artifactId>mc3</artifactId>
+            <version>1.2.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/CoupledMCMC.v1.2.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>beast2</groupId>
             <artifactId>bdtree</artifactId>
             <version>0.0.1</version>
             <scope>system</scope>
