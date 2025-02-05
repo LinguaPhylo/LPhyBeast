@@ -21,6 +21,7 @@ import beastlabs.core.util.Slice;
 import beastlabs.util.BEASTVector;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import coupledMCMC.CoupledMCMC;
 import feast.function.Concatenate;
 import jebl.evolution.sequences.SequenceType;
 import lphy.core.logger.LoggerUtils;
@@ -602,6 +603,55 @@ public class BEASTContext {
         mcmc.initAndValidate();
         return mcmc;
     }
+
+    // TODO
+    private CoupledMCMC createMC3(long chainLength, long logEvery, String logFileStem, int preBurnin) {
+
+        CompoundDistribution posterior = createBEASTPosterior();
+
+        CoupledMCMC mc3 = new CoupledMCMC();
+        mc3.setInputValue("distribution", posterior);
+        mc3.setInputValue("chainLength", chainLength);
+
+        //TODO mc3 inputs here
+
+
+        // TODO eventually all operator related code should go there
+        // create XML operator section, with the capability to replace default operators
+        OperatorStrategy operatorStrategy = new DefaultOperatorStrategy(this);
+        // create all operators, where tree operators strategy can be changed in an extension.
+        List<Operator> operators = operatorStrategy.createOperators();
+        for (int i = 0; i < operators.size(); i++) {
+            System.out.println(operators.get(i));
+        }
+        mc3.setInputValue("operator", operators);
+
+        // TODO eventually all logging related code should go there
+        // create XML logger section
+        topDist = createTopCompoundDist();
+        LoggerFactory loggerFactory = new LoggerFactory(this, topDist);
+        // 3 default loggers: parameter logger, screen logger, tree logger.
+        List<Logger> loggers = loggerFactory.createLoggers(logEvery, logFileStem);
+        // extraLoggers processed in LoggerFactory
+        mc3.setInputValue("logger", loggers);
+
+        State state = new State();
+        state.setInputValue("stateNode", this.state);
+        state.initAndValidate();
+        elements.put(state, null);
+
+        // TODO make sure the stateNode list is being correctly populated
+        mc3.setInputValue("state", state);
+
+        if (inits.size() > 0) mc3.setInputValue("init", inits);
+
+        if (preBurnin > 0)
+            mc3.setInputValue("preBurnin", preBurnin);
+
+        mc3.initAndValidate();
+        return mc3;
+    }
+
 
     // posterior, likelihood, prior
     private CompoundDistribution[] topDist;
