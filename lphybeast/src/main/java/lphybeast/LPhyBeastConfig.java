@@ -63,6 +63,13 @@ public class LPhyBeastConfig {
     int subChainLength;
     int nsThreads;
 
+
+    private boolean useMC3 = false;
+    private int chains = 4;
+    private double deltaTemperature = 0.15;
+    private int resampleEvery = 1000;
+    private double target = 0.234;
+
     /**
      * The configuration to create a BEAST 2 XML.
      * Handle the input file path, output file path, and user.dir.
@@ -198,6 +205,26 @@ public class LPhyBeastConfig {
         // Will throw an ArithmeticException in case of overflow.
         return getChainLength() / NUM_OF_SAMPLES;
     }
+
+    public void setMC3Config(
+            boolean useMC3,
+            int chains,
+            double deltaTemperature,
+            int resampleEvery,
+            double target
+    ) {
+        this.useMC3 = useMC3;
+        this.chains = chains;
+        this.deltaTemperature = deltaTemperature;
+        this.resampleEvery = resampleEvery;
+        this.target = target;
+    }
+
+    public boolean isUseMC3() { return useMC3; }
+    public int getChains() { return chains; }
+    public double getDeltaTemperature() { return deltaTemperature; }
+    public int getResampleEvery() { return resampleEvery; }
+    public double getTarget() { return target; }
 
     public int getRepId() {
         return repId;

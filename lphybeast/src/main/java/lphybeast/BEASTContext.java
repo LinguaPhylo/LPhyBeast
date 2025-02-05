@@ -178,6 +178,22 @@ public class BEASTContext {
         return new XMLProducer().toXML(mcmc, elements.keySet());
     }
 
+    public String toBEASTXML_MC3(final String logFileStem) {
+        // 1. 拿到用户设置的 chainLength / preBurnin / logEvery
+        long chainLength = lPhyBeastConfig.getChainLength();
+        long logEvery = lPhyBeastConfig.getLogEvery();
+        int preBurnin = lPhyBeastConfig.getPreBurnin();
+
+        // 如果用户没显式给 preBurnin < 0，就根据状态维度自动估计
+        if (preBurnin < 0) {
+            preBurnin = getAllStatesSize(state) * 10;
+        }
+
+        CoupledMCMC mc3 = createMC3(chainLength, logEvery, logFileStem, preBurnin);
+
+        return new XMLProducer().toXML(mc3, elements.keySet());
+    }
+
 
     //*** BEAST 2 Parameters ***//
 
@@ -610,10 +626,16 @@ public class BEASTContext {
         CompoundDistribution posterior = createBEASTPosterior();
 
         CoupledMCMC mc3 = new CoupledMCMC();
+        mc3.setID("mcmcmc");
+
         mc3.setInputValue("distribution", posterior);
         mc3.setInputValue("chainLength", chainLength);
 
-        //TODO mc3 inputs here
+        // mc3 inputs here
+        mc3.setInputValue("chains",          lPhyBeastConfig.getChains());
+        mc3.setInputValue("deltaTemperature", lPhyBeastConfig.getDeltaTemperature());
+        mc3.setInputValue("resampleEvery",    lPhyBeastConfig.getResampleEvery());
+        mc3.setInputValue("target",           lPhyBeastConfig.getTarget());
 
 
         // TODO eventually all operator related code should go there
@@ -651,6 +673,8 @@ public class BEASTContext {
         mc3.initAndValidate();
         return mc3;
     }
+
+
 
 
     // posterior, likelihood, prior

@@ -99,6 +99,43 @@ public class LPhyBeastCMD implements Callable<Integer> {
             description = "logging both original BEAST XML created by two LPhy scripts for model mis-specification.")
     boolean log_orignal_xmls;
 
+
+    @Option(
+            names = {"-MC3", "--mc3"},
+            defaultValue = "false",
+            description = "Use Metropolis Coupled MCMC (MC^3) instead of standard MCMC."
+    )
+    boolean useMC3;
+
+    @Option(
+            names = {"--chains"},
+            defaultValue = "4",
+            description = "Number of chains for MC^3 (only valid if --mc3=true)."
+    )
+    int chains;
+
+    @Option(
+            names = {"--deltaTemperature"},
+            defaultValue = "0.15",
+            description = "Delta temperature for MC^3. (only valid if --mc3=true)."
+    )
+    double deltaTemperature;
+
+    @Option(
+            names = {"--resampleEvery"},
+            defaultValue = "1000",
+            description = "Resample frequency for MC^3. (only valid if --mc3=true)."
+    )
+    int resampleEvery;
+
+    @Option(
+            names = {"--target"},
+            defaultValue = "0.234",
+            description = "Target acceptance rate for MC^3. (only valid if --mc3=true)."
+    )
+    double target;
+
+
     // TODO nested sampling
 //    @Option(names = {"-NS", "--nestedSampling"}, defaultValue = "false",
 //            description = "Create XML for nested sampling.")
@@ -167,6 +204,14 @@ public class LPhyBeastCMD implements Callable<Integer> {
             lPhyBeastConfig.setModelMisspec(model2File, log_orignal_xmls);
             // ns
 //            lPhyBeastConfig.setNS(ns, particleCount, subChainLength, nsThreads);
+
+            lPhyBeastConfig.setMC3Config(
+                    useMC3,
+                    chains,
+                    deltaTemperature,
+                    resampleEvery,
+                    target
+            );
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);
