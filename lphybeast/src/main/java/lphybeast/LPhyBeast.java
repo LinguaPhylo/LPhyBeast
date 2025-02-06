@@ -334,7 +334,7 @@ public class LPhyBeast implements Runnable {
         final String logFileStem = lPhyBeastConfig.rmParentDir(filePathNoExt);
         // filePathNoExt here is file stem, which will be used in XML log file names.
         // Cannot handle any directories from other machines.
-        String xml = context.toBEASTXML(logFileStem);
+        String xml;
 
         if (lPhyBeastConfig.isUseMC3()) {
 

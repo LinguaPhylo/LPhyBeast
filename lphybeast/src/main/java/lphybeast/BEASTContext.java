@@ -184,14 +184,31 @@ public class BEASTContext {
         long logEvery = lPhyBeastConfig.getLogEvery();
         int preBurnin = lPhyBeastConfig.getPreBurnin();
 
+        if (chainLength < NUM_OF_SAMPLES) {
+            throw new IllegalArgumentException("Invalid length for MC3 chain, len = " + chainLength);
+        }
+
+        int nsamp = toIntExact(chainLength / logEvery);
+        if (nsamp < NUM_OF_SAMPLES/2) {
+            LoggerUtils.log.warning("The number of logged sample (" + nsamp + ") is too small ! Prefer " + NUM_OF_SAMPLES);
+        }
+
+        createBEASTObjects();
+        assert state.size() > 0;
+
         if (preBurnin < 0) {
             preBurnin = getAllStatesSize(state) * 10;
         }
+
+        LoggerUtils.log.info("Set MC3 chain length = " + chainLength + ", log every = "
+                + logEvery + ", samples = " + NUM_OF_SAMPLES + ", preBurnin = " + preBurnin);
+
 
         CoupledMCMC mc3 = createMC3(chainLength, logEvery, logFileStem, preBurnin);
 
         return new XMLProducer().toXML(mc3, elements.keySet());
     }
+
 
 
     //*** BEAST 2 Parameters ***//
