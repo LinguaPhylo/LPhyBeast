@@ -25,7 +25,8 @@ import java.util.List;
 import static lphybeast.tobeast.TaxaUtils.getTaxonSet;
 
 /**
- * Only supports single calibrations at the moment.
+ * Only supports single calibrations for internal node at the moment.
+ * Only supports age of node generated from distribution.
  */
 public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, CalibratedYuleModel> {
 
@@ -50,17 +51,17 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
         Value cladeAgeValue = tmp.getParams().get("0");
 
         // getting original generator of first element of array
-        Generator priorGenerator = cladeAgeValue.getGenerator();
+        Generator cladePriorGenerator = cladeAgeValue.getGenerator();
 
         BEASTInterface beastCladeAgeValue = context.getBEASTObject(cladeAgeValue);
         context.removeBEASTObject(beastCladeAgeValue);
 
-        if (priorGenerator instanceof GenerativeDistribution<?>) {
+        if (cladePriorGenerator instanceof GenerativeDistribution<?>) {
             // get the distribution for calibration
-            Prior calibrationPrior = (Prior) context.getBEASTObject(priorGenerator);
-            ParametricDistribution calibrationDistribution = calibrationPrior.distInput.get();
+            Prior cladeCalibrationPrior = (Prior) context.getBEASTObject(cladePriorGenerator);
+            ParametricDistribution calibrationDistribution = cladeCalibrationPrior.distInput.get();
             // remove the clade mrca age in the prior section
-            context.removeBEASTObject(calibrationPrior);
+            context.removeBEASTObject(cladeCalibrationPrior);
 
             // get TaxonSet for calibrations
             // get taxa names
@@ -80,6 +81,28 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
             calibratedYuleModel.setInputValue("calibrations", calibrationPoint);
         } else
             throw new UnsupportedOperationException();
+
+        // calibration for the root (if have root age input)
+        if (generator.getRootAge() != null){
+            Value<Number> rootAge = generator.getRootAge();
+            // get all taxa name
+            TaxonSet allTaxa = ((TreeInterface)value).getTaxonset();
+
+            if (rootAge.getGenerator() instanceof GenerativeDistribution<?>) {
+                // get the distribution for calibration
+                Prior rootAgeCalibrationPrior = (Prior) context.getBEASTObject(rootAge.getGenerator());
+                ParametricDistribution rootCalibrationDistribution = rootAgeCalibrationPrior.distInput.get();
+                // remove the clade mrca age in the prior section
+                context.removeBEASTObject(rootAgeCalibrationPrior);
+
+                // create calibration point for the root
+                CalibrationPoint calibrationRoot = new CalibrationPoint();
+                calibrationRoot.setInputValue("taxonset", allTaxa);
+                calibrationRoot.setInputValue("distr", rootCalibrationDistribution);
+                calibrationRoot.initAndValidate();
+                calibratedYuleModel.setInputValue("calibrations", calibrationRoot);
+            }
+        }
 
         calibratedYuleModel.initAndValidate();
         return calibratedYuleModel;
