@@ -64,11 +64,12 @@ public class LPhyBeastConfig {
     int nsThreads;
 
 
-    private boolean useMC3 = false;
-    private int chains = 4;
-    private double deltaTemperature = 0.15;
-    private int resampleEvery = 1000;
-    private double target = 0.234;
+    private boolean useMC3 = false;       // Whether to use Metropolis Coupled MCMC (MC³) instead of standard MCMC
+    private int chains = 4;              // Number of parallel chains for MC³
+    private double deltaTemperature = 0.15;  // Temperature increment among chains for MC³
+    private int resampleEvery = 1000;    // How often chain swaps/resamples occur in MC³
+    private double target = 0.234;       // Desired acceptance rate for MC³ swaps
+
 
     /**
      * The configuration to create a BEAST 2 XML.
@@ -220,10 +221,19 @@ public class LPhyBeastConfig {
         this.target = target;
     }
 
+    /** Indicates if MC³ is enabled. */
     public boolean isUseMC3() { return useMC3; }
+
+    /** Returns the number of chains used in MC³. */
     public int getChains() { return chains; }
+
+    /** Returns the temperature increment (delta) for MC³ chains. */
     public double getDeltaTemperature() { return deltaTemperature; }
+
+    /** Returns the frequency (in steps) at which MC³ resamples/swaps. */
     public int getResampleEvery() { return resampleEvery; }
+
+    /** Returns the target acceptance rate for MC³. */
     public double getTarget() { return target; }
 
     public int getRepId() {

@@ -178,6 +178,13 @@ public class BEASTContext {
         return new XMLProducer().toXML(mcmc, elements.keySet());
     }
 
+    /**
+     * Similar to {@link #toBEASTXML}, but sets up an MC³ chain (Metropolis-coupled MCMC),
+     * which runs multiple chains at different temperatures for improved mixing.
+     * @param logFileStem  log file stem (no extension)
+     * @return             XML string configured for MC³
+     */
+
     public String toBEASTXML_MC3(final String logFileStem) {
 
         long chainLength = lPhyBeastConfig.getChainLength();
@@ -636,7 +643,11 @@ public class BEASTContext {
         return mcmc;
     }
 
-    // TODO
+    // ----- MC3 Construction -----
+    /**
+     * Builds the {@link CoupledMCMC} object for multiple chains at different temperatures.
+     * This method sets the chain count, temperature increment, and other MC³ parameters.
+     */
     private CoupledMCMC createMC3(long chainLength, long logEvery, String logFileStem, int preBurnin) {
 
         CompoundDistribution posterior = createBEASTPosterior();

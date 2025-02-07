@@ -100,6 +100,9 @@ public class LPhyBeastCMD implements Callable<Integer> {
     boolean log_orignal_xmls;
 
 
+    // MC³ (Metropolis-coupled MCMC) parameters, allowing multiple chains at different
+    // "temperatures" to explore the posterior distribution more effectively:
+
     @Option(
             names = {"-MC3", "--mc3"},
             defaultValue = "false",
