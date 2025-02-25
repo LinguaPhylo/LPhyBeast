@@ -33,7 +33,7 @@ BEAST 2 packages, for example:
 - [BEAST_CLASSIC](https://github.com/BEAST2-Dev/beast-classic/)
 - [SMM](https://github.com/BEAST2-Dev/substmodels/)
 
-The details are in [version.xml](./version.xml). All released BEAST 2 packages are listed in
+The details are in [version.xml](./lphybeast/version.xml). All released BEAST 2 packages are listed in
 [Package Viewer](https://compevol.github.io/CBAN/).
 
 BEASTLabs `beast.util.Script` depends on `jdk.nashorn.api.scripting.ScriptObjectMirror`.
