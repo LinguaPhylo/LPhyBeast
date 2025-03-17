@@ -138,6 +138,15 @@ public class LPhyBeastCMD implements Callable<Integer> {
     )
     double target;
 
+    //MutableAlignment
+
+    @Option(
+            names = {"-obs"},
+            description = "A Value which is observed in the model. " +
+                    "By default, alignment is the observed value."
+    )
+    String sampleMutableAlignment;
+
 
     // TODO nested sampling
 //    @Option(names = {"-NS", "--nestedSampling"}, defaultValue = "false",
@@ -215,6 +224,9 @@ public class LPhyBeastCMD implements Callable<Integer> {
                     resampleEvery,
                     target
             );
+
+            //set whether sample alignment
+            lPhyBeastConfig.setsampleMutableAlignment(sampleMutableAlignment);
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);

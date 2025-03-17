@@ -27,6 +27,8 @@ public class LPhyBeastConfig {
      */
     public int compressConstantAlignment = 0;
 
+    public String sampleMutableAlignment;
+
     /**
      * use LPhy simulate function instead
      */
@@ -294,6 +296,10 @@ public class LPhyBeastConfig {
         this.particleCount = particleCount;
         this.subChainLength = subChainLength;
         this.nsThreads = nsThreads;
+    }
+
+    public void setsampleMutableAlignment(String sampleMutableAlignment) {
+        this.sampleMutableAlignment = sampleMutableAlignment;
     }
 
     public int getParticleCount() {
