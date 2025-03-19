@@ -205,10 +205,10 @@ public class LPhyBeast implements Runnable {
                 for (Value v2 : alignmentsM2) {
 
                     if (v1.getId().equals(v2.getId())) {
-                        // fail if there is data clamping
-                        if (parserDictM2.isClamped(v1.getId()))
-                            throw new IllegalArgumentException("Model misspecification test does not support data clamping ! " +
-                                    "Clamped alignment : " + v1.getId());
+                        // fail if alignment is observed
+                        if (parserDictM2.isObserved(v1.getId()))
+                            throw new IllegalArgumentException("Model misspecification test does not support alignment is observed (not simulated) ! " +
+                                    "Observed alignment : " + v1.getId());
 
                         Alignment a2 = (Alignment) v2.value();
 
@@ -252,10 +252,10 @@ public class LPhyBeast implements Runnable {
                 for (Value v2 : timeTreesM2) {
 
                     if (v1.getId().equals(v2.getId())) {
-                        // fail if there is data clamping
-                        if (parserDictM2.isClamped(v1.getId()))
-                            throw new IllegalArgumentException("Model misspecification test does not support data clamping ! " +
-                                    "Clamped alignment : " + v1.getId());
+                        // fail if alignment is observed
+                        if (parserDictM2.isObserved(v1.getId()))
+                            throw new IllegalArgumentException("Model misspecification test does not support alignment is observed (not simulated) ! " +
+                                    "Observed alignment : " + v1.getId());
 
                         TimeTree t2 = (TimeTree) v2.value();
 

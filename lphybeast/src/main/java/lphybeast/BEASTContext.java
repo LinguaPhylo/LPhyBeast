@@ -26,8 +26,8 @@ import feast.function.Concatenate;
 import jebl.evolution.sequences.SequenceType;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.*;
-import lphy.core.parser.DataClampingUtils;
 import lphy.core.parser.LPhyParserDictionary;
+import lphy.core.parser.ObservationUtils;
 import lphy.core.parser.graphicalmodel.GraphicalModelNodeVisitor;
 import lphy.core.parser.graphicalmodel.ValueCreator;
 import lphy.core.vectorization.VectorUtils;
@@ -388,8 +388,8 @@ public class BEASTContext {
             Value value = (Value)node;
             if (!value.isAnonymous()) {
                 BEASTInterface beastInterface = getBEASTObject(value.getId());
-                // cannot be Alignment, otherwise getBEASTObject(value.getId()) makes data clamping not working;
-                // it will get simulated Alignment even though data is clamped.
+                // cannot be Alignment, otherwise getBEASTObject(value.getId()) makes observed alignment not working;
+                // it will get simulated Alignment even though data is observed.
                 if (beastInterface != null) {
                     if (beastInterface instanceof BEASTVector) {
                         List<BEASTInterface> beastInterfaceList = ((BEASTVector)beastInterface).getObjectList();
@@ -404,7 +404,7 @@ public class BEASTContext {
             }
         }
 
-        // have to use this for data clamping
+        // have to use this when alignment is observed
         BEASTInterface beastInterface = beastObjects.get(node);
 
         if (beastInterface != null) {
@@ -522,7 +522,7 @@ public class BEASTContext {
      * @param id
      * @return true if the given id has a value in the data block and random variable in the model block
      */
-    public boolean isClamped(String id) {
+    public boolean isObserved(String id) {
         if (id != null) {
             Value dataValue = parserDictionary.getValue(id, LPhyParserDictionary.Context.data);
             Value modelValue = parserDictionary.getModelDictionary().get(id);
@@ -535,11 +535,11 @@ public class BEASTContext {
      * @param id the id of the value
      * @return the value with this id from the data context if it exits, or if not, then the value from the model context if exists, or if neither exist, then returns null.
      */
-    public Value getClampedValue(String id) {
+    public Value getObservedValue(String id) {
         if (id != null) {
-            Value clampedValue = parserDictionary.getValue(id, LPhyParserDictionary.Context.data);
-            if (clampedValue != null) {
-                return clampedValue;
+            Value observedValue = parserDictionary.getValue(id, LPhyParserDictionary.Context.data);
+            if (observedValue != null) {
+                return observedValue;
             }
             return parserDictionary.getValue(id, LPhyParserDictionary.Context.model);
         }
@@ -777,17 +777,17 @@ public class BEASTContext {
         }
 
         // now that the inputs are done we can do this one.
-        // TODO && is not data clamping
+        // TODO && alignment is not observed
         if (beastObjects.get(value) == null && !skipValue(value)) {
             valueToBEAST(value);
         }
 
     }
 
-    // if data is clamped, skip valueToBEAST for simulated value in the model block,
+    // if alignment is observed, skip valueToBEAST for simulated value in the model block,
     // so that the XML would create duplicated alignment blocks.
     private boolean skipValue(Value<?> value) {
-        if (DataClampingUtils.isClamped(value.getCanonicalId(), parserDictionary))
+        if (ObservationUtils.isObserved(value.getCanonicalId(), parserDictionary))
             return parserDictionary.getModelValues().contains(value);
         return false;
     }
@@ -826,10 +826,10 @@ public class BEASTContext {
 
             if (toBEAST != null) {
                 BEASTInterface beastValue = beastObjects.get(value);
-                // If this is a generative distribution then swap to the clamped value if it exists
-                if (generator instanceof GenerativeDistribution && isClamped(value.getId())) {
-                    Value clampedValue = getClampedValue(value.getId());
-                    beastValue = getBEASTObject(clampedValue);
+                // If this is a generative distribution then swap to the observed value if it exists
+                if (generator instanceof GenerativeDistribution && isObserved(value.getId())) {
+                    Value observedValue = getObservedValue(value.getId());
+                    beastValue = getBEASTObject(observedValue);
                 }
 
                 if (beastValue == null) {
