@@ -1,6 +1,6 @@
 # LPhyBeast
 
-[![Build Status](https://github.com/LinguaPhylo/LPhyBeast/workflows/Lphy%20BEAST%20tests/badge.svg)](https://github.com/LinguaPhylo/LPhyBeast/actions?query=workflow%3A%22Lphy+BEAST+tests%22)
+[![Build Status](https://github.com/LinguaPhylo/LPhyBeast/workflows/LPhyBeast%20test/badge.svg)](https://github.com/LinguaPhylo/LPhyBeast/actions?query=workflow%3A%22LPhyBeast+test%22)
 
 
 LPhyBEAST is a command-line program that takes a
