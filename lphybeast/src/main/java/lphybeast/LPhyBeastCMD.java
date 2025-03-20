@@ -138,16 +138,30 @@ public class LPhyBeastCMD implements Callable<Integer> {
     )
     double target;
 
-    //MutableAlignment
+    /**
+     * Use this option to mark specific variables as observed.
+     * To maintain backward compatibility:
+     * 1. If this option is not provided (default behavior), all variables, including alignments,
+     *    will follow the previous behavior, where LPhy data block variables will be treated as observed.
+     * When this option is used:
+     * 2. If an ID is specified, the corresponding variable will be set as observed,
+     *    and its operators will be removed. Additionally, any alignments not listed in this option
+     *    will be created as MutableAlignment with operators.
+     * 3. If this option is used but no ID is provided (empty string), any alignments defined in
+     *    the LPhy script will be created as MutableAlignment with operators.
+     * Rule 1 still applies even when this option is used.
+     */
 
     @Option(
             names = {"-ob", "--observedParam"}, split = ";",
-            description = "Specify one of many random variables in LPhy are observed by IDs, " +
-                    "whose value will be fixed during MCMC. This includes alignment. " +
-                    "Multiple IDs can be split by ';', but no ';' at the last: " +
-                    "e.g. -ob \"A;tree\" or -ob A. Given this option without any ID (empty string), " +
-                    "it will assume all alignments are sampled. Do not give this option, as default, " +
-                    "it will assume all alignments are observed."
+            description = "Specify one of the many random variables in LPhy as observed using its ID. " +
+                    "The specified values will remain fixed during MCMC, including alignments. " +
+                    "An ID can be a Unicode symbol, as used in the LPhy script, or its canonical name." +
+                    "Multiple IDs should be separated by ';' without a trailing. " +
+                    "\nExample: -ob \"A;tree\" or -ob A.\n" +
+                    "If this option is provided with an empty string, all alignments will be sampled " +
+                    "during MCMC unless they are defined in the LPhy data block. " +
+                    "By default (if this option is not provided), all alignments are assumed to be observed."
     )
     String[] observedParam;
 
