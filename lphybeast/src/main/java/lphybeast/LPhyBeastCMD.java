@@ -141,7 +141,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
     //MutableAlignment
 
     @Option(
-            names = {"-ob", "--observedParam"},
+            names = {"-ob", "--observedParam"}, split = ";",
             description = "Specify one of many random variables in LPhy are observed by IDs, " +
                     "whose value will be fixed during MCMC. This includes alignment. " +
                     "Multiple IDs can be split by ';', but no ';' at the last: " +

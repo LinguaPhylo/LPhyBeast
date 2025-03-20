@@ -98,7 +98,7 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.bas
             }
 
             // TODO check if this is this enough
-            if (!context.isObservedVariable(alignmentValue)) {
+            if (!context.isObserved(alignmentValue)) {
                 // MutableAlignment
                 beastAlignment = new MutableAlignment();
             } else // normal Alignment

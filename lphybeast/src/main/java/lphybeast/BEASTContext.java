@@ -488,14 +488,14 @@ public class BEASTContext {
     }
 
     /**
+     * Directly add to state node list
      * @param stateNode the state node to be added
-     * @param graphicalModelNode the graphical model node that this state node corresponds to, or represents a part of
+     * @param graphicalModelNode the graphical model node that this state node corresponds to,
+     *                           or represents a part of
+     * @param createOperators  whether to create operators for this state node.
+     * @see #addToContext(GraphicalModelNode, BEASTInterface) with conditions to determine if add to state node list.
      */
     public void addStateNode(StateNode stateNode, GraphicalModelNode graphicalModelNode, boolean createOperators) {
-        if (graphicalModelNode instanceof Value value && isObservedVariable(value))
-            // using -ob to set the observed value, then this BEAST parameter will be fixed.
-            return;
-
         if (!state.contains(stateNode)) {
             elements.put(stateNode, graphicalModelNode);
             state.add(stateNode);
@@ -934,6 +934,11 @@ public class BEASTContext {
         if (isState(node)) {
             Value var = (Value) node;
 
+            if (isObserved(var)) {
+                LoggerUtils.log.info("Set the variable " + var.getId() + " in LPhy to be observed.");
+                return;
+            }
+
             if (var.getOutputs().size() > 0 && beastInterface != null && !state.contains(beastInterface)) {
                 if (beastInterface instanceof StateNode) {
                     state.add((StateNode) beastInterface);
@@ -1142,23 +1147,23 @@ public class BEASTContext {
 
     // dealing with -ob "?;?", which can specify any var in lphy to be fixed in beast2 XML.
     // return true, then fix its value, so this beast parameter/alignment will have no operator
-    public boolean isObservedVariable(Value value) {
+    public boolean isObserved(Value value) {
         // ID can be other var, such as tree or diff parameters.
         String[] observedParamID = lPhyBeastConfig.getObservedParamID();
-        if ( observedParamID == null ) {
+        if (observedParamID == null) {
             // as default, no -ob option, any alignments will be observed
             if (lphy.base.evolution.alignment.Alignment.class.isAssignableFrom(value.getType()))
                 return true; // this keeps old lphy script working
             else return false; // not observed
         } else {
             // -ob "" can be used to trigger creating MutableAlignment
-            if ( observedParamID.length == 0 ||
-                    (observedParamID.length == 1 && observedParamID[0].trim().isEmpty()) )
+            if (observedParamID.length == 0 ||
+                    (observedParamID.length == 1 && observedParamID[0].trim().isEmpty()))
                 return false;
             else { // command line has -ob option
                 for (String varID : observedParamID) {
-                    // find ID in -ob
-                    if (varID.equals(value.getId()))
+                    // find ID in -ob, either symbol or canonical
+                    if (varID.equals(value.getCanonicalId()) || varID.equals(Symbols.getUnicodeSymbol(value.getCanonicalId())))
                         return true;
                     // check if var is in lphy data block
                     if (isObserved(value.getId()))
