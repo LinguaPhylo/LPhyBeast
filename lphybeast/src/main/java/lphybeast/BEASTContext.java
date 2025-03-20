@@ -42,7 +42,6 @@ import lphybeast.tobeast.operators.DefaultTreeOperatorStrategy;
 import lphybeast.tobeast.operators.OperatorStrategy;
 import lphybeast.tobeast.operators.TreeOperatorStrategy;
 import lphybeast.tobeast.values.ValueToParameter;
-import mutablealignment.MutableAlignment;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -939,8 +938,11 @@ public class BEASTContext {
                 return;
             }
 
-            if (var.getOutputs().size() > 0 && beastInterface != null && !state.contains(beastInterface)) {
+            // var.getOutputs().size() > 0 &&  is removed from below,
+            // the sink will be included in the following logic checks.
+            if (beastInterface != null && !state.contains(beastInterface)) {
                 if (beastInterface instanceof StateNode) {
+                    // include MutableAlignment
                     state.add((StateNode) beastInterface);
                 } else if (beastInterface instanceof Concatenate) {
                     Concatenate concatenate = (Concatenate) beastInterface;
@@ -967,10 +969,6 @@ public class BEASTContext {
                     } else {
                         throw new RuntimeException("Slice representing random value, but the sliced beast interface is not a state node!");
                     }
-                } else if (beastInterface instanceof MutableAlignment) {
-                    // MutableAlignment
-                    state.add((StateNode) beastInterface);
-
                 } else if (beastInterface instanceof Alignment) {
                     // Do nothing here
 
