@@ -141,11 +141,15 @@ public class LPhyBeastCMD implements Callable<Integer> {
     //MutableAlignment
 
     @Option(
-            names = {"-obs"},
-            description = "A Value which is observed in the model. " +
-                    "By default, alignment is the observed value."
+            names = {"-ob", "--observedParam"},
+            description = "Specify one of many random variables in LPhy are observed by IDs, " +
+                    "whose value will be fixed during MCMC. This includes alignment. " +
+                    "Multiple IDs can be split by ';', but no ';' at the last: " +
+                    "e.g. -ob \"A;tree\" or -ob A. Given this option without any ID (empty string), " +
+                    "it will assume all alignments are sampled. Do not give this option, as default, " +
+                    "it will assume all alignments are observed."
     )
-    String sampleMutableAlignment;
+    String[] observedParam;
 
 
     // TODO nested sampling
@@ -226,7 +230,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
             );
 
             //set whether sample alignment
-            lPhyBeastConfig.setsampleMutableAlignment(sampleMutableAlignment);
+            lPhyBeastConfig.setObservedParamID(observedParam);
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);

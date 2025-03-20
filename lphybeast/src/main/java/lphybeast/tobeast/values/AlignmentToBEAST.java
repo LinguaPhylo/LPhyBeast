@@ -16,6 +16,7 @@ import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 import lphybeast.tobeast.DataTypeUtils;
+import mutablealignment.MutableAlignment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,8 +96,14 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.bas
                     LoggerUtils.log.info("Keep " + s.length() + " variable sites from the original " + alignment.nchar() + " sites.");
                 sequences.add(createBEASTSequence(taxaNames[i], s));
             }
-            // normal Alignment
-            beastAlignment = new beast.base.evolution.alignment.Alignment();
+
+            // TODO check if this is this enough
+            if (!context.isObservedVariable(alignmentValue)) {
+                // MutableAlignment
+                beastAlignment = new MutableAlignment();
+            } else // normal Alignment
+                beastAlignment = new beast.base.evolution.alignment.Alignment();
+
             beastAlignment.setInputValue("sequence", sequences);
 
             // 3. morphological data, needs extra <userDataType section

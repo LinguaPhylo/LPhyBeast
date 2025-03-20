@@ -42,6 +42,7 @@ import lphybeast.tobeast.operators.DefaultTreeOperatorStrategy;
 import lphybeast.tobeast.operators.OperatorStrategy;
 import lphybeast.tobeast.operators.TreeOperatorStrategy;
 import lphybeast.tobeast.values.ValueToParameter;
+import mutablealignment.MutableAlignment;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -491,6 +492,10 @@ public class BEASTContext {
      * @param graphicalModelNode the graphical model node that this state node corresponds to, or represents a part of
      */
     public void addStateNode(StateNode stateNode, GraphicalModelNode graphicalModelNode, boolean createOperators) {
+        if (graphicalModelNode instanceof Value value && isObservedVariable(value))
+            // using -ob to set the observed value, then this BEAST parameter will be fixed.
+            return;
+
         if (!state.contains(stateNode)) {
             elements.put(stateNode, graphicalModelNode);
             state.add(stateNode);
@@ -700,9 +705,6 @@ public class BEASTContext {
         mc3.initAndValidate();
         return mc3;
     }
-
-
-
 
     // posterior, likelihood, prior
     private CompoundDistribution[] topDist;
@@ -960,7 +962,12 @@ public class BEASTContext {
                     } else {
                         throw new RuntimeException("Slice representing random value, but the sliced beast interface is not a state node!");
                     }
+                } else if (beastInterface instanceof MutableAlignment) {
+                    // MutableAlignment
+                    state.add((StateNode) beastInterface);
+
                 } else if (beastInterface instanceof Alignment) {
+                    // Do nothing here
 
                 } else {
                     throw new RuntimeException("Unexpected beastInterface returned true for isState() but can't be added to state");
@@ -1131,6 +1138,35 @@ public class BEASTContext {
             }
         }
         return null;
+    }
+
+    // dealing with -ob "?;?", which can specify any var in lphy to be fixed in beast2 XML.
+    // return true, then fix its value, so this beast parameter/alignment will have no operator
+    public boolean isObservedVariable(Value value) {
+        // ID can be other var, such as tree or diff parameters.
+        String[] observedParamID = lPhyBeastConfig.getObservedParamID();
+        if ( observedParamID == null ) {
+            // as default, no -ob option, any alignments will be observed
+            if (lphy.base.evolution.alignment.Alignment.class.isAssignableFrom(value.getType()))
+                return true; // this keeps old lphy script working
+            else return false; // not observed
+        } else {
+            // -ob "" can be used to trigger creating MutableAlignment
+            if ( observedParamID.length == 0 ||
+                    (observedParamID.length == 1 && observedParamID[0].trim().isEmpty()) )
+                return false;
+            else { // command line has -ob option
+                for (String varID : observedParamID) {
+                    // find ID in -ob
+                    if (varID.equals(value.getId()))
+                        return true;
+                    // check if var is in lphy data block
+                    if (isObserved(value.getId()))
+                        return true;
+                }
+            }
+        }
+        return false; // AlignmentToBEAST will create MutableAlignment
     }
 
     private void logOrignalAlignment(GenericTreeLikelihood treeLikelihood) {

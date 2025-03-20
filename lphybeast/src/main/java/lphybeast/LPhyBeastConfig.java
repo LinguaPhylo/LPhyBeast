@@ -27,7 +27,7 @@ public class LPhyBeastConfig {
      */
     public int compressConstantAlignment = 0;
 
-    public String sampleMutableAlignment;
+    public String[] observedParamID;
 
     /**
      * use LPhy simulate function instead
@@ -298,8 +298,12 @@ public class LPhyBeastConfig {
         this.nsThreads = nsThreads;
     }
 
-    public void setsampleMutableAlignment(String sampleMutableAlignment) {
-        this.sampleMutableAlignment = sampleMutableAlignment;
+    public void setObservedParamID(String[] observedParamID) {
+        this.observedParamID = observedParamID;
+    }
+
+    public String[] getObservedParamID() {
+        return observedParamID;
     }
 
     public int getParticleCount() {
