@@ -106,7 +106,7 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
 
                     operators.addAll(noDuplicatedOperators);
                 } else if (stateNode instanceof MutableAlignment mutableAlignment) {
-                    //TODO Kylie correct op here
+                    //TODO Yao: replace jar and add MutableAlignment op below
 //                    Operator operator = getIntRandomWalkOperator();
 //                    operator.setInputValue("parameter", new IntegerParameter());
 //                    operator.setInputValue("weight", getOperatorWeight(1));
