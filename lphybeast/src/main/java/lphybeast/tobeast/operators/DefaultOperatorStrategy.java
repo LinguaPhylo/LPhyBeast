@@ -27,6 +27,7 @@ import lphy.core.model.*;
 import lphy.core.vectorization.IID;
 import lphybeast.BEASTContext;
 import mutablealignment.MutableAlignment;
+import mutablealignment.MutableAlignmentOperator;
 
 import java.util.*;
 
@@ -107,13 +108,12 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                     operators.addAll(noDuplicatedOperators);
                 } else if (stateNode instanceof MutableAlignment mutableAlignment) {
                     //TODO Yao: replace jar and add MutableAlignment op below
-//                    Operator operator = getIntRandomWalkOperator();
-//                    operator.setInputValue("parameter", new IntegerParameter());
-//                    operator.setInputValue("weight", getOperatorWeight(1));
-//                    operator.setInputValue("windowSize", 1);
-//                    operator.initAndValidate();
-//                    operator.setID("TODO");
-//                    operators.add(operator);
+                    MutableAlignmentOperator operator = new MutableAlignmentOperator();
+                    operator.setInputValue("mutableAlignment", mutableAlignment);
+                    operator.setInputValue("weight", getOperatorWeight(1));
+                    operator.initAndValidate();
+                    operator.setID("alignmentOperator");
+                    operators.add(operator);
                     LoggerUtils.log.severe("Missing mutable alignment operator !");
                 }
             }
