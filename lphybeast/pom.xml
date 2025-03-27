@@ -113,7 +113,7 @@
             <artifactId>MutableAlignment</artifactId>
             <version>0.0.1</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/MutableAlignment-0.0.1.jar</systemPath>
+            <systemPath>${project.basedir}/lib/MutableAlignment-0.0.2.jar</systemPath>
         </dependency>
 
         <dependency>
