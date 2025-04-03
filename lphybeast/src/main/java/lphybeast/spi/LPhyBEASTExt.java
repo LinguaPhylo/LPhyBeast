@@ -6,6 +6,7 @@ import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.evolution.Taxa;
 import lphy.base.evolution.alignment.Alignment;
 import lphy.base.evolution.coalescent.PopulationFunction;
+import lphy.base.evolution.datatype.Variant;
 import lphy.base.evolution.tree.TimeTree;
 import lphy.core.model.Generator;
 import lphy.core.model.Value;
@@ -69,6 +70,7 @@ public interface LPhyBEASTExt {
                 // exclude the value returned by taxa (and ages) functions
                 ( ob instanceof Taxa && !(ob instanceof Alignment) ) ||
                 ob instanceof TimeTree[] ||
+                ob instanceof Variant[] ||
                 isSVSPopFunc(ob);
     }
 
