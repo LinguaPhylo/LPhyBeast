@@ -6,6 +6,7 @@ import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.distribution.RandomComposition;
 import lphy.base.distribution.Sample;
 import lphy.base.distribution.WeightedDirichlet;
+import lphy.base.evolution.SNPSampler;
 import lphy.base.evolution.alignment.FastaAlignment;
 import lphy.base.evolution.datatype.Binary;
 import lphy.base.evolution.datatype.Continuous;
@@ -137,7 +138,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 NodeCount.class, ExtractTrait.class, ExtantTree.class,
                 MigrationMatrix.class, MigrationCount.class,
                 // distribution
-                WeightedDirichlet.class,
+                WeightedDirichlet.class, SNPSampler.class,
                 // utils
                 MapFunction.class, ConcatArray.class, ARange.class, Range.class, RangeList.class,
                 ElementsAt.class, Rep.class, RepArray.class, Sort.class, Unique.class,
