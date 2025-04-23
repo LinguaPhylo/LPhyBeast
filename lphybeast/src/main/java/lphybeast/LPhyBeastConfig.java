@@ -2,6 +2,10 @@ package lphybeast;
 
 import lphy.core.io.UserDir;
 import lphy.core.logger.LoggerUtils;
+import lphy.core.model.Symbols;
+import lphy.core.model.Value;
+import lphy.core.parser.ObservationUtils;
+import lphy.core.parser.graphicalmodel.GraphicalModel;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,6 +58,8 @@ public class LPhyBeastConfig {
     private String[] lphyConst;
     // Ignoring the logging ability for the given lphy random variables
     private String[] varNotLog;
+    // make sure not to initialize MCMC from the 'true' values.
+    private boolean randomStart;
 
     // model misspecification test
     private Path model2File = null;
@@ -87,8 +93,7 @@ public class LPhyBeastConfig {
      * @param lphyConst    constants inputted by user using macro
      */
     public LPhyBeastConfig(Path infile, Path outfile, Path wd, String[] lphyConst, String[] varNotLog,
-                           boolean logunicode)
-            throws FileNotFoundException {
+                           boolean logunicode, boolean randomStart) throws FileNotFoundException {
 
         // Replace the constant value in the lphy script
         this.lphyConst = lphyConst;
@@ -97,6 +102,8 @@ public class LPhyBeastConfig {
         // whether to log IDs in unicode. If false as default,
         // the original ID in unicode will be converted to canonical letters for Windows users.
         this.logunicode = logunicode;
+        // not start from the 'true' values
+        this.randomStart = randomStart;
 
         if (infile == null || !infile.toFile().exists())
             throw new FileNotFoundException("Cannot find LPhy script file ! " + (infile != null ? infile.toAbsolutePath() : null));
@@ -273,6 +280,10 @@ public class LPhyBeastConfig {
         return varNotLog;
     }
 
+    public boolean isRandomStart() {
+        return randomStart;
+    }
+
     public void setModelMisspec(Path model2File, boolean log_orignal_xmls) throws IOException {
         // same path treatment as inpth, model2File can be null
         if (model2File != null) {
@@ -304,6 +315,37 @@ public class LPhyBeastConfig {
 
     public String[] getObservedParamID() {
         return observedParamID;
+    }
+
+    // dealing with -ob "?;?", which can specify any var in lphy to be fixed in beast2 XML.
+    // return true, then fix its value, so this beast parameter/alignment will have no operator
+    public boolean isObserved(Value value, GraphicalModel graphicalModel) {
+        // ID can be other var, such as tree or diff parameters.
+        String[] observedParamID = getObservedParamID();
+
+        // ID can be other var, such as tree or diff parameters.
+        if (observedParamID == null) {
+            // as default, no -ob option, any alignments will be observed
+            if (lphy.base.evolution.alignment.Alignment.class.isAssignableFrom(value.getType()))
+                return true; // this keeps old lphy script working
+            else return false; // not observed
+        } else {
+            // -ob "" can be used to trigger creating MutableAlignment
+            if (observedParamID.length == 0 ||
+                    (observedParamID.length == 1 && observedParamID[0].trim().isEmpty()))
+                return false;
+            else { // command line has -ob option
+                for (String varID : observedParamID) {
+                    // find ID in -ob, either symbol or canonical
+                    if (varID.equals(value.getCanonicalId()) || varID.equals(Symbols.getUnicodeSymbol(value.getCanonicalId())))
+                        return true;
+                    // check if var is in lphy data block
+                    if (ObservationUtils.isObserved(value.getId(), graphicalModel))
+                        return true;
+                }
+            }
+        }
+        return false; // AlignmentToBEAST will create MutableAlignment
     }
 
     public int getParticleCount() {

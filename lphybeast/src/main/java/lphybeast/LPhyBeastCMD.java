@@ -165,6 +165,8 @@ public class LPhyBeastCMD implements Callable<Integer> {
     )
     String[] observedParam;
 
+    @Option(names = {"-rs", "--randomStart"}, description = "make sure not to initialize MCMC from the 'true' values.")
+    boolean randomStart;
 
     // TODO nested sampling
 //    @Option(names = {"-NS", "--nestedSampling"}, defaultValue = "false",
@@ -226,7 +228,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
         try {
             // define config for the run
             LPhyBeastConfig lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd,
-                    lphyConst, varNotLog, logunicode);
+                    lphyConst, varNotLog, logunicode, randomStart);
             lPhyBeastConfig.setMCMCConfig(chainLength, preBurnin, logEvery);
             // replace lphy constants
             lPhyBeastConfig.setCompressConstantAlignment(compressConstantAlignment);

@@ -521,18 +521,9 @@ public class BEASTContext {
         extraLoggables.remove(beastObject);
     }
 
-
-    /**
-     * @param id
-     * @return true if the given id has a value in the data block and random variable in the model block
-     */
-    public boolean isObserved(String id) {
-        if (id != null) {
-            Value dataValue = parserDictionary.getValue(id, LPhyParserDictionary.Context.data);
-            Value modelValue = parserDictionary.getModelDictionary().get(id);
-            return (dataValue != null && modelValue != null && modelValue instanceof RandomVariable);
-        }
-        return false;
+    // dealing with -ob "?;?", which can specify any var in lphy to be fixed in beast2 XML.
+    public boolean isObserved(Value value) {
+        return lPhyBeastConfig.isObserved(value, parserDictionary);
     }
 
     /**
@@ -828,7 +819,8 @@ public class BEASTContext {
             if (toBEAST != null) {
                 BEASTInterface beastValue = beastObjects.get(value);
                 // If this is a generative distribution then swap to the observed value if it exists
-                if (generator instanceof GenerativeDistribution && isObserved(value.getId())) {
+                if (generator instanceof GenerativeDistribution &&
+                        ObservationUtils.isObserved(value.getId(), parserDictionary)) {
                     Value observedValue = getObservedValue(value.getId());
                     beastValue = getBEASTObject(observedValue);
                 }
@@ -933,7 +925,7 @@ public class BEASTContext {
         if (isState(node)) {
             Value var = (Value) node;
 
-            if (isObserved(var)) {
+            if (lPhyBeastConfig.isObserved(var, parserDictionary)) {
                 LoggerUtils.log.info("Set the variable " + var.getId() + " in LPhy to be observed.");
                 return;
             }
@@ -1143,35 +1135,6 @@ public class BEASTContext {
         return null;
     }
 
-    // dealing with -ob "?;?", which can specify any var in lphy to be fixed in beast2 XML.
-    // return true, then fix its value, so this beast parameter/alignment will have no operator
-    public boolean isObserved(Value value) {
-        // ID can be other var, such as tree or diff parameters.
-        String[] observedParamID = lPhyBeastConfig.getObservedParamID();
-        if (observedParamID == null) {
-            // as default, no -ob option, any alignments will be observed
-            if (lphy.base.evolution.alignment.Alignment.class.isAssignableFrom(value.getType()))
-                return true; // this keeps old lphy script working
-            else return false; // not observed
-        } else {
-            // -ob "" can be used to trigger creating MutableAlignment
-            if (observedParamID.length == 0 ||
-                    (observedParamID.length == 1 && observedParamID[0].trim().isEmpty()))
-                return false;
-            else { // command line has -ob option
-                for (String varID : observedParamID) {
-                    // find ID in -ob, either symbol or canonical
-                    if (varID.equals(value.getCanonicalId()) || varID.equals(Symbols.getUnicodeSymbol(value.getCanonicalId())))
-                        return true;
-                    // check if var is in lphy data block
-                    if (isObserved(value.getId()))
-                        return true;
-                }
-            }
-        }
-        return false; // AlignmentToBEAST will create MutableAlignment
-    }
-
     private void logOrignalAlignment(GenericTreeLikelihood treeLikelihood) {
         Alignment alignment = treeLikelihood.dataInput.get();
         String algXML = new XMLProducer().toXML(alignment);
@@ -1244,6 +1207,10 @@ public class BEASTContext {
     }
 
     //*** add, setter, getter ***//
+
+    public LPhyParserDictionary getParserDictionary() {
+        return parserDictionary;
+    }
 
     public LPhyBeastConfig getLPhyBeastConfig() {
         return lPhyBeastConfig;

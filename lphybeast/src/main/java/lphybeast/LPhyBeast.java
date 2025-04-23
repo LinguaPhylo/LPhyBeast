@@ -62,7 +62,7 @@ public class LPhyBeast implements Runnable {
         repTot = 1;
         loader = null;
         try {
-            lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd, null, null, false);
+            lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd, null, null, false, false);
             lPhyBeastConfig.setMCMCConfig(chainLength, preBurnin, -1);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -156,134 +156,7 @@ public class LPhyBeast implements Runnable {
             parserDictFinal = simulator.getParserDictionary();
 
         } else { // model misspecification test
-            // simulateAndLog and simulate use the same sampler, it can sample different lphy scripts.
-            // M1 from File lphyFile, int numReplicates, Long seed
-            Map<Integer, List<Value>> allRepsM1 = simulator.simulate(lphyFile,
-                    1, constants, varNotLog, null);
-            // original parserDict is M1
-            LPhyParserDictionary parserDictM1 = simulator.getParserDictionary();
-
-            // here is M2 using the file lphyM2
-            Map<Integer, List<Value>> allRepsM2 = simulator.simulateAndLog(lphyM2.toFile(),
-                    filePathNoExt+"_misspc", 1, constants, varNotLog, null);
-            LPhyParserDictionary parserDictM2 = simulator.getParserDictionary();
-
-            // log two XMLs:  Alignment1-Model1 and A2M2
-            if (lPhyBeastConfig.log_orignal_xmls) {
-                // due to Windows logging unicode issue, BEASTContext calls updateIDs(value) to update IDs
-                // keep this line here, so IDs will be same between m1 and m2
-                String xml1str = dictToBEASTXML(parserDictM1, filePathNoExt+"_a1m1");
-                Path outFilePath1 = Path.of(filePathNoExt+"_a1m1.xml");
-                // log m2 XML
-                String xml2str = dictToBEASTXML(parserDictM2, filePathNoExt+"_a2m2");
-                Path outFilePath2 = Path.of(filePathNoExt+"_a2m2.xml");
-
-                writeXMLToFile(outFilePath1, xml1str);
-                writeXMLToFile(outFilePath2, xml2str);
-            }
-
-            /*
-             * Swapping the value of Value<Alignment> in lphy dict is easier than
-             * swapping sequences between two beast2 alignment.
-             * Note: it will be matter when swapping sequences between two beast2 alignments
-             * without ensuring the taxa in the same order.
-             */
-
-            // pull out all Alignment and TimeTree
-            List<Value<?>> alignmentsM1 = parserDictM1.getNamedValuesByType(Alignment.class);
-            List<Value<?>> alignmentsM2 = parserDictM2.getNamedValuesByType(Alignment.class);
-
-            List<Value<?>> timeTreesM1 = parserDictM1.getNamedValuesByType(TimeTree.class);
-            List<Value<?>> timeTreesM2 = parserDictM2.getNamedValuesByType(TimeTree.class);
-
-            // TODO: assuming all alignments and trees in M1 must be in M2 with the same ID.
-            for (Value v1 : alignmentsM1) {
-
-                Alignment a1 = (Alignment) v1.value();
-                boolean processed = false;
-
-                for (Value v2 : alignmentsM2) {
-
-                    if (v1.getId().equals(v2.getId())) {
-                        // fail if alignment is observed
-                        if (parserDictM2.isObserved(v1.getId()))
-                            throw new IllegalArgumentException("Model misspecification test does not support alignment is observed (not simulated) ! " +
-                                    "Observed alignment : " + v1.getId());
-
-                        Alignment a2 = (Alignment) v2.value();
-
-                        // validate all pairs of alignments to have the same taxa and sites
-                        // Objects.equals(@Nullable, @Nullable)
-                        if (!Objects.equals(a1.nchar(), a2.nchar()))
-                            throw new IllegalArgumentException("Alignments must has the same length during model misspecification test ! " +
-                                "\nModel 1 alignment " + v1.getId() + " nchar = " + a1.nchar() +
-                                "\nModel 2 alignment " + v2.getId() + " nchar = " + a2.nchar());
-                        String taxaNames1 = Arrays.stream(a1.getTaxaNames()).sorted().collect(Collectors.joining(","));
-                        String taxaNames2 = Arrays.stream(a2.getTaxaNames()).sorted().collect(Collectors.joining(","));
-                        if (! taxaNames1.equals(taxaNames2))
-                            throw new IllegalArgumentException("Taxa names must be same during model misspecification test ! " +
-                                    "\nModel 1 alignment " + v1.getId() + " has taxa : " + taxaNames1 +
-                                    "\nModel 2 alignment " + v2.getId() + " has taxa : " + taxaNames2);
-
-                        // replace the value inside Value, otherwise it will break Graph
-                        v2.setValue(v1.value());
-
-                        parserDictM2.getModelDictionary().put(v2.getId(), v2);
-                        // TODO not sure this set will be used, but this add another D
-//                        parserDictM2.getModelValues().add(v2);
-
-                        processed = true;
-                        break;
-                    }
-
-                } // End for loop
-
-                if (!processed)
-                    // TODO waring instead ?
-                    throw new IllegalArgumentException("Model 1 alignment " + v1.getId() + " does not exist in model 2 !");
-
-            }
-
-            for (Value v1 : timeTreesM1) {
-
-                TimeTree t1 = (TimeTree) v1.value();
-                boolean processed = false;
-
-                for (Value v2 : timeTreesM2) {
-
-                    if (v1.getId().equals(v2.getId())) {
-                        // fail if alignment is observed
-                        if (parserDictM2.isObserved(v1.getId()))
-                            throw new IllegalArgumentException("Model misspecification test does not support alignment is observed (not simulated) ! " +
-                                    "Observed alignment : " + v1.getId());
-
-                        TimeTree t2 = (TimeTree) v2.value();
-
-                        // validate all pairs of alignments to have the same taxa and sites
-                        // Objects.equals(@Nullable, @Nullable)
-                        if (!Objects.equals(t1.n(), t2.n()))
-                            throw new IllegalArgumentException("TimeTree must has the same tips during model misspecification test ! " +
-                                    "\nModel 1 TimeTree " + v1.getId() + " n tips = " + t1.n() +
-                                    "\nModel 2 TimeTree " + v2.getId() + " n tips = " + t2.n());
-
-                        // replace the value inside Value, otherwise it will break Graph
-                        v2.setValue(v1.value());
-
-                        parserDictM2.getModelDictionary().put(v2.getId(), v2);
-                        // TODO not sure this set will be used, but this add another D
-//                        parserDictM2.getModelValues().add(v2);
-
-                        processed = true;
-                        break;
-                    }
-
-                } // End for loop
-
-                if (!processed)
-                    // TODO waring instead ?
-                    throw new IllegalArgumentException("Model 1 TimeTree " + v1.getId() + " does not exist in model 2 !");
-
-            }
+            LPhyParserDictionary parserDictM2 = processMisspecification(simulator, lphyFile, constants, varNotLog, lphyM2, filePathNoExt);
 
             parserDictFinal = parserDictM2;
 
@@ -295,6 +168,140 @@ public class LPhyBeast implements Runnable {
         String xml = dictToBEASTXML(parserDictFinal, filePathNoExt);
 
         writeXMLToFile(outPath, xml);
+    }
+
+    private LPhyParserDictionary processMisspecification(NamedRandomValueSimulator simulator, File lphyFile,
+                                                         String[] constants, String[] varNotLog,
+                                                         Path lphyM2, String filePathNoExt) throws IOException {
+        // simulateAndLog and simulate use the same sampler, it can sample different lphy scripts.
+        // M1 from File lphyFile, int numReplicates, Long seed
+        Map<Integer, List<Value>> allRepsM1 = simulator.simulate(lphyFile,
+                1, constants, varNotLog, null);
+        // original parserDict is M1
+        LPhyParserDictionary parserDictM1 = simulator.getParserDictionary();
+
+        // here is M2 using the file lphyM2
+        Map<Integer, List<Value>> allRepsM2 = simulator.simulateAndLog(lphyM2.toFile(),
+                filePathNoExt +"_misspc", 1, constants, varNotLog, null);
+        LPhyParserDictionary parserDictM2 = simulator.getParserDictionary();
+
+        // log two XMLs:  Alignment1-Model1 and A2M2
+        if (lPhyBeastConfig.log_orignal_xmls) {
+            // due to Windows logging unicode issue, BEASTContext calls updateIDs(value) to update IDs
+            // keep this line here, so IDs will be same between m1 and m2
+            String xml1str = dictToBEASTXML(parserDictM1, filePathNoExt +"_a1m1");
+            Path outFilePath1 = Path.of(filePathNoExt +"_a1m1.xml");
+            // log m2 XML
+            String xml2str = dictToBEASTXML(parserDictM2, filePathNoExt +"_a2m2");
+            Path outFilePath2 = Path.of(filePathNoExt +"_a2m2.xml");
+
+            writeXMLToFile(outFilePath1, xml1str);
+            writeXMLToFile(outFilePath2, xml2str);
+        }
+
+        /*
+         * Swapping the value of Value<Alignment> in lphy dict is easier than
+         * swapping sequences between two beast2 alignment.
+         * Note: it will be matter when swapping sequences between two beast2 alignments
+         * without ensuring the taxa in the same order.
+         */
+
+        // pull out all Alignment and TimeTree
+        List<Value<?>> alignmentsM1 = parserDictM1.getNamedValuesByType(Alignment.class);
+        List<Value<?>> alignmentsM2 = parserDictM2.getNamedValuesByType(Alignment.class);
+
+        List<Value<?>> timeTreesM1 = parserDictM1.getNamedValuesByType(TimeTree.class);
+        List<Value<?>> timeTreesM2 = parserDictM2.getNamedValuesByType(TimeTree.class);
+
+        // TODO: assuming all alignments and trees in M1 must be in M2 with the same ID.
+        for (Value v1 : alignmentsM1) {
+
+            Alignment a1 = (Alignment) v1.value();
+            boolean processed = false;
+
+            for (Value v2 : alignmentsM2) {
+
+                if (v1.getId().equals(v2.getId())) {
+                    // fail if alignment is observed
+                    if (parserDictM2.isObserved(v1.getId()))
+                        throw new IllegalArgumentException("Model misspecification test does not support alignment is observed (not simulated) ! " +
+                                "Observed alignment : " + v1.getId());
+
+                    Alignment a2 = (Alignment) v2.value();
+
+                    // validate all pairs of alignments to have the same taxa and sites
+                    // Objects.equals(@Nullable, @Nullable)
+                    if (!Objects.equals(a1.nchar(), a2.nchar()))
+                        throw new IllegalArgumentException("Alignments must has the same length during model misspecification test ! " +
+                            "\nModel 1 alignment " + v1.getId() + " nchar = " + a1.nchar() +
+                            "\nModel 2 alignment " + v2.getId() + " nchar = " + a2.nchar());
+                    String taxaNames1 = Arrays.stream(a1.getTaxaNames()).sorted().collect(Collectors.joining(","));
+                    String taxaNames2 = Arrays.stream(a2.getTaxaNames()).sorted().collect(Collectors.joining(","));
+                    if (! taxaNames1.equals(taxaNames2))
+                        throw new IllegalArgumentException("Taxa names must be same during model misspecification test ! " +
+                                "\nModel 1 alignment " + v1.getId() + " has taxa : " + taxaNames1 +
+                                "\nModel 2 alignment " + v2.getId() + " has taxa : " + taxaNames2);
+
+                    // replace the value inside Value, otherwise it will break Graph
+                    v2.setValue(v1.value());
+
+                    parserDictM2.getModelDictionary().put(v2.getId(), v2);
+                    // TODO not sure this set will be used, but this add another D
+//                        parserDictM2.getModelValues().add(v2);
+
+                    processed = true;
+                    break;
+                }
+
+            } // End for loop
+
+            if (!processed)
+                // TODO waring instead ?
+                throw new IllegalArgumentException("Model 1 alignment " + v1.getId() + " does not exist in model 2 !");
+
+        }
+
+        for (Value v1 : timeTreesM1) {
+
+            TimeTree t1 = (TimeTree) v1.value();
+            boolean processed = false;
+
+            for (Value v2 : timeTreesM2) {
+
+                if (v1.getId().equals(v2.getId())) {
+                    // fail if alignment is observed
+                    if (parserDictM2.isObserved(v1.getId()))
+                        throw new IllegalArgumentException("Model misspecification test does not support alignment is observed (not simulated) ! " +
+                                "Observed alignment : " + v1.getId());
+
+                    TimeTree t2 = (TimeTree) v2.value();
+
+                    // validate all pairs of alignments to have the same taxa and sites
+                    // Objects.equals(@Nullable, @Nullable)
+                    if (!Objects.equals(t1.n(), t2.n()))
+                        throw new IllegalArgumentException("TimeTree must has the same tips during model misspecification test ! " +
+                                "\nModel 1 TimeTree " + v1.getId() + " n tips = " + t1.n() +
+                                "\nModel 2 TimeTree " + v2.getId() + " n tips = " + t2.n());
+
+                    // replace the value inside Value, otherwise it will break Graph
+                    v2.setValue(v1.value());
+
+                    parserDictM2.getModelDictionary().put(v2.getId(), v2);
+                    // TODO not sure this set will be used, but this add another D
+//                        parserDictM2.getModelValues().add(v2);
+
+                    processed = true;
+                    break;
+                }
+
+            } // End for loop
+
+            if (!processed)
+                // TODO waring instead ?
+                throw new IllegalArgumentException("Model 1 TimeTree " + v1.getId() + " does not exist in model 2 !");
+
+        }
+        return parserDictM2;
     }
 
     private void writeXMLToFile(Path outPath, String xml) throws IOException {
