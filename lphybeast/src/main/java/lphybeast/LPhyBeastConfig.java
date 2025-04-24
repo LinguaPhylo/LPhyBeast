@@ -327,7 +327,7 @@ public class LPhyBeastConfig {
         // ID can be other var, such as tree or diff parameters.
         if (observedParamID == null) {
             // as default, no -ob option, any alignments or vector of alignments will be observed
-            if (VectorUtils.isAssignableFrom(value, lphy.base.evolution.alignment.Alignment.class))
+            if (VectorUtils.isAssignableFrom(value, lphy.base.evolution.alignment.TaxaCharacterMatrix.class))
                 return true; // this keeps old lphy script working
             else return false; // not observed
         } else {
