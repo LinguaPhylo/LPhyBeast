@@ -15,6 +15,8 @@ express and communicate BEAST2 analyses.
 LPhyBEAST is implemented as an application in the BEAST 2 package "lphybeast". 
 The installation guide and usage instructions are available in the [User Manual](https://linguaphylo.github.io/setup/#lphybeast-installation). 
 
+The options available in the development version can be seen [here](https://github.com/LinguaPhylo/LPhyBeast/blob/master/lphybeast/src/main/java/lphybeast/LPhyBeastCMD.java)
+
 
 ## Tutorials
 
