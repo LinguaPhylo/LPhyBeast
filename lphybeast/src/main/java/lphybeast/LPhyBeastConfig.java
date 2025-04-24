@@ -6,6 +6,7 @@ import lphy.core.model.Symbols;
 import lphy.core.model.Value;
 import lphy.core.parser.ObservationUtils;
 import lphy.core.parser.graphicalmodel.GraphicalModel;
+import lphy.core.vectorization.VectorUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -325,8 +326,8 @@ public class LPhyBeastConfig {
 
         // ID can be other var, such as tree or diff parameters.
         if (observedParamID == null) {
-            // as default, no -ob option, any alignments will be observed
-            if (lphy.base.evolution.alignment.Alignment.class.isAssignableFrom(value.getType()))
+            // as default, no -ob option, any alignments or vector of alignments will be observed
+            if (VectorUtils.isAssignableFrom(value, lphy.base.evolution.alignment.Alignment.class))
                 return true; // this keeps old lphy script working
             else return false; // not observed
         } else {

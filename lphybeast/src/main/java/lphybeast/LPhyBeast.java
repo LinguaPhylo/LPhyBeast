@@ -6,6 +6,7 @@ import lphy.core.codebuilder.CanonicalCodeBuilder;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.Value;
 import lphy.core.parser.LPhyParserDictionary;
+import lphy.core.parser.graphicalmodel.GraphicalModel;
 import lphy.core.simulator.NamedRandomValueSimulator;
 import lphy.core.simulator.Sampler;
 
@@ -152,8 +153,35 @@ public class LPhyBeast implements Runnable {
             // filePathNoExt + "_true" distinguish files containing true values and true trees.
             Map<Integer, List<Value>> allReps = simulator.simulateAndLog(lphyFile,
                     filePathNoExt + "_true", 1, constants, varNotLog, null);
+            // 1st simulation is the truth
+            LPhyParserDictionary original = simulator.getParserDictionary();
 
-            parserDictFinal = simulator.getParserDictionary();
+            if (lPhyBeastConfig.isRandomStart()) {
+                // should not create any log files here
+                Map<Integer, List<Value>> startingValues = simulator.simulate(lphyFile, 1,
+                        constants, varNotLog, null);
+                LPhyParserDictionary forXML = simulator.getParserDictionary();
+                Map<String, Value<?>> modelDict = forXML.getModelDictionary();
+
+                // replace all starting values in forXML
+                for (Map.Entry<String, Value<?>> entry : modelDict.entrySet()) {
+                    String key = entry.getKey();
+                    Value value = entry.getValue();
+
+                    // if var is observed, the value should use the 1st simulation (true value)
+                    if (lPhyBeastConfig.isObserved(value, forXML)) {
+                        // get the random var value from 1st simulation
+                        Value originalValue = original.getValue(key, GraphicalModel.Context.model);
+                        if (originalValue == null || originalValue.value() == null)
+                            throw new IllegalArgumentException("Model var " + key + " can be found !");
+                        // replace it
+                        System.out.println("Replace the value of " + key + " from " + value.value() + " to " + originalValue.value());
+                        value.setValue(originalValue.value());
+                    }
+                }
+                parserDictFinal = forXML;
+            } else
+                parserDictFinal = original;
 
         } else { // model misspecification test
             LPhyParserDictionary parserDictM2 = processMisspecification(simulator, lphyFile, constants, varNotLog, lphyM2, filePathNoExt);
@@ -341,7 +369,6 @@ public class LPhyBeast implements Runnable {
         final String logFileStem = lPhyBeastConfig.rmParentDir(filePathNoExt);
         // filePathNoExt here is file stem, which will be used in XML log file names.
         // Cannot handle any directories from other machines.
-
 
         // If 'useMC3' is true in the config, produce an MC³-based XML; otherwise, standard MCMC.
         String xml;
