@@ -59,12 +59,12 @@ public class LPhyBeast implements Runnable {
     /**
      * Create LPhyBeast instance from LPhyBeastLauncher in another subproject.
      */
-    public LPhyBeast(Path infile, Path outfile, Path wd, long chainLength, int preBurnin) {
+    public LPhyBeast(Path infile, Path outfile, Path wd, long chainLength, int preBurnin, boolean sampleFromPrior) {
         repTot = 1;
         loader = null;
         try {
             lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd, null, null, false, false);
-            lPhyBeastConfig.setMCMCConfig(chainLength, preBurnin, -1);
+            lPhyBeastConfig.setMCMCConfig(chainLength, preBurnin, -1, sampleFromPrior);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

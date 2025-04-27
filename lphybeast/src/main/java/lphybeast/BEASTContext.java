@@ -153,6 +153,7 @@ public class BEASTContext {
     public String toBEASTXML(final String logFileStem) {
         long chainLength = lPhyBeastConfig.getChainLength();
         int preBurnin = lPhyBeastConfig.getPreBurnin();
+        boolean sampleFromPrior = lPhyBeastConfig.sampleFromPrior();
         // default to 1M if not specified
         if (chainLength < NUM_OF_SAMPLES)
             throw new IllegalArgumentException("Invalid length for MCMC chain, len = " + chainLength);
@@ -171,9 +172,9 @@ public class BEASTContext {
             preBurnin = getAllStatesSize(state) * 10;
 
         LoggerUtils.log.info("Set MCMC chain length = " + chainLength + ", log every = " +
-                logEvery + ", samples = " + NUM_OF_SAMPLES + ", preBurnin = " + preBurnin);
+                logEvery + ", samples = " + NUM_OF_SAMPLES + ", preBurnin = " + preBurnin + ", sampleFromPrior = " + sampleFromPrior);
 
-        MCMC mcmc = createMCMC(chainLength, logEvery, logFileStem, preBurnin);
+        MCMC mcmc = createMCMC(chainLength, logEvery, logFileStem, preBurnin, sampleFromPrior);
 
         return new XMLProducer().toXML(mcmc, elements.keySet());
     }
@@ -190,6 +191,7 @@ public class BEASTContext {
         long chainLength = lPhyBeastConfig.getChainLength();
         long logEvery = lPhyBeastConfig.getLogEvery();
         int preBurnin = lPhyBeastConfig.getPreBurnin();
+        boolean sampleFromPrior = lPhyBeastConfig.sampleFromPrior();
 
         if (chainLength < NUM_OF_SAMPLES) {
             throw new IllegalArgumentException("Invalid length for MC3 chain, len = " + chainLength);
@@ -208,10 +210,10 @@ public class BEASTContext {
         }
 
         LoggerUtils.log.info("Set MC3 chain length = " + chainLength + ", log every = "
-                + logEvery + ", samples = " + NUM_OF_SAMPLES + ", preBurnin = " + preBurnin);
+                + logEvery + ", samples = " + NUM_OF_SAMPLES + ", preBurnin = " + preBurnin + ", sampleFromPrior = " + sampleFromPrior);
 
 
-        CoupledMCMC mc3 = createMC3(chainLength, logEvery, logFileStem, preBurnin);
+        CoupledMCMC mc3 = createMC3(chainLength, logEvery, logFileStem, preBurnin, sampleFromPrior);
 
         return new XMLProducer().toXML(mc3, elements.keySet());
     }
@@ -594,13 +596,14 @@ public class BEASTContext {
     /**
      * The main class to init BEAST 2 MCMC
      */
-    private MCMC createMCMC(long chainLength, long logEvery, String logFileStem, int preBurnin) {
+    private MCMC createMCMC(long chainLength, long logEvery, String logFileStem, int preBurnin, boolean sampleFromPrior) {
 
         CompoundDistribution posterior = createBEASTPosterior();
 
         MCMC mcmc = new MCMC();
         mcmc.setInputValue("distribution", posterior);
         mcmc.setInputValue("chainLength", chainLength);
+        mcmc.setInputValue("sampleFromPrior", sampleFromPrior);
 
         // TODO eventually all operator related code should go there
         // create XML operator section, with the capability to replace default operators
@@ -643,7 +646,7 @@ public class BEASTContext {
      * Builds the {@link CoupledMCMC} object for multiple chains at different temperatures.
      * This method sets the chain count, temperature increment, and other MC³ parameters.
      */
-    private CoupledMCMC createMC3(long chainLength, long logEvery, String logFileStem, int preBurnin) {
+    private CoupledMCMC createMC3(long chainLength, long logEvery, String logFileStem, int preBurnin, boolean sampleFromPrior) {
 
         CompoundDistribution posterior = createBEASTPosterior();
 
@@ -652,6 +655,7 @@ public class BEASTContext {
 
         mc3.setInputValue("distribution", posterior);
         mc3.setInputValue("chainLength", chainLength);
+        mc3.setInputValue("sampleFromPrior", sampleFromPrior);
 
         // mc3 inputs here
         mc3.setInputValue("chains",          lPhyBeastConfig.getChains());
@@ -1197,7 +1201,7 @@ public class BEASTContext {
 
     public void runBEAST(String logFileStem) {
 
-        MCMC mcmc = createMCMC(1000000, 1000, logFileStem, 0);
+        MCMC mcmc = createMCMC(1000000, 1000, logFileStem, 0, false);
 
         try {
             mcmc.run();

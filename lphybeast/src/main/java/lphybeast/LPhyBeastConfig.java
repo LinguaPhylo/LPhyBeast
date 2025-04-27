@@ -48,10 +48,12 @@ public class LPhyBeastConfig {
      * preBurnin     The number of burnin samples taken before entering the main loop of MCMC.
      *               If < 0, as default, then it will be automatically assigned to all state nodes size * 10.
      * repId         if >= 0, then add it as postfix to the output file stem
+     * sampleFromPrior if flagged, sample from prior, otherwise default false
      */
     private int preBurnin = -1; // auto estimate
     private long chainLength = 1000000; // 1M
     private long logEvery = 0;
+    private boolean sampleFromPrior;
     private int repId = -1; // >=0 for multi-outputs
 
     private boolean logunicode;
@@ -143,6 +145,7 @@ public class LPhyBeastConfig {
         inPath = null; // lphy script is in String
         outPath = null;
         preBurnin = 0;
+        sampleFromPrior = false;
         this.compressConstantAlignment = 0;
         this.logAllAlignments = false;
     }
@@ -197,9 +200,11 @@ public class LPhyBeastConfig {
      *                     If < 0, then use the default, which will be automatically assigned to all state nodes size * 10.
      * @param logEvery     The frequency to log. If < 0, then use the default,
      *                     which is calculated by getChainLength() / NUM_OF_SAMPLES.
+     * @param sampleFromPrior The flag of whether MCMC sample from prior.
      */
-    public void setMCMCConfig(long chainLength, int preBurnin, long logEvery) {
+    public void setMCMCConfig(long chainLength, int preBurnin, long logEvery, boolean sampleFromPrior) {
         this.chainLength = chainLength;
+        this.sampleFromPrior = sampleFromPrior;
         if (preBurnin > 0) this.preBurnin = preBurnin;
         if (logEvery > 0) this.logEvery = logEvery;
     }
@@ -215,6 +220,10 @@ public class LPhyBeastConfig {
         if (logEvery > 0) return logEvery;
         // Will throw an ArithmeticException in case of overflow.
         return getChainLength() / NUM_OF_SAMPLES;
+    }
+
+    public boolean sampleFromPrior() {
+        return sampleFromPrior;
     }
 
     public void setMC3Config(

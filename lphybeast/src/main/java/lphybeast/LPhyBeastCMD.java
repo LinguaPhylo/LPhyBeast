@@ -51,6 +51,10 @@ public class LPhyBeastCMD implements Callable<Integer> {
     @Option(names = {"-le", "--logEvery"},
             description = "The state frequency to be logged.")
     long logEvery;
+    @Option(names = {"-sp", "--sampleFromPrior"},
+            defaultValue = "false",
+            description = "The flag of whether MCMC sample from prior.")
+    boolean sampleFromPrior;
 
     //well calibrated study
     @Option(names = {"-r", "--replicates"}, defaultValue = "1", description = "the number of replicates (XML) given one LPhy script, " +
@@ -229,7 +233,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
             // define config for the run
             LPhyBeastConfig lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd,
                     lphyConst, varNotLog, logunicode, randomStart);
-            lPhyBeastConfig.setMCMCConfig(chainLength, preBurnin, logEvery);
+            lPhyBeastConfig.setMCMCConfig(chainLength, preBurnin, logEvery, sampleFromPrior);
             // replace lphy constants
             lPhyBeastConfig.setCompressConstantAlignment(compressConstantAlignment);
             // model misspecification test
