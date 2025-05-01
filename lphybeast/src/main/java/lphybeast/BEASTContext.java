@@ -270,7 +270,8 @@ public class BEASTContext {
      * @param value    set estimate="false" for IntegerArray/DoubleArray values that are not RandomVariables.
      * @param lower
      * @param upper
-     * @param forceToDouble  if true, it will ignore whether component type is Integer or not.
+     * @param forceToDouble  if true, it will ignore whether component type is Integer or not,
+     *                       and always return RealParameter.
      * @return        A {@link IntegerParameter} or {@link RealParameter}
      *                given bounds and value(s) based on the type of value.
      */
