@@ -28,7 +28,7 @@ public class LocalClockToBeast implements GeneratorToBEAST<LocalClock, FlexibleL
         // 1 dimension
         RealParameter rootRateParameter = context.getAsRealParameter(rootRate);
         // specify the parameter has the upper bound at 1.0
-        rootRateParameter.setInputValue("upper", 1.0);
+        //rootRateParameter.setInputValue("upper", 1.0);
 
         rootCladeModel.initByName("clock.rate", rootRateParameter);
 
