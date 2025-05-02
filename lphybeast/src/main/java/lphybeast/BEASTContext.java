@@ -267,18 +267,17 @@ public class BEASTContext {
     }
 
     /**
-     * @param value    set estimate="false" for IntegerArray/DoubleArray values that are not RandomVariables.
-     * @param lower
-     * @param upper
+     * @param value    IntegerArray/DoubleArray, and set estimate="false" for values that are not RandomVariables.
+     * @param lower    Number, can be null
+     * @param upper    Number, can be null
      * @param forceToDouble  if true, it will ignore whether component type is Integer or not,
      *                       and always return RealParameter.
      * @return        A {@link IntegerParameter} or {@link RealParameter}
-     *                given bounds and value(s) based on the type of value.
+     *                given bounds and array values based on the type of values.
      */
     public static Parameter<? extends Number> createParameterWithBound(
             Value<? extends Number[]> value, Number lower, Number upper, boolean forceToDouble) {
 
-        List<Number> values = Arrays.asList(value.value());
         Parameter.Base parameter;
 
         // forceToDouble will ignore whether component type is Integer or not
@@ -287,17 +286,23 @@ public class BEASTContext {
 
             parameter = new IntegerParameter();
 
+            if (lower != null)
+                parameter.setInputValue("lower", lower.intValue());
+            if (upper != null)
+                parameter.setInputValue("upper", upper.intValue());
+
         } else { // Double and Number
             parameter = new RealParameter();
+
+            if (lower != null)
+                parameter.setInputValue("lower", lower.doubleValue());
+            if (upper != null)
+                parameter.setInputValue("upper", upper.doubleValue());
         }
 
+        List<Number> values = Arrays.asList(value.value());
         parameter.setInputValue("value", values);
         parameter.setInputValue("dimension", values.size());
-
-        if (lower != null)
-            parameter.setInputValue("lower", lower.intValue());
-        if (upper != null)
-            parameter.setInputValue("upper", upper.intValue());
 
         // set estimate="false" for IntegerArray/DoubleArray values that are not RandomVariables.
         if (!(value instanceof RandomVariable))
