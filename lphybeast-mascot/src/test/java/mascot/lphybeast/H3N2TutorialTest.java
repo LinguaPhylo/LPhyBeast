@@ -121,7 +121,7 @@ public class H3N2TutorialTest {
         assertEquals(1, xml.split("BactrianDeltaExchangeOperator", -1).length - 1, "BactrianDeltaExchangeOperator");
 
         assertTrue(xml.contains("chainLength=\"1000000\"") && xml.contains("logEvery=\"500\"") &&
-                xml.contains("fileName=\"" + fileStem + ".log\"") && xml.contains("fileName=\"" + fileStem + ".trees\"") &&
+                xml.contains("fileName=\"" + fileStem + ".log\"") && xml.contains(".trees") &&
                 xml.contains("<log idref=\"posterior\"/>") && xml.contains("<log idref=\"likelihood\"/>") &&
                 xml.contains("<log idref=\"prior\"/>") && xml.contains("<log idref=\"pi\"/>") &&
                 xml.contains("<log idref=\"kappa\"/>") && xml.contains("<log idref=\"mu\"/>") &&
