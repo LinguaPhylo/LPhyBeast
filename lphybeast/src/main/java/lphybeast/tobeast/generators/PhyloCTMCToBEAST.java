@@ -30,7 +30,6 @@ import lphy.base.distribution.LogNormal;
 import lphy.base.distribution.UCLNMean1;
 import lphy.base.evolution.branchrate.LocalBranchRates;
 import lphy.base.evolution.branchrate.LocalClock;
-import lphy.base.evolution.continuous.AutoCorrelatedClock;
 import lphy.base.evolution.likelihood.PhyloCTMC;
 import lphy.base.evolution.substitutionmodel.RateMatrix;
 import lphy.base.evolution.tree.TimeTree;
@@ -49,7 +48,6 @@ import orc.consoperators.SmallPulley;
 import orc.consoperators.UcldScalerOperator;
 import orc.ner.NEROperator_dAE_dBE_dCE;
 import orc.operators.SampleFromPriorOperator;
-import rc.beast.evolution.clockmodel.AutoCorrelatedClockModel;
 
 import java.util.Map;
 
@@ -239,9 +237,6 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
                 treeLikelihood.setInputValue("branchRateModel", context.getBEASTObject(generator));
             } else if (generator instanceof LocalClock) {
                 treeLikelihood.setInputValue("branchRateModel", context.getBEASTObject(generator));
-            } else if (generator instanceof AutoCorrelatedClock) {
-                AutoCorrelatedClockModel acModel = (AutoCorrelatedClockModel) context.getBEASTObject(generator);
-                treeLikelihood.setInputValue("branchRateModel", acModel);
             } else {
                 throw new UnsupportedOperationException("Only localBranchRates and lognormally distributed branchRates currently supported for LPhyBEAST !");
             }
@@ -463,7 +458,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         InConstantDistanceOperator inConstDistOperator = new InConstantDistanceOperator();
         inConstDistOperator.initByName("clockModel", relaxedClockModel, "tree", tree, "rates", rates,
                 "twindowSize", tWindowSize, "weight", 1.0);
-//        inConstantDistanceOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
+        //        inConstantDistanceOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
         inConstDistOperator.setID(relaxedClockModel.getID() + ".inConstantDistanceOperator");
         return inConstDistOperator;
     }
@@ -472,7 +467,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         SmallPulley smallPulley = new SmallPulley();
         smallPulley.initByName("clockModel", relaxedClockModel, "tree", tree, "rates", rates,
                 "dwindowSize", 0.1, "weight", 1.0);
-//        smallPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+        //        smallPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
         smallPulley.setID(relaxedClockModel.getID() + ".smallPulley");
         smallPulley.initAndValidate();
         return smallPulley;
@@ -484,7 +479,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         SimpleDistance simpleDistance = new SimpleDistance();
         simpleDistance.initByName("clockModel", relaxedClockModel, "tree", tree, "rates", rates,
                 "twindowSize", tWindowSize, "weight", 1.0);
-//        simpleDistance.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+        //        simpleDistance.setInputValue("weight", BEASTContext.getOperatorWeight(2));
         simpleDistance.setID(relaxedClockModel.getID() + ".simpleDistance");
         simpleDistance.initAndValidate();
         return simpleDistance;
@@ -495,52 +490,52 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
      * @deprecated this will be replaced by ORC soon
      */
     @Deprecated
-//    private static void addRelaxedClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, BEASTContext context) {
-//
-//        RealParameter rates = relaxedClockModel.rateInput.get();
-//
-//        double tWindowSize = tree.getRoot().getHeight() / 10.0;
-//
-//        InConstantDistanceOperator inConstantDistanceOperator = new InConstantDistanceOperator();
-//        inConstantDistanceOperator.setInputValue("clockModel", relaxedClockModel);
-//        inConstantDistanceOperator.setInputValue("tree", tree);
-//        inConstantDistanceOperator.setInputValue("rates", rates);
-//        inConstantDistanceOperator.setInputValue("twindowSize", tWindowSize);
-//        inConstantDistanceOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
-//        inConstantDistanceOperator.setID(relaxedClockModel.getID() + ".inConstantDistanceOperator");
-//        inConstantDistanceOperator.initAndValidate();
-//        context.addExtraOperator(inConstantDistanceOperator);
-//
-//        SimpleDistance simpleDistance = new SimpleDistance();
-//        simpleDistance.setInputValue("clockModel", relaxedClockModel);
-//        simpleDistance.setInputValue("tree", tree);
-//        simpleDistance.setInputValue("rates", rates);
-//        simpleDistance.setInputValue("twindowSize", tWindowSize);
-//        simpleDistance.setInputValue("weight", BEASTContext.getOperatorWeight(2));
-//        simpleDistance.setID(relaxedClockModel.getID() + ".simpleDistance");
-//        simpleDistance.initAndValidate();
-//        context.addExtraOperator(simpleDistance);
-//
-//        BigPulley bigPulley = new BigPulley();
-//        bigPulley.setInputValue("tree", tree);
-//        bigPulley.setInputValue("rates", rates);
-//        bigPulley.setInputValue("twindowSize", tWindowSize);
-//        bigPulley.setInputValue("dwindowSize", 0.1);
-//        bigPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
-//        bigPulley.setID(relaxedClockModel.getID() + ".bigPulley");
-//        bigPulley.initAndValidate();
-//        context.addExtraOperator(bigPulley);
-//
-//        SmallPulley smallPulley = new SmallPulley();
-//        smallPulley.setInputValue("clockModel", relaxedClockModel);
-//        smallPulley.setInputValue("tree", tree);
-//        smallPulley.setInputValue("rates", rates);
-//        smallPulley.setInputValue("dwindowSize", 0.1);
-//        smallPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
-//        smallPulley.setID(relaxedClockModel.getID() + ".smallPulley");
-//        smallPulley.initAndValidate();
-//        context.addExtraOperator(smallPulley);
-//    }
+    //    private static void addRelaxedClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, BEASTContext context) {
+    //
+    //        RealParameter rates = relaxedClockModel.rateInput.get();
+    //
+    //        double tWindowSize = tree.getRoot().getHeight() / 10.0;
+    //
+    //        InConstantDistanceOperator inConstantDistanceOperator = new InConstantDistanceOperator();
+    //        inConstantDistanceOperator.setInputValue("clockModel", relaxedClockModel);
+    //        inConstantDistanceOperator.setInputValue("tree", tree);
+    //        inConstantDistanceOperator.setInputValue("rates", rates);
+    //        inConstantDistanceOperator.setInputValue("twindowSize", tWindowSize);
+    //        inConstantDistanceOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
+    //        inConstantDistanceOperator.setID(relaxedClockModel.getID() + ".inConstantDistanceOperator");
+    //        inConstantDistanceOperator.initAndValidate();
+    //        context.addExtraOperator(inConstantDistanceOperator);
+    //
+    //        SimpleDistance simpleDistance = new SimpleDistance();
+    //        simpleDistance.setInputValue("clockModel", relaxedClockModel);
+    //        simpleDistance.setInputValue("tree", tree);
+    //        simpleDistance.setInputValue("rates", rates);
+    //        simpleDistance.setInputValue("twindowSize", tWindowSize);
+    //        simpleDistance.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+    //        simpleDistance.setID(relaxedClockModel.getID() + ".simpleDistance");
+    //        simpleDistance.initAndValidate();
+    //        context.addExtraOperator(simpleDistance);
+    //
+    //        BigPulley bigPulley = new BigPulley();
+    //        bigPulley.setInputValue("tree", tree);
+    //        bigPulley.setInputValue("rates", rates);
+    //        bigPulley.setInputValue("twindowSize", tWindowSize);
+    //        bigPulley.setInputValue("dwindowSize", 0.1);
+    //        bigPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+    //        bigPulley.setID(relaxedClockModel.getID() + ".bigPulley");
+    //        bigPulley.initAndValidate();
+    //        context.addExtraOperator(bigPulley);
+    //
+    //        SmallPulley smallPulley = new SmallPulley();
+    //        smallPulley.setInputValue("clockModel", relaxedClockModel);
+    //        smallPulley.setInputValue("tree", tree);
+    //        smallPulley.setInputValue("rates", rates);
+    //        smallPulley.setInputValue("dwindowSize", 0.1);
+    //        smallPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
+    //        smallPulley.setID(relaxedClockModel.getID() + ".smallPulley");
+    //        smallPulley.initAndValidate();
+    //        context.addExtraOperator(smallPulley);
+    //    }
 
     @Override
     public Class<PhyloCTMC> getGeneratorClass() {
