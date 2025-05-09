@@ -191,7 +191,6 @@ public class BEASTContext {
         long chainLength = lPhyBeastConfig.getChainLength();
         long logEvery = lPhyBeastConfig.getLogEvery();
         int preBurnin = lPhyBeastConfig.getPreBurnin();
-        boolean sampleFromPrior = lPhyBeastConfig.sampleFromPrior();
 
         if (chainLength < NUM_OF_SAMPLES) {
             throw new IllegalArgumentException("Invalid length for MC3 chain, len = " + chainLength);
@@ -210,10 +209,10 @@ public class BEASTContext {
         }
 
         LoggerUtils.log.info("Set MC3 chain length = " + chainLength + ", log every = "
-                + logEvery + ", samples = " + NUM_OF_SAMPLES + ", preBurnin = " + preBurnin + ", sampleFromPrior = " + sampleFromPrior);
+                + logEvery + ", samples = " + NUM_OF_SAMPLES + ", preBurnin = " + preBurnin);
 
 
-        CoupledMCMC mc3 = createMC3(chainLength, logEvery, logFileStem, preBurnin, sampleFromPrior);
+        CoupledMCMC mc3 = createMC3(chainLength, logEvery, logFileStem, preBurnin);
 
         return new XMLProducer().toXML(mc3, elements.keySet());
     }
@@ -602,7 +601,6 @@ public class BEASTContext {
         MCMC mcmc = new MCMC();
         mcmc.setInputValue("distribution", posterior);
         mcmc.setInputValue("chainLength", chainLength);
-        mcmc.setInputValue("sampleFromPrior", sampleFromPrior);
 
         // TODO eventually all operator related code should go there
         // create XML operator section, with the capability to replace default operators
@@ -637,6 +635,10 @@ public class BEASTContext {
             mcmc.setInputValue("preBurnin", preBurnin);
 
         mcmc.initAndValidate();
+        if (sampleFromPrior){
+            mcmc.setInputValue("sampleFromPrior", sampleFromPrior);
+        }
+
         return mcmc;
     }
 
@@ -645,7 +647,7 @@ public class BEASTContext {
      * Builds the {@link CoupledMCMC} object for multiple chains at different temperatures.
      * This method sets the chain count, temperature increment, and other MC³ parameters.
      */
-    private CoupledMCMC createMC3(long chainLength, long logEvery, String logFileStem, int preBurnin, boolean sampleFromPrior) {
+    private CoupledMCMC createMC3(long chainLength, long logEvery, String logFileStem, int preBurnin) {
 
         CompoundDistribution posterior = createBEASTPosterior();
 
@@ -654,7 +656,6 @@ public class BEASTContext {
 
         mc3.setInputValue("distribution", posterior);
         mc3.setInputValue("chainLength", chainLength);
-        mc3.setInputValue("sampleFromPrior", sampleFromPrior);
 
         // mc3 inputs here
         mc3.setInputValue("chains",          lPhyBeastConfig.getChains());

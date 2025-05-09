@@ -204,7 +204,7 @@ public class LPhyBeastConfig {
      */
     public void setMCMCConfig(long chainLength, int preBurnin, long logEvery, boolean sampleFromPrior) {
         this.chainLength = chainLength;
-        this.sampleFromPrior = sampleFromPrior;
+        if (sampleFromPrior) this.sampleFromPrior = sampleFromPrior;
         if (preBurnin > 0) this.preBurnin = preBurnin;
         if (logEvery > 0) this.logEvery = logEvery;
     }
