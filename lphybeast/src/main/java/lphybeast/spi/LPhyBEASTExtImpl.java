@@ -12,9 +12,7 @@ import lphy.base.evolution.datatype.Binary;
 import lphy.base.evolution.datatype.Continuous;
 import lphy.base.function.*;
 import lphy.base.function.alignment.*;
-import lphy.base.function.datatype.BinaryDatatypeFunction;
-import lphy.base.function.datatype.NucleotidesFunction;
-import lphy.base.function.datatype.StandardDatatypeFunction;
+import lphy.base.function.datatype.*;
 import lphy.base.function.io.ReadFasta;
 import lphy.base.function.io.ReadNexus;
 import lphy.base.function.io.WriteFasta;
@@ -106,6 +104,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 UniformToBEAST.class,
                 VectorizedDistributionToBEAST.class,
                 VectorizedFunctionToBEAST.class,
+                WAGToBEAST.class,
                 WeightedDirichletToBEAST.class,
                 YuleToBEAST.class, CalibratedYuleToBeast.class,
 //                AutoCorrelatedClockToBEAST.class, AutoCorrelatedLogRatesToBEAST.class,
@@ -146,7 +145,8 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 Get.class, Length.class, Select.class, Intersect.class,
                 RandomComposition.class, SumBoolean.class,
                 // sequence typs
-                NucleotidesFunction.class, StandardDatatypeFunction.class, BinaryDatatypeFunction.class,
+                NucleotidesFunction.class, StandardDatatypeFunction.class,
+                BinaryDatatypeFunction.class, AminoAcidsFunction.class,
                 // lphy
                 MethodCall.class, Simulate.class, Sample.class, ArrayFunction.class,
                 ExpressionNode.class, ExpressionNodeWrapper.class
