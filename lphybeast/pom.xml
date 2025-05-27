@@ -23,12 +23,19 @@
         </dependency>
 
         <!--  all beast 2  -->
+<!--        <dependency>-->
+<!--            <groupId>beast2</groupId>-->
+<!--            <artifactId>beast-base</artifactId>-->
+<!--            <version>${beast.version}</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/lib/BEAST.base-${beast.version}.jar</systemPath>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>beast2</groupId>
-            <artifactId>beast-base</artifactId>
-            <version>${beast.version}</version>
+            <artifactId>BEAST.base</artifactId>
+            <version>2.7.7</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/BEAST.base-${beast.version}.jar</systemPath>
+            <systemPath>${project.basedir}/lib/BEAST.base.jar</systemPath>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>beast2</groupId>-->
@@ -122,6 +129,11 @@
             <version>1.8</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/nashorn.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>beast2</groupId>
+            <artifactId>BEAST.base</artifactId>
+            <version>2.7.7</version>
         </dependency>
 
     </dependencies>

@@ -12,6 +12,7 @@ public class DirichletToBEAST implements GeneratorToBEAST<Dirichlet, Prior> {
     public Prior generatorToBEAST(Dirichlet generator, BEASTInterface value, BEASTContext context) {
         beast.base.inference.distribution.Dirichlet beastDirichlet = new beast.base.inference.distribution.Dirichlet();
         beastDirichlet.setInputValue("alpha", context.getAsRealParameter(generator.getConcentration()));
+        beastDirichlet.setInputValue("sum", generator.getSum().value());
         beastDirichlet.initAndValidate();
 
         return BEASTContext.createPrior(beastDirichlet, (RealParameter) value);
