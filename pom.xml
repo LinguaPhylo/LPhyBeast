@@ -6,7 +6,7 @@
         <groupId>io.github.linguaphylo</groupId>
         <artifactId>linguaphylo</artifactId>
         <!-- parent pom version -->
-        <version>1.6.1</version>
+        <version>1.6.1-beastManual</version>
     </parent>
 
     <artifactId>lphybeast-root</artifactId>

@@ -60,10 +60,10 @@
 <!--        </dependency>-->
         <dependency>
             <groupId>beast2</groupId>
-            <artifactId>beast-launcher</artifactId>
+            <artifactId>launcher</artifactId>
             <version>${beast.version}</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/launcher-${beast.version}.jar</systemPath>
+            <systemPath>${project.basedir}/lib/launcher.jar</systemPath>
         </dependency>
 
         <dependency>
