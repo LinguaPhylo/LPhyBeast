@@ -6,7 +6,7 @@
         <groupId>io.github.linguaphylo</groupId>
         <artifactId>linguaphylo</artifactId>
         <!-- parent pom version -->
-        <version>1.6.1-beastManual</version>
+        <version>1.6.1</version>
     </parent>
 
     <artifactId>lphybeast-root</artifactId>
@@ -21,7 +21,7 @@
         <lphy.vision>1.6.1</lphy.vision>
         <beast.version>2.7.7</beast.version>
         <!-- used by lphybeast : https://maven.apache.org/maven-ci-friendly.html -->
-        <revision>1.2.1</revision>
+        <revision>1.2.1-beastManual</revision>
         <!-- used by lphybeast ext -->
         <lphybeastext.version>1.0.0</lphybeastext.version>
         <maven.compiler.source>17</maven.compiler.source>
