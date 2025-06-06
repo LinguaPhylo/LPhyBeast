@@ -132,7 +132,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 NTaxaFunction.class, NCharFunction.class, TaxaFunction.class, CreateTaxa.class,
                 SpeciesTaxa.class, TaxaAgesFromFunction.class, RemoveTaxa.class,
                 CopySites.class, MissingSites.class, SelectSitesByMissingFraction.class, InvariableSites.class,
-                VariableSites.class, Distance.class,
+                VariableSites.class, Distance.class, InformativeSites.class,
                 DiscretizedGamma.class,
                 // Tree
                 NodeCount.class, ExtractTrait.class, ExtantTree.class,
