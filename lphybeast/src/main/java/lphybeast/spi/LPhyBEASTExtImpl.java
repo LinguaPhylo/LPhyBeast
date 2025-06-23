@@ -13,6 +13,7 @@ import lphy.base.evolution.datatype.Continuous;
 import lphy.base.function.*;
 import lphy.base.function.alignment.*;
 import lphy.base.function.datatype.*;
+import lphy.base.function.io.ReadDelim;
 import lphy.base.function.io.ReadFasta;
 import lphy.base.function.io.ReadNexus;
 import lphy.base.function.io.WriteFasta;
@@ -149,7 +150,9 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 BinaryDatatypeFunction.class, AminoAcidsFunction.class,
                 // lphy
                 MethodCall.class, Simulate.class, Sample.class, ArrayFunction.class,
-                ExpressionNode.class, ExpressionNodeWrapper.class
+                ExpressionNode.class, ExpressionNodeWrapper.class,
+                // io
+                ReadDelim.class
         );
     }
 
