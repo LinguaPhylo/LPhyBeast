@@ -18,7 +18,7 @@
 
     <properties>
         <!-- lphy vision in the dependencies  -->
-        <lphy.vision>1.6.1</lphy.vision>
+        <lphy.vision>1.7.0</lphy.vision>
         <beast.version>2.7.7</beast.version>
         <!-- used by lphybeast : https://maven.apache.org/maven-ci-friendly.html -->
         <revision>1.2.1</revision>
