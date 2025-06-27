@@ -1,10 +1,10 @@
-<package name='lphybeast' version='1.2.1'>
-    <depends on='BEAST.base' atleast='2.7.7'/>
-    <depends on='BEAST.app' atleast='2.7.7'/>
+<package name='lphybeast' version='1.3.0'>
+    <depends on='BEAST.base' atleast='2.7.8'/>
+    <depends on='BEAST.app' atleast='2.7.8'/>
 
-    <depends on='BEASTLabs' atleast='2.0.2'/>
-    <depends on='BEAST_CLASSIC' atleast='1.6.3'/>
-    <depends on='feast' atleast='9.8.5'
+    <depends on='BEASTLabs' atleast='2.0.3'/>
+    <depends on='BEAST_CLASSIC' atleast='1.6.4'/>
+    <depends on='feast' atleast='10.5.0'
              projectURL="https://github.com/tgvaughan/feast"
              description="Expands the flexibility of BEAST 2 XML."/>
     <depends on='SSM' atleast='1.2.0'
