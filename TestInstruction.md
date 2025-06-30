@@ -6,6 +6,15 @@ To test pre-released LPhyBEAST, ensure that all required LPhy and BEAST 2 packag
 If you are using pre-release versions, follow the separate instructions for installing them.
 After installation, print out the package versions to verify that you are testing against the correct ones.
 
+
+## LPhy and the script to launch LPhyBEAST
+
+Follow the user manual below to install the pre-release version of LPhy using the same process, 
+and then set up the `lphybeast` script
+
+https://linguaphylo.github.io/setup/
+
+
 ## Install pre-released LPhyBEAST from Package Manager
 
 1. Open "Package Manager" using BEAUti, click the button "Package Repository", 
@@ -17,6 +26,8 @@ It should look like the screenshot below:
 
 <a href="./LPhyBeastTestRepo.png"><img src="LPhyBeastTestRepo.png" width="450" ></a>
 
+2. Install pre-released LPhyBEAST 
+
 After "Close" the window, you will see the version of LPhyBEAST refreshed. 
 For example, we are testing 1.3.0 and the latest release is 1.2.1.
 
@@ -24,25 +35,18 @@ For example, we are testing 1.3.0 and the latest release is 1.2.1.
 
 Click the button "Install/Upgrade" to install the pre-release.
 
-
-2. Follow the user manual to install pre-released LPhy, and set up the `lphybeast` script
-
-https://linguaphylo.github.io/setup/
-
-
-3. Run the lphybeast script to verify that LPHY_LIB points to the correct directory.
-
-Note: If it does not, remove any other LPhy versions that could be interfering with the path.
-
-For example, 
+3. Run the `lphybeast` script to verify that `LPHY_LIB` points to the correct directory.
 
 ```bash
 $YOUR_PATH$/bin/lphybeast -V
 ```
+
+For example, a successful output to use LPhy 1.7.0 looks like this: 
 
 ```
 openjdk version "17.0.5" 2022-10-18 LTS
 ...
 LPHY_LIB = /Applications/lphystudio-1.7.0/lib
 ```
+**Note:** if it does not, remove any other LPhy versions that could be interfering with the path.
 
