@@ -50,3 +50,7 @@ LPHY_LIB = /Applications/lphystudio-1.7.0/lib
 ```
 **Note:** if it does not, remove any other LPhy versions that could be interfering with the path.
 
+## After tests are done
+
+Once all tests are finished and the official version is released,
+remember to update your setup to use the latest release instead of the testing version.
