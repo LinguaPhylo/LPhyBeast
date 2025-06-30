@@ -15,12 +15,12 @@ https://raw.githubusercontent.com/LinguaPhylo/LPhyBeastTest/main/beast2/prerelea
 
 It should look like the screenshot below:
 
-<a href="./LPhyBeastTestRepo.png"><img src="LPhyBeastTestRepo.png" align="left" width="300" ></a>
+<a href="./LPhyBeastTestRepo.png"><img src="LPhyBeastTestRepo.png" width="450" ></a>
 
 After "Close" the window, you will see the version of LPhyBEAST refreshed. 
 For example, we are testing 1.3.0 and the latest release is 1.2.1.
 
-<a href="./PackageManager.png"><img src="PackageManager.png" align="left" width="600" ></a>
+<a href="./PackageManager.png"><img src="PackageManager.png" width="700" ></a>
 
 Click the button "Install/Upgrade" to install the pre-release.
 
