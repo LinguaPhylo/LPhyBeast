@@ -16,7 +16,8 @@
              description="Adaptive coupled MCMC (adaptive parallel tempering or MC3)"
              projectURL="https://github.com/nicfel/CoupledMCMC/"/>
 
-    <depends on='MutableAlignment' atleast='0.0.2'/>
+<!-- uncomment this after MutableAlignment is released   -->
+<!--    <depends on='MutableAlignment' atleast='0.0.2'/>-->
 
     <!-- add BEAST2 service below  -->
 
