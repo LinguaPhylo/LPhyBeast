@@ -35,6 +35,29 @@ For example, we are testing 1.3.0 and the latest release is 1.2.1.
 
 Click the button "Install/Upgrade" to install the pre-release.
 
+**Note:** if you have a problem to install it using GUI, 
+you can use the following commands in your terminal instead.
+
+Check the current versions:
+
+```bash
+$BEAST2_PATH$/bin/packagemanager -list
+```
+
+Remove `lphybeast`. If you installed its extensions, you need to remove those extensions first.
+
+```bash
+$BEAST2_PATH$/bin/packagemanager -del lphybeast
+```
+
+Install `lphybeast`.
+
+```bash
+$BEAST2_PATH$/bin/packagemanager -add lphybeast
+```
+
+Then, check the versions again.
+
 3. Run the `lphybeast` script to verify that `LPHY_LIB` points to the correct directory.
 
 ```bash
