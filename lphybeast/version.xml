@@ -12,7 +12,7 @@
              projectURL="https://github.com/BEAST2-Dev/substmodels/"/>
     <depends on='ORC' atleast='1.2.0'/>
     <depends on='bdtree' atleast='0.0.1'/>
-    <depends name="CoupledMCMC" atleast="1.2.2"
+    <depends on="CoupledMCMC" atleast="1.2.2"
              description="Adaptive coupled MCMC (adaptive parallel tempering or MC3)"
              projectURL="https://github.com/nicfel/CoupledMCMC/"/>
 
