@@ -85,6 +85,9 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
         // calibration for the root (if have root age input)
         if (generator.getRootAge() != null){
             Value<Number> rootAge = generator.getRootAge();
+            // remove the root age from the prior section
+            context.removeBEASTObject(context.getBEASTObject(rootAge));
+
             // get all taxa name
             TaxonSet allTaxa = ((TreeInterface)value).getTaxonset();
 
