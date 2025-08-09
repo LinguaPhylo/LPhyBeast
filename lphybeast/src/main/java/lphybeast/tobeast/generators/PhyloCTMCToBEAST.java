@@ -30,7 +30,6 @@ import lphy.base.distribution.LogNormal;
 import lphy.base.distribution.UCLNMean1;
 import lphy.base.evolution.branchrate.LocalBranchRates;
 import lphy.base.evolution.branchrate.LocalClock;
-import lphy.base.evolution.continuous.AutoCorrelatedClock;
 import lphy.base.evolution.likelihood.PhyloCTMC;
 import lphy.base.evolution.substitutionmodel.RateMatrix;
 import lphy.base.evolution.tree.TimeTree;
@@ -50,7 +49,6 @@ import orc.consoperators.SmallPulley;
 import orc.consoperators.UcldScalerOperator;
 import orc.ner.NEROperator_dAE_dBE_dCE;
 import orc.operators.SampleFromPriorOperator;
-import rc.beast.evolution.clockmodel.AutoCorrelatedClockModel;
 
 import java.util.Map;
 
@@ -255,9 +253,6 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
                 treeLikelihood.setInputValue("branchRateModel", context.getBEASTObject(generator));
             } else if (generator instanceof LocalClock) {
                 treeLikelihood.setInputValue("branchRateModel", context.getBEASTObject(generator));
-            } else if (generator instanceof AutoCorrelatedClock) {
-                AutoCorrelatedClockModel acModel = (AutoCorrelatedClockModel) context.getBEASTObject(generator);
-                treeLikelihood.setInputValue("branchRateModel", acModel);
             } else {
                 throw new UnsupportedOperationException("Only localBranchRates and lognormally distributed branchRates currently supported for LPhyBEAST !");
             }
