@@ -48,6 +48,11 @@
         <file>
             <source>../LICENSE</source>
         </file>
+        <!-- Note : delete this after MutableAlignment is released -->
+        <file>
+            <source>lib/MutableAlignment-0.0.2.jar</source>
+            <outputDirectory>lib</outputDirectory>
+        </file>
     </files>
     <dependencySets>
         <!-- Dependency set for lphybeast with useTransitiveDependencies set to false -->

@@ -107,10 +107,9 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
 
                     operators.addAll(noDuplicatedOperators);
                 } else if (stateNode instanceof MutableAlignment mutableAlignment) {
-                    //TODO Yao: replace jar and add MutableAlignment op below
                     MutableAlignmentOperator operator = new MutableAlignmentOperator();
                     operator.setInputValue("mutableAlignment", mutableAlignment);
-                    operator.setInputValue("weight", getOperatorWeight(1));
+                    operator.setInputValue("weight", getOperatorWeight(mutableAlignment.getTaxonCount()* mutableAlignment.getSiteCount()-1, 0.5));
                     operator.initAndValidate();
                     operator.setID("alignmentOperator");
                     operators.add(operator);

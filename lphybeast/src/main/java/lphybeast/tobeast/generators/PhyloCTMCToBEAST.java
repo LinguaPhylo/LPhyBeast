@@ -42,6 +42,7 @@ import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.loggers.TraitTreeLogger;
 import lphybeast.tobeast.operators.DefaultOperatorStrategy;
+import mutablealignment.MATreeLikelihood;
 import orc.consoperators.InConstantDistanceOperator;
 import orc.consoperators.SimpleDistance;
 import orc.consoperators.SmallPulley;
@@ -61,7 +62,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             // for discrete phylogeography
             return createAncestralStateTreeLikelihood(phyloCTMC, traitAlignment, context);
         } else {
-            return createThreadedTreeLikelihood(phyloCTMC, value, context);
+            return createGenericTreeLikelihood(phyloCTMC, value, context);
         }
 
     }
@@ -137,19 +138,34 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
     }
 
 
-    private ThreadedTreeLikelihood createThreadedTreeLikelihood(PhyloCTMC phyloCTMC, BEASTInterface value, BEASTContext context) {
-        ThreadedTreeLikelihood treeLikelihood = new ThreadedTreeLikelihood();
+    private GenericTreeLikelihood createGenericTreeLikelihood(PhyloCTMC phyloCTMC, BEASTInterface value, BEASTContext context) {
+        GenericTreeLikelihood treeLikelihood = null;
 
         assert value instanceof beast.base.evolution.alignment.Alignment;
         beast.base.evolution.alignment.Alignment alignment = (beast.base.evolution.alignment.Alignment)value;
+
+        Value alignmentValue = (Value)context.getBEASTToLPHYMap().get(alignment);
+
+        if (!context.isObserved(alignmentValue)) {
+            // MutableAlignment
+            treeLikelihood = new MATreeLikelihood();
+            treeLikelihood.setInputValue("useAmbiguities", false);
+
+        } else {
+            // normal Alignment
+            treeLikelihood = new ThreadedTreeLikelihood();
+            treeLikelihood.setInputValue("useAmbiguities", true);
+        }
+
+
+
         treeLikelihood.setInputValue("data", alignment);
+
 
         constructTreeAndBranchRate(phyloCTMC, treeLikelihood, context);
 
         SiteModel siteModel = constructSiteModel(phyloCTMC, context);
         treeLikelihood.setInputValue("siteModel", siteModel);
-
-        treeLikelihood.setInputValue("useAmbiguities", true);
         treeLikelihood.initAndValidate();
         treeLikelihood.setID(alignment.getID() + ".treeLikelihood");
         // logging
