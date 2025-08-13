@@ -265,7 +265,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
     }
 
-    private static RealParameter getClockRateParam(Value<Number> clockRateValue, BEASTContext context) {
+    public static RealParameter getClockRateParam(Value<Number> clockRateValue, BEASTContext context) {
         RealParameter clockRateParam;
         if (clockRateValue != null) {
             clockRateParam = context.getAsRealParameter(clockRateValue);
@@ -337,7 +337,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
      * Assume ORCRates and ORCsigma are StateNode.
      * TODO uclnMean operator ?
      */
-    private static void addORCOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, BEASTContext context) {
+    public static void addORCOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, BEASTContext context) {
         // assume rates to Tree is 1 to 1 mapping, when setting ID
         RealParameter rates = relaxedClockModel.rateInput.get();
 
