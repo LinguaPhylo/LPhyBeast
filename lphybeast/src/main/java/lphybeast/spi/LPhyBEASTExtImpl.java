@@ -12,7 +12,10 @@ import lphy.base.evolution.datatype.Binary;
 import lphy.base.evolution.datatype.Continuous;
 import lphy.base.function.*;
 import lphy.base.function.alignment.*;
-import lphy.base.function.datatype.*;
+import lphy.base.function.datatype.AminoAcidsFunction;
+import lphy.base.function.datatype.BinaryDatatypeFunction;
+import lphy.base.function.datatype.NucleotidesFunction;
+import lphy.base.function.datatype.StandardDatatypeFunction;
 import lphy.base.function.io.ReadDelim;
 import lphy.base.function.io.ReadFasta;
 import lphy.base.function.io.ReadNexus;
@@ -36,8 +39,8 @@ import lphybeast.ValueToBEAST;
 import lphybeast.tobeast.generators.*;
 import lphybeast.tobeast.values.*;
 
-import java.util.Map;
 import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -75,6 +78,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 BirthDeathSampleTreeDTToBEAST.class,
                 DirichletToBEAST.class,
                 ExpToBEAST.class,
+                ExpressionNodeToBEAST.class,
                 F81ToBEAST.class,
 //                FossilBirthDeathTreeToBEAST.class,
                 GammaToBEAST.class,

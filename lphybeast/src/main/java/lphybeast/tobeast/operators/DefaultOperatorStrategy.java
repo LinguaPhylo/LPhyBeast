@@ -273,7 +273,7 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
     //*** static methods ***//
 
     // when both mu and tree are random var
-    public static void addUpDownOperator(Tree tree, RealParameter clockRate, BEASTContext context) {
+    public static void addUpDownOperator(Tree tree, StateNode clockRate, BEASTContext context) {
         String idStr = clockRate.getID() + "Up" + tree.getID() + "DownOperator";
         // avoid to duplicate updown ops from the same pair of rate and tree
         if (!context.hasExtraOperator(idStr)) {

@@ -25,6 +25,7 @@ import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
 import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModelLogger;
 import beastlabs.evolution.tree.RNNIMetric;
+import feast.expressions.ExpCalculator;
 import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.distribution.LogNormal;
 import lphy.base.distribution.UCLNMean1;
@@ -202,10 +203,15 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
         Value<Number> clockRateValue = phyloCTMC.getClockRate();
         // clock.rate
-        RealParameter clockRateParam = getClockRateParam(clockRateValue, context);
-        // updown op when estimating clock.rate
-        if (clockRateValue instanceof RandomVariable && timeTreeValue instanceof RandomVariable && skipBranchOperators == false) {
-            DefaultOperatorStrategy.addUpDownOperator(tree, clockRateParam, context);
+        Function clockRateParam = getClockRateParam(clockRateValue, context);
+        // add updown op when estimating clock.rate
+        if (timeTreeValue instanceof RandomVariable && skipBranchOperators == false) {
+            if (clockRateValue instanceof RandomVariable && clockRateParam instanceof StateNode clockRate)
+                // clockRate must be state node here
+                DefaultOperatorStrategy.addUpDownOperator(tree, clockRate, context);
+            else if (clockRateParam instanceof ExpCalculator)
+                // clockRate can be expression
+                LoggerUtils.log.warning("The up-down operator is not available when clock rate is computed by expressions !");
         }
 
         // relaxed or local clock
@@ -265,10 +271,10 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
     }
 
-    public static RealParameter getClockRateParam(Value<Number> clockRateValue, BEASTContext context) {
-        RealParameter clockRateParam;
+    public static Function getClockRateParam(Value<Number> clockRateValue, BEASTContext context) {
+        Function clockRateParam;
         if (clockRateValue != null) {
-            clockRateParam = context.getAsRealParameter(clockRateValue);
+            clockRateParam = context.getAsFunctionOrRealParameter(clockRateValue);
 
         } else {
             clockRateParam =  BEASTContext.createRealParameter(1.0);
