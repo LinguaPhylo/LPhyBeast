@@ -3,13 +3,12 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import feast.expressions.ExpCalculator;
 import lphy.core.model.ExpressionNode;
-import lphy.core.model.GraphicalModelNode;
 import lphy.core.model.RandomVariable;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
+import lphybeast.tobeast.ExpressionUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ExpressionNodeToBEAST implements GeneratorToBEAST<ExpressionNode, ExpCalculator> {
@@ -21,7 +20,7 @@ public class ExpressionNodeToBEAST implements GeneratorToBEAST<ExpressionNode, E
 
         // this can only be used, when expression contains random var, such as exp(a+b); a ~ Normal();
         // and the expression must be the model block
-        if (isNamedModelValue(output, context)) {
+        if (ExpressionUtils.isNamedModelValue(output, context)) {
 
             if (!output.getCanonicalId().equals(value.getID()))
                 throw new IllegalArgumentException("The LPhy expression output ID " + output.getCanonicalId() +
@@ -31,7 +30,7 @@ public class ExpressionNodeToBEAST implements GeneratorToBEAST<ExpressionNode, E
 
             // recursive to add args
 
-            List<RandomVariable> args = findArgs(expression);
+            List<RandomVariable> args = ExpressionUtils.findArgs(expression);
 
             for (RandomVariable randomVariable : args) {
                 //TODO other types of parameters?
@@ -66,25 +65,4 @@ public class ExpressionNodeToBEAST implements GeneratorToBEAST<ExpressionNode, E
         return ExpCalculator.class;
     }
 
-    public static boolean isNamedModelValue(Value value, BEASTContext context) {
-        return context.getParserDictionary().getModelDictionary().values().contains(value);
-    }
-
-    public static List<RandomVariable> findArgs(ExpressionNode expression) {
-        List<RandomVariable> args = new ArrayList<>();
-
-        addArgs(expression, args);
-
-        return args;
-    }
-
-    private static void addArgs(ExpressionNode expression, List<RandomVariable> args) {
-        List<GraphicalModelNode> inputs = expression.getInputs();
-        for (GraphicalModelNode input : inputs) {
-            if (input instanceof RandomVariable randomVariable)
-                args.add(randomVariable);
-            else if (input instanceof Value value && value.getGenerator() instanceof ExpressionNode newExpression)
-                addArgs(newExpression, args);
-        }
-    }
 }

@@ -19,6 +19,7 @@ import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
 import com.google.common.collect.Multimap;
+import feast.expressions.ExpCalculator;
 import lphy.base.distribution.Dirichlet;
 import lphy.base.distribution.RandomComposition;
 import lphy.base.distribution.WeightedDirichlet;
@@ -280,6 +281,29 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
             Operator upDownOperator = new BactrianUpDownOperator();
             upDownOperator.setID(idStr);
             upDownOperator.setInputValue("up", clockRate);
+            upDownOperator.setInputValue("down", tree);
+            upDownOperator.setInputValue("scaleFactor", 0.9);
+            upDownOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getInternalNodeCount()+1));
+            context.addExtraOperator(upDownOperator);
+        }
+    }
+
+    // This is used when clockRate is computed by ExpCalculator
+    public static void addUpDownOperator(Tree tree, ExpCalculator clockRate, BEASTContext context) {
+        String idStr = clockRate.getID() + "Up" + tree.getID() + "DownOperator";
+        // avoid to duplicate updown ops from the same pair of rate and tree
+        if (!context.hasExtraOperator(idStr)) {
+            Operator upDownOperator = new BactrianUpDownOperator();
+            upDownOperator.setID(idStr);
+
+            List<Function> args = clockRate.functionsInput.get();
+            for (Function function : args) {
+                upDownOperator.setInputValue("up", function);
+            }
+            LoggerUtils.log.warning("The clock rate is computed as " +
+                    clockRate.expressionInput.get() +
+                    ", where all arguments are assumed to scale upward in the up–down operator !");
+//            upDownOperator.setInputValue("up", clockRate);
             upDownOperator.setInputValue("down", tree);
             upDownOperator.setInputValue("scaleFactor", 0.9);
             upDownOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getInternalNodeCount()+1));

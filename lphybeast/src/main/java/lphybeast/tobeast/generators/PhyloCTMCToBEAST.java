@@ -209,9 +209,9 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             if (clockRateValue instanceof RandomVariable && clockRateParam instanceof StateNode clockRate)
                 // clockRate must be state node here
                 DefaultOperatorStrategy.addUpDownOperator(tree, clockRate, context);
-            else if (clockRateParam instanceof ExpCalculator)
-                // clockRate can be expression
-                LoggerUtils.log.warning("The up-down operator is not available when clock rate is computed by expressions !");
+            else if (clockRateParam instanceof ExpCalculator expression)
+                // clockRate is computed by expression
+                DefaultOperatorStrategy.addUpDownOperator(tree, expression, context);
         }
 
         // relaxed or local clock
