@@ -32,6 +32,7 @@ import lphy.base.distribution.UCLNMean1;
 import lphy.base.evolution.branchrate.LocalBranchRates;
 import lphy.base.evolution.branchrate.LocalClock;
 import lphy.base.evolution.likelihood.PhyloCTMC;
+import lphy.base.evolution.likelihood.PhyloLikelihood;
 import lphy.base.evolution.substitutionmodel.RateMatrix;
 import lphy.base.evolution.tree.TimeTree;
 import lphy.core.logger.LoggerUtils;
@@ -193,7 +194,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
      * @param context
      * @param skipBranchOperators skip constructing branch rates
      */
-    public static void constructTreeAndBranchRate(PhyloCTMC phyloCTMC, GenericTreeLikelihood treeLikelihood, BEASTContext context, boolean skipBranchOperators) {
+    public static void constructTreeAndBranchRate(PhyloLikelihood phyloCTMC, GenericTreeLikelihood treeLikelihood, BEASTContext context, boolean skipBranchOperators) {
         Value<TimeTree> timeTreeValue = phyloCTMC.getTree();
         Tree tree = (Tree) context.getBEASTObject(timeTreeValue);
         //tree.setInputValue("taxa", value);
