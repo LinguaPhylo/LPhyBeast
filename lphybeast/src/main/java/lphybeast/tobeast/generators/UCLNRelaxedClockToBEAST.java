@@ -1,6 +1,7 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
+import beast.base.core.Function;
 import beast.base.evolution.RateStatistic;
 import beast.base.evolution.branchratemodel.UCRelaxedClockModel;
 import beast.base.evolution.tree.TreeInterface;
@@ -34,8 +35,10 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
         for (GraphicalModelNode treeOut : tree.getOutputs()) {
             if (treeOut instanceof PhyloCTMC phyloCTMC) {
                 Value mu = phyloCTMC.getClockRate();
-                if (mu != null) // BEAST clock.rate default to 1.0
-                    ucRelaxedClockModel.setInputValue("clock.rate", context.getAsRealParameter(mu));
+                if (mu != null) {// BEAST clock.rate default to 1.0
+                    Function function = context.getAsFunctionOrRealParameter(mu);
+                    ucRelaxedClockModel.setInputValue("clock.rate", function);
+                }
 //                else
 //                    ucRelaxedClockModel.setInputValue("clock.rate", new RealParameter("1.0"));
             }

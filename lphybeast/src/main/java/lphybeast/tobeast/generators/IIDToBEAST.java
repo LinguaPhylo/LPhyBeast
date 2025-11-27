@@ -56,10 +56,10 @@ public class IIDToBEAST implements GeneratorToBEAST<IID, BEASTInterface> {
             for (int i = 0; i < values.size(); i++)  {
                 // get Prior
                 BEASTInterface beastGenerator = toBEAST.generatorToBEAST(baseDistribution, values.get(i), context);
-                if ( !(beastGenerator instanceof Prior) )
-                    throw new IllegalArgumentException("Expecting Prior to be generated ! " + beastGenerator.getClass().getSimpleName());
+//                if ( !(beastGenerator instanceof Prior) )
+//                    throw new IllegalArgumentException("Expecting Prior to be generated ! " + beastGenerator.getClass().getSimpleName());
 
-                beastGenerators.add((Prior) beastGenerator);
+                beastGenerators.add(beastGenerator);
                 /** call {@link BEASTContext#addToContext(GraphicalModelNode, BEASTInterface)} **/
                 context.putBEASTObject(baseDistribution, beastGenerator);
             }

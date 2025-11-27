@@ -20,6 +20,7 @@ import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
 import com.google.common.collect.Multimap;
 import feast.expressions.ExpCalculator;
+import feast.function.Concatenate;
 import lphy.base.distribution.Dirichlet;
 import lphy.base.distribution.RandomComposition;
 import lphy.base.distribution.WeightedDirichlet;
@@ -296,9 +297,15 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
             Operator upDownOperator = new BactrianUpDownOperator();
             upDownOperator.setID(idStr);
 
+            //TODO too complex now
             List<Function> args = clockRate.functionsInput.get();
             for (Function function : args) {
-                upDownOperator.setInputValue("up", function);
+                if (function instanceof Concatenate concatenate) {
+                    for (Function func : concatenate.functionsInput.get())
+                        upDownOperator.setInputValue("up", func);
+
+                } else
+                    upDownOperator.setInputValue("up", function);
             }
             LoggerUtils.log.warning("The clock rate is computed as " +
                     clockRate.expressionInput.get() +

@@ -5,6 +5,8 @@ import lphy.core.model.ExpressionNode;
 import lphy.core.model.GraphicalModelNode;
 import lphy.core.model.RandomVariable;
 import lphy.core.model.Value;
+import lphy.core.vectorization.operation.Slice;
+import lphy.core.vectorization.operation.SliceDoubleArray;
 import lphybeast.BEASTContext;
 
 import java.util.ArrayList;
@@ -51,6 +53,10 @@ public final class ExpressionUtils {
                 args.add(randomVariable);
             else if (input instanceof Value value && value.getGenerator() instanceof ExpressionNode newExpression)
                 addArgs(newExpression, args);
+//            else if (input instanceof Value value && value.getGenerator() instanceof Slice slice
+//                    && slice.getParams().get("array") instanceof RandomVariable array) {
+//                args.add(array);
+//            }
         }
     }
 }

@@ -331,8 +331,11 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
             RateMatrix rateMatrix = (RateMatrix)qGenerator;
             Value<Double> meanRate = rateMatrix.getMeanRate();
-            BEASTInterface mutationRate = meanRate==null ? null : context.getBEASTObject(meanRate);
-            if (mutationRate != null) siteModel.setInputValue("mutationRate", mutationRate);
+            // getAsRealParameter cannot handel Slice
+            BEASTInterface mutationRate = context.getBEASTObject(meanRate);
+            // mutationRate must be real param
+            if (mutationRate != null)
+                siteModel.setInputValue("mutationRate", mutationRate);
 
             siteModel.initAndValidate();
         }
