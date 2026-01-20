@@ -63,6 +63,8 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 TimeTreeToBEAST.class,
                 DoubleValueToBEAST.class,
                 DoubleArray2DValueToBEAST.class,
+                LogisticToBEAST.class,
+                ExponentialToBEAST.class,
                 IntegerValueToBEAST.class,
                 BooleanArrayValueToBEAST.class,
                 BooleanValueToBEAST.class );
