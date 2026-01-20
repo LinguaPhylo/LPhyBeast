@@ -8,6 +8,8 @@ import lphy.base.distribution.Sample;
 import lphy.base.distribution.WeightedDirichlet;
 import lphy.base.evolution.SNPSampler;
 import lphy.base.evolution.alignment.FastaAlignment;
+import lphy.base.evolution.coalescent.PopulationFunctionCoalescent;
+import lphy.base.evolution.coalescent.populationmodel.ExponentialPopulationFunction;
 import lphy.base.evolution.datatype.Binary;
 import lphy.base.evolution.datatype.Continuous;
 import lphy.base.function.*;
@@ -158,7 +160,9 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 MethodCall.class, Simulate.class, Sample.class, ArrayFunction.class,
                 ExpressionNode.class, ExpressionNodeWrapper.class,
                 // io
-                ReadDelim.class
+                ReadDelim.class,
+                // popfunc
+                ExponentialPopulationFunction.class, PopulationFunctionCoalescent.class
         );
     }
 
