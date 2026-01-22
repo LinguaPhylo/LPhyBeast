@@ -10,6 +10,7 @@ import lphy.base.evolution.SNPSampler;
 import lphy.base.evolution.alignment.FastaAlignment;
 import lphy.base.evolution.datatype.Binary;
 import lphy.base.evolution.datatype.Continuous;
+import lphy.base.evolution.likelihood.MixturePhyloCTMC;
 import lphy.base.function.*;
 import lphy.base.function.alignment.*;
 import lphy.base.function.datatype.AminoAcidsFunction;
@@ -98,6 +99,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 NormalToBEAST.class,
                 PhyloCTMCToBEAST.class,
                 PoissonToBEAST.class,
+                PopFuncCoalescentToBEAST.class,
                 RandomBooleanArrayToBEAST.class,
                 SerialCoalescentToBEAST.class,
 //                SimFBDAgeToBEAST.class,
@@ -114,7 +116,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 WAGToBEAST.class,
                 WeightedDirichletToBEAST.class,
                 YuleToBEAST.class, CalibratedYuleToBeast.class,
-//                AutoCorrelatedClockToBEAST.class, AutoCorrelatedLogRatesToBEAST.class,
+                AutoCorrelatedClockToBEAST.class, AutoCorrelatedLogRatesToBEAST.class,CategoricalToBEAST.class,MixturePhyloCTMCToBEAST.class,
                 ExpMarkovChainToBEAST.class );
     }
 
