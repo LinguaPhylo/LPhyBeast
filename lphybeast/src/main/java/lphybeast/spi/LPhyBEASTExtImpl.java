@@ -6,6 +6,7 @@ import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.distribution.RandomComposition;
 import lphy.base.distribution.Sample;
 import lphy.base.distribution.WeightedDirichlet;
+import lphy.base.evolution.Mpileup;
 import lphy.base.evolution.SNPSampler;
 import lphy.base.evolution.alignment.FastaAlignment;
 import lphy.base.evolution.coalescent.PopulationFunctionCoalescent;
@@ -18,10 +19,7 @@ import lphy.base.function.datatype.AminoAcidsFunction;
 import lphy.base.function.datatype.BinaryDatatypeFunction;
 import lphy.base.function.datatype.NucleotidesFunction;
 import lphy.base.function.datatype.StandardDatatypeFunction;
-import lphy.base.function.io.ReadDelim;
-import lphy.base.function.io.ReadFasta;
-import lphy.base.function.io.ReadNexus;
-import lphy.base.function.io.WriteFasta;
+import lphy.base.function.io.*;
 import lphy.base.function.taxa.*;
 import lphy.base.function.tree.ExtantTree;
 import lphy.base.function.tree.MigrationCount;
@@ -160,7 +158,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 MethodCall.class, Simulate.class, Sample.class, ArrayFunction.class,
                 ExpressionNode.class, ExpressionNodeWrapper.class,
                 // io
-                ReadDelim.class,
+                ReadDelim.class, ReadMpileup.class,
                 // popfunc
                 ExponentialPopulationFunction.class, PopulationFunctionCoalescent.class
         );
@@ -172,7 +170,8 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
         return List.of(String.class, // ignore all String: d = nexus(file="Dengue4.nex");
                 HashMap.class, TreeMap.class,
                 FastaAlignment.class, // for fasta format
-                SequenceType.class // ignore all data types
+                SequenceType.class, // ignore all data types
+                Mpileup.class
         );
     }
 
