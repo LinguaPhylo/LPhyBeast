@@ -22,8 +22,8 @@ public class ExponentialToBEAST implements ValueToBEAST<ExponentialPopulation, E
 
         beastPopFunc = new ExponentialGrowth();
 
-        beastPopFunc.setInputValue("GrowthRate", GrowthRateParam);
-        beastPopFunc.setInputValue("N0", N0Param);
+        beastPopFunc.setInputValue("growthRate", GrowthRateParam);
+        beastPopFunc.setInputValue("popSize", N0Param);
         beastPopFunc.initAndValidate();
 
         ValueToParameter.setID(beastPopFunc, lphyPopFuncVal);
