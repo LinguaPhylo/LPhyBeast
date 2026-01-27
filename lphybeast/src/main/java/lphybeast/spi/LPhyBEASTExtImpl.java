@@ -116,7 +116,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 WAGToBEAST.class,
                 WeightedDirichletToBEAST.class,
                 YuleToBEAST.class, CalibratedYuleToBeast.class,
-                AutoCorrelatedClockToBEAST.class, AutoCorrelatedLogRatesToBEAST.class,CategoricalToBEAST.class,MixturePhyloCTMCToBEAST.class,
+//                AutoCorrelatedClockToBEAST.class, AutoCorrelatedLogRatesToBEAST.class,CategoricalToBEAST.class,MixturePhyloCTMCToBEAST.class,
                 ExpMarkovChainToBEAST.class );
     }
 
