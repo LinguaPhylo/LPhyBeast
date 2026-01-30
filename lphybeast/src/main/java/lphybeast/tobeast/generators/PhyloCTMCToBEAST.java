@@ -3,6 +3,7 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.core.Function;
 import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.branchratemodel.BranchRateModel;
 import beast.base.evolution.branchratemodel.StrictClockModel;
 import beast.base.evolution.branchratemodel.UCRelaxedClockModel;
 import beast.base.evolution.datatype.DataType;
@@ -29,8 +30,6 @@ import feast.expressions.ExpCalculator;
 import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.distribution.LogNormal;
 import lphy.base.distribution.UCLNMean1;
-import lphy.base.evolution.branchrate.LocalBranchRates;
-import lphy.base.evolution.branchrate.LocalClock;
 import lphy.base.evolution.likelihood.PhyloCTMC;
 import lphy.base.evolution.likelihood.PhyloLikelihood;
 import lphy.base.evolution.substitutionmodel.RateMatrix;
@@ -224,6 +223,9 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
              * 2. Keep the alternative option to use IID LogNormal on branch rates in LPhy, but XML is not recommended.
              */
             Generator generator = branchRates.getGenerator();
+            // get the BEAST obj, and check its type below
+            BEASTInterface beastBranchModel = context.getBEASTObject(generator);
+
             if (generator instanceof UCLNMean1 ucln) {
 
                 // UCLNRelaxedClockToBEAST: the mean of log-normal distr on branch rates in real space is fixed to 1.
@@ -241,7 +243,8 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
                 // simpleRelaxedClock.lphy
                 UCRelaxedClockModel relaxedClockModel = new UCRelaxedClockModel();
 
-                Prior logNormalPrior = (Prior) context.getBEASTObject(generator);
+//                Prior logNormalPrior = (Prior) context.getBEASTObject(generator);
+                Prior logNormalPrior = (Prior) beastBranchModel;
 
                 RealParameter beastBranchRates = context.getAsRealParameter(branchRates);
 
@@ -256,10 +259,9 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
                     addORCOperators(tree, relaxedClockModel, context);
                 }
 
-            } else if (generator instanceof LocalBranchRates) {
-                treeLikelihood.setInputValue("branchRateModel", context.getBEASTObject(generator));
-            } else if (generator instanceof LocalClock) {
-                treeLikelihood.setInputValue("branchRateModel", context.getBEASTObject(generator));
+            } else if (beastBranchModel instanceof BranchRateModel branchRateModel) {
+                // this replaces generator instanceof LocalBranchRates, generator instanceof LocalClock
+                treeLikelihood.setInputValue("branchRateModel", branchRateModel);
             } else {
                 throw new UnsupportedOperationException("Only localBranchRates and lognormally distributed branchRates currently supported for LPhyBEAST !");
             }
