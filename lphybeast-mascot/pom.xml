@@ -19,9 +19,9 @@
         <dependency>
             <groupId>beast2</groupId>
             <artifactId>mascot</artifactId>
-            <version>3.0.0</version>
+            <version>3.0.8</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/Mascot.v3.0.0.jar</systemPath>
+            <systemPath>${project.basedir}/lib/Mascot.v3.0.8.jar</systemPath>
         </dependency>
 
         <dependency>
