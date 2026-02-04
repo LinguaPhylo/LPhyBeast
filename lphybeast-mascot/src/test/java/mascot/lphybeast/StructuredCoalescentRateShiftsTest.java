@@ -70,6 +70,12 @@ public class StructuredCoalescentRateShiftsTest {
         assertTrue(xml.contains("neGLM") || xml.contains("NeGLM"), "Should have Ne GLM");
 
         System.out.println("Simple rate shifts test passed - XML generated successfully");
+
+        // Save XML for inspection
+        try {
+            java.nio.file.Files.writeString(java.nio.file.Path.of("/tmp/simpleRateShifts.xml"), xml);
+            System.out.println("XML saved to /tmp/simpleRateShifts.xml");
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     @Test
