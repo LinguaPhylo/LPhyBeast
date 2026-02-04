@@ -7,6 +7,8 @@ import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
 import lphybeast.spi.LPhyBEASTExt;
 import mascot.lphybeast.tobeast.generators.StructuredCoalescentToMascot;
+import mascot.lphybeast.tobeast.generators.StructuredCoalescentToGLM;
+import mascot.lphybeast.tobeast.generators.StructuredCoalescentRateShiftsToGLM;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +32,10 @@ public class MascotLBImpl implements LPhyBEASTExt {
 
     @Override
     public List<Class<? extends GeneratorToBEAST>> getGeneratorToBEASTs() {
-        return Arrays.asList( StructuredCoalescentToMascot.class );
+        return Arrays.asList(
+                StructuredCoalescentToMascot.class,
+                StructuredCoalescentRateShiftsToGLM.class
+        );
     }
 
     @Override

@@ -130,5 +130,11 @@ public class GLMStructuredCoalescentTest {
                 "Should have migration clock parameter");
 
         System.out.println("Full GLM test passed - XML generated successfully");
+
+        // Save XML to file for manual testing
+        try {
+            java.nio.file.Files.writeString(java.nio.file.Path.of("/tmp/glmFull.xml"), xml);
+            System.out.println("XML saved to /tmp/glmFull.xml");
+        } catch (Exception e) { e.printStackTrace(); }
     }
 }
