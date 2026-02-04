@@ -8,6 +8,7 @@ import beast.base.inference.parameter.RealParameter;
 import lphy.base.evolution.coalescent.StructuredCoalescent;
 import lphy.base.evolution.tree.TimeTree;
 import lphy.base.evolution.tree.TimeTreeNode;
+import lphy.base.function.GeneralLinearFunction;
 import lphy.base.function.MigrationMatrix;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
@@ -20,11 +21,26 @@ import mascot.lphybeast.tobeast.loggers.MascotExtraTreeLogger;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Converts LPhy StructuredCoalescent to BEAST2 MASCOT.
+ * <p>
+ * If migration rates come from a {@link GeneralLinearFunction}, delegates to
+ * {@link StructuredCoalescentToGLM} for GLM-based MASCOT conversion.
+ * Otherwise, uses constant dynamics.
+ * </p>
+ */
 public class StructuredCoalescentToMascot implements
         GeneratorToBEAST<StructuredCoalescent, mascot.distribution.Mascot> {
 
     @Override
     public mascot.distribution.Mascot generatorToBEAST(StructuredCoalescent coalescent, BEASTInterface value, BEASTContext context) {
+
+        // Check if this uses GLM-based migration rates
+        if (StructuredCoalescentToGLM.usesGLM(coalescent)) {
+            System.out.println("Detected GLM-based migration rates, using MASCOT GLM dynamics");
+            StructuredCoalescentToGLM glmConverter = new StructuredCoalescentToGLM();
+            return glmConverter.generatorToBEAST(coalescent, value, context);
+        }
 
         mascot.distribution.Mascot mascot = new mascot.distribution.Mascot();
 
