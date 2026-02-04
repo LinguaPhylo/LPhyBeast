@@ -11,7 +11,9 @@ import lphy.base.evolution.tree.TimeTree;
 import lphy.base.evolution.tree.TimeTreeNode;
 import lphy.base.function.GeneralLinearFunction;
 import lphy.base.function.MigrationMatrix;
+import lphy.core.model.Generator;
 import lphy.core.model.Value;
+import lphy.core.vectorization.VectorizedFunction;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.values.TimeTreeToBEAST;
@@ -73,10 +75,63 @@ public class StructuredCoalescentToGLM implements
             Value<Double[]> migRates = migMatrix.getMigrationRates();
             Value<Double[]> theta = migMatrix.getTheta();
             // Use GLM converter if either migration rates or theta come from GeneralLinearFunction
-            return migRates.getGenerator() instanceof GeneralLinearFunction ||
-                   theta.getGenerator() instanceof GeneralLinearFunction;
+            // (either directly or via VectorizedFunction)
+            return isGeneralLinearFunction(migRates.getGenerator()) ||
+                   isGeneralLinearFunction(theta.getGenerator());
         }
         return false;
+    }
+
+    /**
+     * Check if a generator is a GeneralLinearFunction (either directly or vectorized).
+     */
+    private static boolean isGeneralLinearFunction(Generator<?> generator) {
+        if (generator instanceof GeneralLinearFunction) {
+            return true;
+        }
+        if (generator instanceof VectorizedFunction<?> vf) {
+            // Check if the component functions are GeneralLinearFunction
+            return !vf.getComponentFunctions().isEmpty() &&
+                   vf.getComponentFunctions().get(0) instanceof GeneralLinearFunction;
+        }
+        return false;
+    }
+
+    /**
+     * Extract GLM parameters from either a GeneralLinearFunction or VectorizedFunction.
+     * Returns null if not a GLM.
+     */
+    private static record GLMParams(
+            Value<Double[]> beta,
+            Value<?> x,  // Could be Double[] or Double[][]
+            Value<String> link,
+            Value<Double> scale,
+            boolean isVectorized
+    ) {}
+
+    private static GLMParams extractGLMParams(Generator<?> generator) {
+        if (generator instanceof GeneralLinearFunction glm) {
+            return new GLMParams(
+                    glm.getParams().get(GeneralLinearFunction.betaParamName),
+                    glm.getParams().get(GeneralLinearFunction.xParamName),
+                    glm.getParams().get(GeneralLinearFunction.linkParamName),
+                    glm.getParams().get(GeneralLinearFunction.scaleParamName),
+                    false
+            );
+        }
+        if (generator instanceof VectorizedFunction<?> vf &&
+            !vf.getComponentFunctions().isEmpty() &&
+            vf.getComponentFunctions().get(0) instanceof GeneralLinearFunction) {
+            // Get params from the VectorizedFunction - these are the original (non-sliced) values
+            return new GLMParams(
+                    vf.getParams().get(GeneralLinearFunction.betaParamName),
+                    vf.getParams().get(GeneralLinearFunction.xParamName),  // This is the full matrix
+                    vf.getParams().get(GeneralLinearFunction.linkParamName),
+                    vf.getParams().get(GeneralLinearFunction.scaleParamName),
+                    true
+            );
+        }
+        return null;
     }
 
     @Override
@@ -101,18 +156,13 @@ public class StructuredCoalescentToGLM implements
 
         // === Migration GLM ===
         LogLinear migrationGLM;
-        if (migRatesValue.getGenerator() instanceof GeneralLinearFunction migGlmFunction) {
-            Value<Double[]> betaValue = migGlmFunction.getParams().get(GeneralLinearFunction.betaParamName);
-            Value<Double[]> xValue = migGlmFunction.getParams().get(GeneralLinearFunction.xParamName);
-            Value<String> linkValue = migGlmFunction.getParams().get(GeneralLinearFunction.linkParamName);
-            Value<Double> scaleValue = migGlmFunction.getParams().get(GeneralLinearFunction.scaleParamName);
-
-            String link = (linkValue != null) ? linkValue.value() : "identity";
+        GLMParams migParams = extractGLMParams(migRatesValue.getGenerator());
+        if (migParams != null) {
+            String link = (migParams.link() != null) ? migParams.link().value() : "identity";
             if (!"log".equalsIgnoreCase(link)) {
                 throw new IllegalArgumentException("MASCOT GLM requires log link function for migration, but got: " + link);
             }
-
-            migrationGLM = createMigrationGLM(betaValue, xValue, scaleValue, nDemes, context);
+            migrationGLM = createMigrationGLM(migParams, nDemes, context);
         } else {
             // Migration rates are not from GLM - create simple constant migration GLM
             migrationGLM = createSimpleMigrationGLM(migRatesValue, nDemes, context);
@@ -120,18 +170,13 @@ public class StructuredCoalescentToGLM implements
 
         // === Ne GLM ===
         LogLinear neGLM;
-        if (NeValue.getGenerator() instanceof GeneralLinearFunction neGlmFunction) {
-            Value<Double[]> betaValue = neGlmFunction.getParams().get(GeneralLinearFunction.betaParamName);
-            Value<Double[]> xValue = neGlmFunction.getParams().get(GeneralLinearFunction.xParamName);
-            Value<String> linkValue = neGlmFunction.getParams().get(GeneralLinearFunction.linkParamName);
-            Value<Double> scaleValue = neGlmFunction.getParams().get(GeneralLinearFunction.scaleParamName);
-
-            String link = (linkValue != null) ? linkValue.value() : "identity";
+        GLMParams neParams = extractGLMParams(NeValue.getGenerator());
+        if (neParams != null) {
+            String link = (neParams.link() != null) ? neParams.link().value() : "identity";
             if (!"log".equalsIgnoreCase(link)) {
                 throw new IllegalArgumentException("MASCOT GLM requires log link function for Ne, but got: " + link);
             }
-
-            neGLM = createNeGLM(betaValue, xValue, scaleValue, nDemes, context);
+            neGLM = createNeGLM(neParams, nDemes, context);
         } else {
             // Ne is not from GLM - create simple constant Ne GLM
             neGLM = createSimpleNeGLM(NeValue, nDemes, context);
@@ -191,48 +236,22 @@ public class StructuredCoalescentToGLM implements
 
     /**
      * Create the migration GLM model from LPhy GeneralLinearFunction parameters.
-     * @param scaleValue optional scale parameter (used as MASCOT clock)
      */
-    private LogLinear createMigrationGLM(Value<Double[]> betaValue, Value<Double[]> xValue,
-                                          Value<Double> scaleValue, int nDemes, BEASTContext context) {
+    private LogLinear createMigrationGLM(GLMParams params, int nDemes, BEASTContext context) {
 
-        Double[] beta = betaValue.value();
-        Double[] x = xValue.value();
+        Double[] beta = params.beta().value();
         int nPredictors = beta.length;
         int nMigRates = nDemes * (nDemes - 1);
 
-        // For vectorised input, x should have nMigRates * nPredictors values
-        // organised as a flattened design matrix
-        if (x.length != nMigRates * nPredictors && x.length != nPredictors) {
-            throw new IllegalArgumentException(
-                "Design matrix x has wrong dimensions. Expected " + (nMigRates * nPredictors) +
-                " or " + nPredictors + " values, got " + x.length);
-        }
-
-        // Create covariates - one per predictor
-        List<Covariate> covariates = new ArrayList<>();
-        for (int p = 0; p < nPredictors; p++) {
-            Double[] covValues = new Double[nMigRates];
-            if (x.length == nPredictors) {
-                // Same predictor value for all migration rates (intercept-like)
-                Arrays.fill(covValues, x[p]);
-            } else {
-                // Extract column p from the design matrix
-                for (int i = 0; i < nMigRates; i++) {
-                    covValues[i] = x[i * nPredictors + p];
-                }
-            }
-            Covariate cov = new Covariate(covValues, "migration_predictor_" + p);
-            cov.initAndValidate();
-            covariates.add(cov);
-        }
+        // Extract covariate matrix - handle both vectorized (Double[][]) and non-vectorized (Double[]) cases
+        List<Covariate> covariates = extractCovariates(params.x(), nPredictors, nMigRates, "migration_predictor_");
 
         CovariateList covariateList = new CovariateList();
         covariateList.setInputValue("covariates", covariates);
         covariateList.initAndValidate();
 
         // Get or create scaler parameter (beta coefficients)
-        RealParameter scalerParam = (RealParameter) context.getBEASTObject(betaValue);
+        RealParameter scalerParam = (RealParameter) context.getBEASTObject(params.beta());
         scalerParam.setID("migrationScalerGLM");
 
         // Create indicator parameter (all 1s = all predictors included)
@@ -245,8 +264,8 @@ public class StructuredCoalescentToGLM implements
 
         // Create clock parameter from scale value, or default 1.0
         RealParameter clockParam;
-        if (scaleValue != null) {
-            clockParam = (RealParameter) context.getBEASTObject(scaleValue);
+        if (params.scale() != null) {
+            clockParam = (RealParameter) context.getBEASTObject(params.scale());
             clockParam.setID("migrationClockGLM");
         } else {
             clockParam = new RealParameter();
@@ -269,6 +288,69 @@ public class StructuredCoalescentToGLM implements
         glm.initAndValidate();
 
         return glm;
+    }
+
+    /**
+     * Extract covariates from the design matrix.
+     * Handles both vectorized (Double[][]) and non-vectorized (Double[]) cases.
+     */
+    private List<Covariate> extractCovariates(Value<?> xValue, int nPredictors, int nRows, String namePrefix) {
+        List<Covariate> covariates = new ArrayList<>();
+        Object x = xValue.value();
+
+        if (x instanceof Double[][] matrix) {
+            // Vectorized case: x is a 2D matrix [nRows x nPredictors]
+            if (matrix.length != nRows) {
+                throw new IllegalArgumentException(
+                    "Design matrix has " + matrix.length + " rows, expected " + nRows);
+            }
+            if (matrix.length > 0 && matrix[0].length != nPredictors) {
+                throw new IllegalArgumentException(
+                    "Design matrix has " + matrix[0].length + " columns, expected " + nPredictors);
+            }
+
+            // Create one covariate per predictor (column)
+            for (int p = 0; p < nPredictors; p++) {
+                Double[] covValues = new Double[nRows];
+                for (int i = 0; i < nRows; i++) {
+                    covValues[i] = matrix[i][p];
+                }
+                Covariate cov = new Covariate(covValues, namePrefix + p);
+                cov.initAndValidate();
+                covariates.add(cov);
+            }
+        } else if (x instanceof Double[] array) {
+            // Non-vectorized case: single row or flattened matrix
+            if (array.length == nPredictors) {
+                // Same predictor values for all rows (intercept-like)
+                for (int p = 0; p < nPredictors; p++) {
+                    Double[] covValues = new Double[nRows];
+                    Arrays.fill(covValues, array[p]);
+                    Covariate cov = new Covariate(covValues, namePrefix + p);
+                    cov.initAndValidate();
+                    covariates.add(cov);
+                }
+            } else if (array.length == nRows * nPredictors) {
+                // Flattened design matrix
+                for (int p = 0; p < nPredictors; p++) {
+                    Double[] covValues = new Double[nRows];
+                    for (int i = 0; i < nRows; i++) {
+                        covValues[i] = array[i * nPredictors + p];
+                    }
+                    Covariate cov = new Covariate(covValues, namePrefix + p);
+                    cov.initAndValidate();
+                    covariates.add(cov);
+                }
+            } else {
+                throw new IllegalArgumentException(
+                    "Design matrix x has wrong dimensions. Expected " + nPredictors +
+                    " or " + (nRows * nPredictors) + " values, got " + array.length);
+            }
+        } else {
+            throw new IllegalArgumentException("Unexpected type for design matrix: " + x.getClass());
+        }
+
+        return covariates;
     }
 
     /**
@@ -324,46 +406,21 @@ public class StructuredCoalescentToGLM implements
 
     /**
      * Create the Ne GLM model from LPhy GeneralLinearFunction parameters.
-     * @param scaleValue optional scale parameter (used as MASCOT clock for Ne)
      */
-    private LogLinear createNeGLM(Value<Double[]> betaValue, Value<Double[]> xValue,
-                                   Value<Double> scaleValue, int nDemes, BEASTContext context) {
+    private LogLinear createNeGLM(GLMParams params, int nDemes, BEASTContext context) {
 
-        Double[] beta = betaValue.value();
-        Double[] x = xValue.value();
+        Double[] beta = params.beta().value();
         int nPredictors = beta.length;
 
-        // For vectorised input, x should have nDemes * nPredictors values
-        if (x.length != nDemes * nPredictors && x.length != nPredictors) {
-            throw new IllegalArgumentException(
-                "Design matrix x for Ne has wrong dimensions. Expected " + (nDemes * nPredictors) +
-                " or " + nPredictors + " values, got " + x.length);
-        }
-
-        // Create covariates - one per predictor
-        List<Covariate> covariates = new ArrayList<>();
-        for (int p = 0; p < nPredictors; p++) {
-            Double[] covValues = new Double[nDemes];
-            if (x.length == nPredictors) {
-                // Same predictor value for all demes (intercept-like)
-                Arrays.fill(covValues, x[p]);
-            } else {
-                // Extract column p from the design matrix
-                for (int i = 0; i < nDemes; i++) {
-                    covValues[i] = x[i * nPredictors + p];
-                }
-            }
-            Covariate cov = new Covariate(covValues, "Ne_predictor_" + p);
-            cov.initAndValidate();
-            covariates.add(cov);
-        }
+        // Extract covariate matrix - handle both vectorized (Double[][]) and non-vectorized (Double[]) cases
+        List<Covariate> covariates = extractCovariates(params.x(), nPredictors, nDemes, "Ne_predictor_");
 
         CovariateList covariateList = new CovariateList();
         covariateList.setInputValue("covariates", covariates);
         covariateList.initAndValidate();
 
         // Get or create scaler parameter (beta coefficients)
-        RealParameter scalerParam = (RealParameter) context.getBEASTObject(betaValue);
+        RealParameter scalerParam = (RealParameter) context.getBEASTObject(params.beta());
         scalerParam.setID("neScalerGLM");
 
         // Create indicator parameter (all 1s = all predictors included)
@@ -376,8 +433,8 @@ public class StructuredCoalescentToGLM implements
 
         // Create clock parameter from scale value, or default 1.0
         RealParameter clockParam;
-        if (scaleValue != null) {
-            clockParam = (RealParameter) context.getBEASTObject(scaleValue);
+        if (params.scale() != null) {
+            clockParam = (RealParameter) context.getBEASTObject(params.scale());
             clockParam.setID("neClockGLM");
         } else {
             clockParam = new RealParameter();
