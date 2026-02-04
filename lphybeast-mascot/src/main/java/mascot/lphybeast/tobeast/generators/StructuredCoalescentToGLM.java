@@ -315,8 +315,8 @@ public class StructuredCoalescentToGLM implements
                 for (int i = 0; i < nRows; i++) {
                     covValues[i] = matrix[i][p];
                 }
+                // Note: Do NOT call initAndValidate() - it would overwrite values from empty valuesInput
                 Covariate cov = new Covariate(covValues, namePrefix + p);
-                cov.initAndValidate();
                 covariates.add(cov);
             }
         } else if (x instanceof Double[] array) {
@@ -326,8 +326,8 @@ public class StructuredCoalescentToGLM implements
                 for (int p = 0; p < nPredictors; p++) {
                     Double[] covValues = new Double[nRows];
                     Arrays.fill(covValues, array[p]);
+                    // Note: Do NOT call initAndValidate() - it would overwrite values from empty valuesInput
                     Covariate cov = new Covariate(covValues, namePrefix + p);
-                    cov.initAndValidate();
                     covariates.add(cov);
                 }
             } else if (array.length == nRows * nPredictors) {
@@ -337,8 +337,8 @@ public class StructuredCoalescentToGLM implements
                     for (int i = 0; i < nRows; i++) {
                         covValues[i] = array[i * nPredictors + p];
                     }
+                    // Note: Do NOT call initAndValidate() - it would overwrite values from empty valuesInput
                     Covariate cov = new Covariate(covValues, namePrefix + p);
-                    cov.initAndValidate();
                     covariates.add(cov);
                 }
             } else {
@@ -362,8 +362,8 @@ public class StructuredCoalescentToGLM implements
         int nMigRates = nDemes * (nDemes - 1);
 
         // Create a single covariate with the migration rate values
+        // Note: Do NOT call initAndValidate() - it would overwrite values from empty valuesInput
         Covariate cov = new Covariate(migRates, "migration_intercept");
-        cov.initAndValidate();
 
         List<Covariate> covariates = new ArrayList<>();
         covariates.add(cov);
@@ -467,8 +467,8 @@ public class StructuredCoalescentToGLM implements
         Double[] ne = NeValue.value();
 
         // Create a single "intercept" covariate with Ne values
+        // Note: Do NOT call initAndValidate() - it would overwrite values from empty valuesInput
         Covariate cov = new Covariate(ne, "Ne_intercept");
-        cov.initAndValidate();
 
         List<Covariate> covariates = new ArrayList<>();
         covariates.add(cov);
