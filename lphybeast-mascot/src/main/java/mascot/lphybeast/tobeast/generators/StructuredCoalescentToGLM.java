@@ -182,17 +182,18 @@ public class StructuredCoalescentToGLM implements
             neGLM = createSimpleNeGLM(NeValue, nDemes, context);
         }
 
-        // === Rate Shifts (single epoch for now) ===
+        // === Rate Shifts ===
+        // Single epoch extending to infinity (constant rates through time)
         RateShifts rateShifts = new RateShifts();
-        rateShifts.setInputValue("value", "0.0");
+        rateShifts.setInputValue("value", Double.POSITIVE_INFINITY);
         rateShifts.initAndValidate();
 
         // === GLM Dynamics ===
         GLM dynamics = new GLM();
         dynamics.setInputValue("migrationGLM", migrationGLM);
         dynamics.setInputValue("NeGLM", neGLM);
-        dynamics.setInputValue("dimension", nDemes);
         dynamics.setInputValue("rateShifts", rateShifts);
+        dynamics.setInputValue("dimension", nDemes);
         dynamics.setInputValue("fromBeauti", false);
 
         // Create type trait set
