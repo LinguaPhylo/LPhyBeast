@@ -153,6 +153,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 ElementsAt.class, Rep.class, RepArray.class, Sort.class, Unique.class,
                 Get.class, Length.class, Select.class, Intersect.class,
                 RandomComposition.class, SumBoolean.class,
+                Union.class, Difference.class,
                 // sequence typs
                 NucleotidesFunction.class, StandardDatatypeFunction.class,
                 BinaryDatatypeFunction.class, AminoAcidsFunction.class,
