@@ -161,7 +161,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 MethodCall.class, Simulate.class, Sample.class, ArrayFunction.class,
                 ExpressionNode.class, ExpressionNodeWrapper.class,
                 // io
-                ReadDelim.class, ReadMpileup.class, toGLM.class,
+                ReadDelim.class, ReadMpileup.class, toDesignMatrix.class,
                 // popfunc
                 ExponentialPopulationFunction.class, PopulationFunctionCoalescent.class
         );
