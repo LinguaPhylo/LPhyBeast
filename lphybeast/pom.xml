@@ -115,6 +115,13 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/MutableAlignment-0.0.2.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>beast2</groupId>
+            <artifactId>BICEPS</artifactId>
+            <version>1.1.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/BICEPS.addon.v1.1.2.jar</systemPath>
+        </dependency>
 
         <dependency>
             <groupId>java1.8</groupId>

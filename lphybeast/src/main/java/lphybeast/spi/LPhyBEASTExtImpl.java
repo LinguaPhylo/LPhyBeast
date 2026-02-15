@@ -103,6 +103,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 RandomBooleanArrayToBEAST.class,
                 SerialCoalescentToBEAST.class,
 //                SimFBDAgeToBEAST.class,
+                BICEPSToBEAST.class,
                 SkylineToBSP.class,
 //                SimulateToAlignments.class,
                 SliceDoubleArrayToBEAST.class,

@@ -15,6 +15,7 @@
     <depends on="CoupledMCMC" atleast="1.2.2"
              description="Adaptive coupled MCMC (adaptive parallel tempering or MC3)"
              projectURL="https://github.com/nicfel/CoupledMCMC/"/>
+    <depends on='BICEPS' atleast='1.1.2'/>
 
 <!-- uncomment this after MutableAlignment is released   -->
 <!--    <depends on='MutableAlignment' atleast='0.0.2'/>-->
