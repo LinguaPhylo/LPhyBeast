@@ -137,4 +137,71 @@ public class GLMStructuredCoalescentTest {
             System.out.println("XML saved to /tmp/glmFull.xml");
         } catch (Exception e) { e.printStackTrace(); }
     }
+
+    @Test
+    public void testGLMWithCbind() {
+        // Test GLM where the design matrix is built from cbind of two separate predictor matrices.
+        // This is the workflow from the MASCOT-GLM CSV example scripts.
+        // 3 demes, 2 migration predictors combined via cbind
+        String lphyScript = """
+            data {
+              S = 3;
+              // Migration predictor 1: distances (3*(3-1)=6 pairs)
+              X_dist = [[0.5],
+                        [2.0],
+                        [0.5],
+                        [1.5],
+                        [2.0],
+                        [1.5]];
+              // Migration predictor 2: border sharing
+              X_border = [[1.0],
+                          [0.0],
+                          [1.0],
+                          [0.0],
+                          [0.0],
+                          [0.0]];
+              // Combine into 2-column design matrix via cbind
+              X_m = cbind(a=X_dist, b=X_border);
+              // X_m is Double[6][2]
+
+              taxa = taxa(names=["A1","A2","A3","A4","A5","B1","B2","B3","B4","B5","C1","C2","C3","C4","C5"]);
+              demes = ["A","A","A","A","A","B","B","B","B","B","C","C","C","C","C"];
+            }
+            model {
+              Theta ~ LogNormal(meanlog=-3.0, sdlog=1.0, replicates=S);
+
+              beta_m ~ Normal(mean=0.0, sd=1.0, replicates=2);
+              m_scale ~ LogNormal(meanlog=-2.0, sdlog=1.0);
+              m = generalLinearFunction(beta=beta_m, x=X_m, link="log", scale=m_scale);
+
+              M = migrationMatrix(theta=Theta, m=m);
+              psi ~ StructuredCoalescent(M=M, taxa=taxa, demes=demes, sort=true);
+              D ~ PhyloCTMC(L=200, Q=jukesCantor(), tree=psi);
+            }""";
+
+        String xml = TestUtils.lphyScriptToBEASTXML(lphyScript, "glmCbind");
+
+        // Check GLM dynamics is used
+        assertTrue(xml.contains("mascot.dynamics.GLM"), "Should use GLM dynamics");
+        assertTrue(xml.contains("migrationGLM"), "Should have migrationGLM");
+
+        // Check that 2 covariates are created (one per predictor column from cbind)
+        // Each column of the cbind result should become a separate <covariates> element
+        assertTrue(xml.contains("migration_predictor_0"), "Should have first migration predictor covariate");
+        assertTrue(xml.contains("migration_predictor_1"), "Should have second migration predictor covariate");
+
+        // Check migration GLM components
+        assertTrue(xml.contains("migrationScalerGLM") || xml.contains("id=\"beta_m\""),
+                "Should have migration scaler/beta parameter");
+        assertTrue(xml.contains("migrationClockGLM") || xml.contains("id=\"m_scale\""),
+                "Should have migration clock parameter");
+
+        System.out.println("GLM cbind test passed - XML generated successfully");
+
+        // Save XML for inspection
+        try {
+            java.nio.file.Files.writeString(java.nio.file.Path.of("/tmp/glmCbind.xml"), xml);
+            System.out.println("XML saved to /tmp/glmCbind.xml");
+        } catch (Exception e) { e.printStackTrace(); }
+    }
 }

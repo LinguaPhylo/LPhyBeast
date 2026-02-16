@@ -137,4 +137,75 @@ public class StructuredCoalescentRateShiftsTest {
             System.out.println("XML saved to /tmp/rateShiftsGLM.xml");
         } catch (Exception e) { e.printStackTrace(); }
     }
+
+    @Test
+    public void testGLMRateShiftsWithCbind() {
+        // Test with GLM + rate shifts + cbind for combining multiple predictors
+        // This mirrors the full MASCOT-GLM tutorial workflow
+        String lphyScript = """
+            data {
+              S = 3;
+              nIntervals = 2;
+              rateShiftTimes = [0.0, 5.0];
+
+              // Ne: 2 predictors combined via cbind
+              // Predictor 1: static values tiled across 2 intervals => [6][1]
+              X_Ne_static = [[2.0], [1.5], [1.8], [2.0], [1.5], [1.8]];
+              // Predictor 2: time-variant values => [6][1]
+              X_Ne_tv = [[0.8], [0.5], [0.6], [0.2], [0.1], [0.15]];
+              // Combine into [6][2]
+              X_Ne = cbind(a=X_Ne_static, b=X_Ne_tv);
+
+              // Migration: 2 predictors combined via cbind
+              // 3 demes => 3*(3-1)=6 migration rates per interval => 12 total rows
+              X_m_dist = [[0.5], [2.0], [0.5], [1.5], [2.0], [1.5],
+                          [0.5], [2.0], [0.5], [1.5], [2.0], [1.5]];
+              X_m_border = [[1.0], [0.0], [1.0], [0.0], [0.0], [0.0],
+                            [1.0], [0.0], [1.0], [0.0], [0.0], [0.0]];
+              X_m = cbind(a=X_m_dist, b=X_m_border);
+
+              taxa = taxa(names=["A1","A2","A3","B1","B2","B3","C1","C2","C3"]);
+              demes = ["A","A","A","B","B","B","C","C","C"];
+            }
+            model {
+              beta_Ne ~ Normal(mean=0.0, sd=1.0, replicates=2);
+              Ne_scale ~ LogNormal(meanlog=0.0, sdlog=1.0);
+              theta = generalLinearFunction(beta=beta_Ne, x=X_Ne, link="log", scale=Ne_scale);
+
+              beta_m ~ Normal(mean=0.0, sd=1.0, replicates=2);
+              m_scale ~ LogNormal(meanlog=-2.0, sdlog=1.0);
+              m = generalLinearFunction(beta=beta_m, x=X_m, link="log", scale=m_scale);
+
+              psi ~ StructuredCoalescentRateShifts(
+                theta=theta,
+                m=m,
+                rateShiftTimes=rateShiftTimes,
+                taxa=taxa,
+                demes=demes
+              );
+              D ~ PhyloCTMC(L=200, Q=jukesCantor(), tree=psi);
+            }""";
+
+        String xml = TestUtils.lphyScriptToBEASTXML(lphyScript, "rateShiftsCbind");
+
+        // Check GLM dynamics is used
+        assertTrue(xml.contains("mascot.dynamics.GLM"), "Should use GLM dynamics");
+        assertTrue(xml.contains("mascot.dynamics.RateShifts"), "Should have RateShifts");
+
+        // Check 2 Ne covariates from cbind
+        assertTrue(xml.contains("Ne_predictor_0"), "Should have Ne predictor 0 from cbind");
+        assertTrue(xml.contains("Ne_predictor_1"), "Should have Ne predictor 1 from cbind");
+
+        // Check 2 migration covariates from cbind
+        assertTrue(xml.contains("migration_predictor_0"), "Should have migration predictor 0 from cbind");
+        assertTrue(xml.contains("migration_predictor_1"), "Should have migration predictor 1 from cbind");
+
+        System.out.println("GLM rate shifts with cbind test passed - XML generated successfully");
+
+        // Save XML for inspection
+        try {
+            java.nio.file.Files.writeString(java.nio.file.Path.of("/tmp/rateShiftsCbind.xml"), xml);
+            System.out.println("XML saved to /tmp/rateShiftsCbind.xml");
+        } catch (Exception e) { e.printStackTrace(); }
+    }
 }
