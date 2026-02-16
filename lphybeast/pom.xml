@@ -120,7 +120,7 @@
             <artifactId>BICEPS</artifactId>
             <version>1.1.2</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/BICEPS.addon.v1.1.2.jar</systemPath>
+            <systemPath>${project.basedir}/lib/BICEPS.v1.1.2.jar</systemPath>
         </dependency>
 
         <dependency>
