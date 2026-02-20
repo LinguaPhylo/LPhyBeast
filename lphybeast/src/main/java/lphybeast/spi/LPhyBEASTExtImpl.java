@@ -146,7 +146,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 DiscretizedGamma.class,
                 // Tree
                 NodeCount.class, ExtractTrait.class, ExtantTree.class,
-                MigrationMatrix.class, MigrationCount.class,
+                MigrationMatrix.class, MigrationCount.class, ReadTrees.class,
                 // distribution
                 WeightedDirichlet.class, SNPSampler.class,
                 // utils
