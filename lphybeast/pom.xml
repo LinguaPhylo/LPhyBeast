@@ -170,6 +170,16 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <configuration>
+                    <executable>java</executable>
+                    <classpathScope>compile</classpathScope>
+                    <commandlineArgs>-Dpicocli.disable.closures=true -classpath %classpath lphybeast.LPhyBeastCMD -vf version.xml ${lphybeast.args}</commandlineArgs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

@@ -8,6 +8,7 @@
 
 # build files
 **/target/**
+.flattened-pom.xml
 *.class
 
 # BlueJ files
