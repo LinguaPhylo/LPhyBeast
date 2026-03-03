@@ -3,6 +3,12 @@ package lphybeast;
 import beast.base.core.BEASTInterface;
 import lphy.core.model.Value;
 
+/**
+ * Implementations are instantiated once and reused across all replicates
+ * (when using the {@code -r} flag). Avoid mutable instance fields — any
+ * state accumulated during one replicate will carry over into the next,
+ * causing stale-reference bugs. Use local variables instead.
+ */
 public interface ValueToBEAST<T, S extends BEASTInterface> {
 
     /**

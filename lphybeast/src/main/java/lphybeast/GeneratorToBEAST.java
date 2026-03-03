@@ -5,6 +5,12 @@ import lphy.core.model.Generator;
 
 import java.util.List;
 
+/**
+ * Implementations are instantiated once and reused across all replicates
+ * (when using the {@code -r} flag). Avoid mutable instance fields — any
+ * state accumulated during one replicate will carry over into the next,
+ * causing stale-reference bugs. Use local variables instead.
+ */
 public interface GeneratorToBEAST<T extends Generator,S extends BEASTInterface> {
 
     /**
