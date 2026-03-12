@@ -8,7 +8,9 @@ import lphybeast.ValueToBEAST;
 import lphybeast.spi.LPhyBEASTExt;
 import lphybeast.tobeast.operators.TreeOperatorStrategy;
 import sa.lphybeast.operators.SATreeOperatorStrategy;
+import sa.lphybeast.tobeast.generators.FossilBirthDeathTreeDTToBEAST;
 import sa.lphybeast.tobeast.generators.FossilBirthDeathTreeToBEAST;
+import sa.lphybeast.tobeast.generators.SimFBDAgeDTToBEAST;
 import sa.lphybeast.tobeast.generators.SimFBDAgeToBEAST;
 
 import java.util.ArrayList;
@@ -33,7 +35,8 @@ public class SALBImpl implements LPhyBEASTExt {
 
     @Override
     public List<Class<? extends GeneratorToBEAST>> getGeneratorToBEASTs() {
-        return Arrays.asList( FossilBirthDeathTreeToBEAST.class, SimFBDAgeToBEAST.class );
+        return Arrays.asList( FossilBirthDeathTreeToBEAST.class, FossilBirthDeathTreeDTToBEAST.class,
+                SimFBDAgeToBEAST.class, SimFBDAgeDTToBEAST.class );
     }
 
     @Override
