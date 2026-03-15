@@ -6,6 +6,7 @@ import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.distribution.RandomComposition;
 import lphy.base.distribution.Sample;
 import lphy.base.distribution.WeightedDirichlet;
+import lphy.base.evolution.DateToAge;
 import lphy.base.evolution.Mpileup;
 import lphy.base.evolution.SNPSampler;
 import lphy.base.evolution.alignment.FastaAlignment;
@@ -116,7 +117,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 VectorizedFunctionToBEAST.class,
                 WAGToBEAST.class,
                 WeightedDirichletToBEAST.class,
-                YuleToBEAST.class, CalibratedYuleToBeast.class,
+                YuleToBEAST.class, CalibratedYuleToBeast.class, LeafCalibrationsToBEAST.class,
 //                AutoCorrelatedClockToBEAST.class, AutoCorrelatedLogRatesToBEAST.class,CategoricalToBEAST.class,MixturePhyloCTMCToBEAST.class,
                 ExpMarkovChainToBEAST.class );
     }
@@ -143,7 +144,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 SpeciesTaxa.class, TaxaAgesFromFunction.class, RemoveTaxa.class,
                 CopySites.class, MissingSites.class, SelectSitesByMissingFraction.class, InvariableSites.class,
                 VariableSites.class, Distance.class, InformativeSites.class,
-                DiscretizedGamma.class,
+                DiscretizedGamma.class, DateToAge.class,
                 // Tree
                 NodeCount.class, ExtractTrait.class, ExtantTree.class,
                 MigrationMatrix.class, MigrationCount.class, ReadTrees.class,
