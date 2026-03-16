@@ -106,6 +106,8 @@ public class StructuredCoalescentToGLM implements
             Value<?> x,  // Could be Double[] or Double[][]
             Value<String> link,
             Value<Double> scale,
+            Value<Boolean[]> indicator,
+            Value<Double> error,
             boolean isVectorized
     ) {}
 
@@ -116,6 +118,8 @@ public class StructuredCoalescentToGLM implements
                     glm.getParams().get(GeneralLinearFunction.xParamName),
                     glm.getParams().get(GeneralLinearFunction.linkParamName),
                     glm.getParams().get(GeneralLinearFunction.scaleParamName),
+                    glm.getParams().get(GeneralLinearFunction.indicatorParamName),
+                    glm.getParams().get(GeneralLinearFunction.errorParamName),
                     false
             );
         }
@@ -128,6 +132,8 @@ public class StructuredCoalescentToGLM implements
                     vf.getParams().get(GeneralLinearFunction.xParamName),  // This is the full matrix
                     vf.getParams().get(GeneralLinearFunction.linkParamName),
                     vf.getParams().get(GeneralLinearFunction.scaleParamName),
+                    vf.getParams().get(GeneralLinearFunction.indicatorParamName),
+                    vf.getParams().get(GeneralLinearFunction.errorParamName),
                     true
             );
         }
@@ -286,13 +292,19 @@ public class StructuredCoalescentToGLM implements
         RealParameter scalerParam = (RealParameter) context.getBEASTObject(params.beta());
         scalerParam.setID("migrationScalerGLM");
 
-        // Create indicator parameter (all 1s = all predictors included)
-        Boolean[] indicators = new Boolean[nPredictors];
-        Arrays.fill(indicators, true);
-        BooleanParameter indicatorParam = new BooleanParameter();
-        indicatorParam.setInputValue("value", Arrays.asList(indicators));
-        indicatorParam.setID("migrationIndicatorGLM");
-        indicatorParam.initAndValidate();
+        // Create indicator parameter - use LPhy indicators if provided, otherwise all true
+        BooleanParameter indicatorParam;
+        if (params.indicator() != null) {
+            indicatorParam = (BooleanParameter) context.getBEASTObject(params.indicator());
+            indicatorParam.setID("migrationIndicatorGLM");
+        } else {
+            Boolean[] indicators = new Boolean[nPredictors];
+            Arrays.fill(indicators, true);
+            indicatorParam = new BooleanParameter();
+            indicatorParam.setInputValue("value", Arrays.asList(indicators));
+            indicatorParam.setID("migrationIndicatorGLM");
+            indicatorParam.initAndValidate();
+        }
 
         // Create clock parameter from scale value, or default 1.0
         RealParameter clockParam;
@@ -312,6 +324,14 @@ public class StructuredCoalescentToGLM implements
         glm.setInputValue("scaler", scalerParam);
         glm.setInputValue("indicator", indicatorParam);
         glm.setInputValue("clock", clockParam);
+
+        // Wire error term if provided
+        if (params.error() != null) {
+            RealParameter errorParam = (RealParameter) context.getBEASTObject(params.error());
+            errorParam.setID("migrationErrorGLM");
+            glm.setInputValue("error", errorParam);
+        }
+
         glm.setID("migrationGLM");
 
         // Set nrIntervals and verticalEntries before initAndValidate
@@ -479,13 +499,19 @@ public class StructuredCoalescentToGLM implements
         RealParameter scalerParam = (RealParameter) context.getBEASTObject(params.beta());
         scalerParam.setID("neScalerGLM");
 
-        // Create indicator parameter (all 1s = all predictors included)
-        Boolean[] indicators = new Boolean[nPredictors];
-        Arrays.fill(indicators, true);
-        BooleanParameter indicatorParam = new BooleanParameter();
-        indicatorParam.setInputValue("value", Arrays.asList(indicators));
-        indicatorParam.setID("neIndicatorGLM");
-        indicatorParam.initAndValidate();
+        // Create indicator parameter - use LPhy indicators if provided, otherwise all true
+        BooleanParameter indicatorParam;
+        if (params.indicator() != null) {
+            indicatorParam = (BooleanParameter) context.getBEASTObject(params.indicator());
+            indicatorParam.setID("neIndicatorGLM");
+        } else {
+            Boolean[] indicators = new Boolean[nPredictors];
+            Arrays.fill(indicators, true);
+            indicatorParam = new BooleanParameter();
+            indicatorParam.setInputValue("value", Arrays.asList(indicators));
+            indicatorParam.setID("neIndicatorGLM");
+            indicatorParam.initAndValidate();
+        }
 
         // Create clock parameter from scale value, or default 1.0
         RealParameter clockParam;
@@ -505,6 +531,14 @@ public class StructuredCoalescentToGLM implements
         glm.setInputValue("scaler", scalerParam);
         glm.setInputValue("indicator", indicatorParam);
         glm.setInputValue("clock", clockParam);
+
+        // Wire error term if provided
+        if (params.error() != null) {
+            RealParameter errorParam = (RealParameter) context.getBEASTObject(params.error());
+            errorParam.setID("neErrorGLM");
+            glm.setInputValue("error", errorParam);
+        }
+
         glm.setID("neGLM");
 
         // Set nrIntervals and verticalEntries before initAndValidate

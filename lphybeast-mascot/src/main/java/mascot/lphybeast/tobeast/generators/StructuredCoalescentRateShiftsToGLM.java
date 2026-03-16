@@ -82,6 +82,8 @@ public class StructuredCoalescentRateShiftsToGLM implements
             Value<?> x,
             Value<String> link,
             Value<Double> scale,
+            Value<Boolean[]> indicator,
+            Value<Double> error,
             boolean isVectorized
     ) {}
 
@@ -232,13 +234,19 @@ public class StructuredCoalescentRateShiftsToGLM implements
         RealParameter scalerParam = (RealParameter) context.getBEASTObject(params.beta());
         scalerParam.setID(namePrefix + "ScalerGLM");
 
-        // Create indicator parameter (all true = all predictors included)
-        Boolean[] indicators = new Boolean[nPredictors];
-        Arrays.fill(indicators, true);
-        BooleanParameter indicatorParam = new BooleanParameter();
-        indicatorParam.setInputValue("value", Arrays.asList(indicators));
-        indicatorParam.setID(namePrefix + "IndicatorGLM");
-        indicatorParam.initAndValidate();
+        // Create indicator parameter - use LPhy indicators if provided, otherwise all true
+        BooleanParameter indicatorParam;
+        if (params.indicator() != null) {
+            indicatorParam = (BooleanParameter) context.getBEASTObject(params.indicator());
+            indicatorParam.setID(namePrefix + "IndicatorGLM");
+        } else {
+            Boolean[] indicators = new Boolean[nPredictors];
+            Arrays.fill(indicators, true);
+            indicatorParam = new BooleanParameter();
+            indicatorParam.setInputValue("value", Arrays.asList(indicators));
+            indicatorParam.setID(namePrefix + "IndicatorGLM");
+            indicatorParam.initAndValidate();
+        }
 
         // Create clock parameter from scale value, or default 1.0
         RealParameter clockParam;
@@ -258,6 +266,14 @@ public class StructuredCoalescentRateShiftsToGLM implements
         glm.setInputValue("scaler", scalerParam);
         glm.setInputValue("indicator", indicatorParam);
         glm.setInputValue("clock", clockParam);
+
+        // Wire error term if provided
+        if (params.error() != null) {
+            RealParameter errorParam = (RealParameter) context.getBEASTObject(params.error());
+            errorParam.setID(namePrefix + "ErrorGLM");
+            glm.setInputValue("error", errorParam);
+        }
+
         glm.setID(namePrefix + "GLM");
 
         glm.nrIntervals = nIntervals;
@@ -389,6 +405,8 @@ public class StructuredCoalescentRateShiftsToGLM implements
                     glm.getParams().get(GeneralLinearFunction.xParamName),
                     glm.getParams().get(GeneralLinearFunction.linkParamName),
                     glm.getParams().get(GeneralLinearFunction.scaleParamName),
+                    glm.getParams().get(GeneralLinearFunction.indicatorParamName),
+                    glm.getParams().get(GeneralLinearFunction.errorParamName),
                     false
             );
         }
@@ -400,6 +418,8 @@ public class StructuredCoalescentRateShiftsToGLM implements
                     vf.getParams().get(GeneralLinearFunction.xParamName),
                     vf.getParams().get(GeneralLinearFunction.linkParamName),
                     vf.getParams().get(GeneralLinearFunction.scaleParamName),
+                    vf.getParams().get(GeneralLinearFunction.indicatorParamName),
+                    vf.getParams().get(GeneralLinearFunction.errorParamName),
                     true
             );
         }
