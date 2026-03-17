@@ -5,7 +5,9 @@ import beast.base.evolution.operator.SubtreeSlide;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.Operator;
 import lphy.base.evolution.birthdeath.FossilBirthDeathTree;
+import lphy.base.evolution.birthdeath.FossilBirthDeathTreeDT;
 import lphy.base.evolution.birthdeath.SimFBDAge;
+import lphy.base.evolution.birthdeath.SimFBDAgeDT;
 import lphy.base.evolution.birthdeath.SimFossilsPoisson;
 import lphy.base.evolution.tree.TimeTree;
 import lphy.core.model.GraphicalModelNode;
@@ -35,7 +37,9 @@ public class SATreeOperatorStrategy implements TreeOperatorStrategy {
         GraphicalModelNode<TimeTree> graphicalModelNode = (GraphicalModelNode<TimeTree>) BEASTToLPHYMap.get(tree);
         if (graphicalModelNode instanceof Value<TimeTree> timeTreeValue)
             return timeTreeValue.getGenerator() instanceof SimFBDAge ||  // simFBDAge.lphy
+                    timeTreeValue.getGenerator() instanceof SimFBDAgeDT ||  // simFBDAge with diversification/turnover
                     timeTreeValue.getGenerator() instanceof FossilBirthDeathTree ||  // simFossilsCompact.lphy
+                    timeTreeValue.getGenerator() instanceof FossilBirthDeathTreeDT ||  // FBD with diversification/turnover
                     timeTreeValue.getGenerator() instanceof SimFossilsPoisson;   // simFossils.lphy
         else
             throw new IllegalArgumentException("BEAST tree " + tree + " must map to Value<TimeTree> !");
