@@ -6,6 +6,7 @@ import lphy.core.model.Generator;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
 import lphybeast.spi.LPhyBEASTExt;
+import mascot.lphybeast.tobeast.generators.PoissonIndicatorsToBEAST;
 import mascot.lphybeast.tobeast.generators.StructuredCoalescentToMascot;
 import mascot.lphybeast.tobeast.generators.StructuredCoalescentToGLM;
 import mascot.lphybeast.tobeast.generators.StructuredCoalescentRateShiftsToGLM;
@@ -34,7 +35,8 @@ public class MascotLBImpl implements LPhyBEASTExt {
     public List<Class<? extends GeneratorToBEAST>> getGeneratorToBEASTs() {
         return Arrays.asList(
                 StructuredCoalescentToMascot.class,
-                StructuredCoalescentRateShiftsToGLM.class
+                StructuredCoalescentRateShiftsToGLM.class,
+                PoissonIndicatorsToBEAST.class
         );
     }
 
