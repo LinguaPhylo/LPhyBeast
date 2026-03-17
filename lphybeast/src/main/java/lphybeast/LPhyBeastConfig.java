@@ -63,6 +63,7 @@ public class LPhyBeastConfig {
     private String[] varNotLog;
     // make sure not to initialize MCMC from the 'true' values.
     private boolean randomStart;
+    private String operatorSchedule = null;
 
     // model misspecification test
     private Path model2File = null;
@@ -368,5 +369,13 @@ public class LPhyBeastConfig {
 
     public int getNsThreads() {
         return nsThreads;
+    }
+
+    public String getOperatorSchedule() {
+        return operatorSchedule;
+    }
+
+    public void setOperatorSchedule(String operatorSchedule) {
+        this.operatorSchedule = operatorSchedule;
     }
 }

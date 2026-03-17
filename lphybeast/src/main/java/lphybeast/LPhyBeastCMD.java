@@ -172,6 +172,11 @@ public class LPhyBeastCMD implements Callable<Integer> {
     @Option(names = {"-rs", "--randomStart"}, description = "make sure not to initialize MCMC from the 'true' values.")
     boolean randomStart;
 
+    @Option(names = {"--operatorSchedule"},
+            description = "Specify the operator schedule to use. Options: 'targeted'. " +
+                    "If 'targeted', inserts a TargetedOperatorSchedule into the BEAST XML.")
+    String operatorSchedule = null;
+
     // TODO nested sampling
 //    @Option(names = {"-NS", "--nestedSampling"}, defaultValue = "false",
 //            description = "Create XML for nested sampling.")
@@ -251,6 +256,8 @@ public class LPhyBeastCMD implements Callable<Integer> {
 
             //set whether sample alignment
             lPhyBeastConfig.setObservedParamID(observedParam);
+
+            lPhyBeastConfig.setOperatorSchedule(operatorSchedule);
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);
