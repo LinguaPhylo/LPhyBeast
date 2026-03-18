@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 /**
@@ -389,6 +390,15 @@ public class LPhyBeast implements Runnable {
             String insert = "    <operatorschedule id=\"TargetedOperatorSchedule_\" " +
                     "spec=\"targetedbeast.operatorschedule.TargetedOperatorSchedule\"/>\n";
             xml = xml.replace("</run>", insert + "</run>");
+        }
+
+        // replace starting tree newick if provided
+        String startingNewick = lPhyBeastConfig.getStartingTreeNewick();
+        if (startingNewick != null) {
+            String safeNewick = Matcher.quoteReplacement(startingNewick);
+            xml = xml.replaceAll("newick=\"[^\"]*\"", "newick=\"" + safeNewick + "\"");
+            LoggerUtils.log.info("Replaced starting tree newick from file: " +
+                    lPhyBeastConfig.getStartingTreeFile());
         }
 
         xmlBuilder.append("\n").append(xml).append("\n");

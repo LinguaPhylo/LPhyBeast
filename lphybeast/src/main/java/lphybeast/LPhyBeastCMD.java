@@ -177,6 +177,12 @@ public class LPhyBeastCMD implements Callable<Integer> {
                     "If 'targeted', inserts a TargetedOperatorSchedule into the BEAST XML.")
     String operatorSchedule = null;
 
+    @Option(names = {"-t", "--startingTree"},
+            description = "File containing a Newick tree to use as the starting tree in the BEAST XML. " +
+                    "The file should contain a single Newick string. " +
+                    "This replaces the default starting tree for all tree state nodes.")
+    Path startingTreeFile = null;
+
     // TODO nested sampling
 //    @Option(names = {"-NS", "--nestedSampling"}, defaultValue = "false",
 //            description = "Create XML for nested sampling.")
@@ -258,6 +264,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
             lPhyBeastConfig.setObservedParamID(observedParam);
 
             lPhyBeastConfig.setOperatorSchedule(operatorSchedule);
+            lPhyBeastConfig.setStartingTreeFile(startingTreeFile);
 
             if (seed > 0)
                 RandomUtils.setSeed(seed);

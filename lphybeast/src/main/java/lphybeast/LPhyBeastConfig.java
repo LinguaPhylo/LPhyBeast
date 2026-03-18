@@ -11,6 +11,7 @@ import lphy.core.vectorization.VectorUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -64,6 +65,7 @@ public class LPhyBeastConfig {
     // make sure not to initialize MCMC from the 'true' values.
     private boolean randomStart;
     private String operatorSchedule = null;
+    private Path startingTreeFile = null;
 
     // model misspecification test
     private Path model2File = null;
@@ -377,5 +379,32 @@ public class LPhyBeastConfig {
 
     public void setOperatorSchedule(String operatorSchedule) {
         this.operatorSchedule = operatorSchedule;
+    }
+
+    public Path getStartingTreeFile() {
+        return startingTreeFile;
+    }
+
+    public void setStartingTreeFile(Path startingTreeFile) {
+        this.startingTreeFile = startingTreeFile;
+    }
+
+    /**
+     * Read the starting tree Newick string from the file specified by {@link #startingTreeFile}.
+     * @return the Newick string trimmed, or null if no starting tree file is set.
+     * @throws IOException if the file cannot be read.
+     */
+    public String getStartingTreeNewick() throws IOException {
+        if (startingTreeFile == null) return null;
+
+        Path resolvedPath = UserDir.getUserPath(startingTreeFile);
+        if (!resolvedPath.toFile().exists())
+            throw new FileNotFoundException("Cannot find starting tree file: " + resolvedPath.toAbsolutePath());
+
+        String content = Files.readString(resolvedPath).trim();
+        if (content.isEmpty())
+            throw new IOException("Starting tree file is empty: " + resolvedPath.toAbsolutePath());
+
+        return content;
     }
 }
