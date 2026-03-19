@@ -3,142 +3,73 @@
     <parent>
         <groupId>io.github.linguaphylo</groupId>
         <artifactId>lphybeast-root</artifactId>
-        <version>${revision}</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
     <name>lphybeast</name>
     <artifactId>lphybeast</artifactId>
 
     <dependencies>
+        <!-- BEAST 3 -->
+        <dependency>
+            <groupId>io.github.compevol</groupId>
+            <artifactId>beast-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.compevol</groupId>
+            <artifactId>beast-pkgmgmt</artifactId>
+        </dependency>
+
+        <!-- LPhy -->
         <dependency>
             <groupId>io.github.linguaphylo</groupId>
             <artifactId>lphy-base</artifactId>
-            <version>${lphy.vision}</version>
         </dependency>
 
-        <!--  previous version 23.6.1-jre has 3 vulnerabilities found by IntelliJ  -->
+        <!-- Utilities -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>33.2.1-jre</version>
         </dependency>
 
-        <!--  all beast 2  -->
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>beast-base</artifactId>
-            <version>${beast.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/BEAST.base-${beast.version}.jar</systemPath>
-        </dependency>
-<!--        <dependency>-->
-<!--            <groupId>beast2</groupId>-->
-<!--            <artifactId>beast-base</artifactId>-->
-<!--            <version>${beast.version}</version>-->
-<!--            <classifier>source</classifier>-->
-<!--            <systemPath>${project.basedir}/lib/BEAST.base-${beast.version}.src.jar</systemPath>-->
-<!--        </dependency>-->
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>beast-app</artifactId>
-            <version>${beast.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/BEAST.app-${beast.version}.jar</systemPath>
-        </dependency>
-<!--        <dependency>-->
-<!--            <groupId>beast2</groupId>-->
-<!--            <artifactId>beast-app</artifactId>-->
-<!--            <version>${beast.version}</version>-->
-<!--            <classifier>source</classifier>-->
-<!--            <systemPath>${project.basedir}/lib/BEAST.app-${beast.version}.src.jar</systemPath>-->
-<!--        </dependency>-->
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>beast-launcher</artifactId>
-            <version>${beast.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/launcher-${beast.version}.jar</systemPath>
-        </dependency>
+        <!-- TODO Phase 2-4: These BEAST2 package deps are commented out.
+             They will be resolved at runtime via beast3 package manager,
+             or vendored where needed.
 
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>beast-labs</artifactId>
-            <version>2.0.3</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/BEASTlabs.v2.0.3.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>beast-classic</artifactId>
-            <version>1.6.4</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/BEAST_CLASSIC-1.6.4.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>mc3</artifactId>
-            <version>1.2.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/CoupledMCMC.v1.2.2.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>bdtree</artifactId>
-            <version>0.0.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/bdtree.v0.0.1.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>ORC</artifactId>
-            <version>1.2.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/ORC-1.2.0.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>feast</artifactId>
-            <version>10.5.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/feast.v10.5.0.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>SSM</artifactId>
-            <version>1.2.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/SSM.v1.2.0.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>MutableAlignment</artifactId>
-            <version>0.0.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/MutableAlignment-0.0.2.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>beast2</groupId>
-            <artifactId>BICEPS</artifactId>
-            <version>1.1.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/BICEPS.v1.1.2.jar</systemPath>
-        </dependency>
+             BEASTLabs (4 classes needed: BEASTVector, RNNIMetric, Slice, BernoulliDistribution)
+             feast (2 classes: ExpCalculator, Concatenate)
+             ORC (6 operator classes)
+             BEAST_CLASSIC
+             CoupledMCMC
+             bdtree
+             SSM
+             MutableAlignment
+             BICEPS
+             nashorn
+        -->
 
+        <!-- Testing -->
         <dependency>
-            <groupId>java1.8</groupId>
-            <artifactId>nashorn</artifactId>
-            <version>1.8</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/nashorn.jar</systemPath>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.15.0</version>
+                <configuration>
+                    <release>25</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.4.2</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -149,36 +80,19 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.7.1</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/assembly/lphybeast-assembly.xml</descriptor>
-                    </descriptors>
-                    <outputDirectory>${project.build.directory}</outputDirectory>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <finalName>${project.artifactId}-${project.version}</finalName>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.6.3</version>
                 <configuration>
                     <executable>java</executable>
                     <classpathScope>compile</classpathScope>
-                    <commandlineArgs>-Dpicocli.disable.closures=true -classpath %classpath lphybeast.LPhyBeastCMD -vf version.xml ${lphybeast.args}</commandlineArgs>
+                    <commandlineArgs>-Dpicocli.disable.closures=true -classpath %classpath lphybeast.LPhyBeastCMD ${lphybeast.args}</commandlineArgs>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
             </plugin>
         </plugins>
     </build>
