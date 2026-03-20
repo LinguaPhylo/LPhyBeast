@@ -46,33 +46,19 @@
             <version>1.7.0-SNAPSHOT</version>
         </dependency>
 
-        <!-- feast -->
-        <dependency>
-            <groupId>feast</groupId>
-            <artifactId>feast</artifactId>
-            <version>11.0.0-SNAPSHOT</version>
-        </dependency>
-
-        <!-- MutableAlignment -->
+        <!-- BEAGLE (optional in beast-base, needed at runtime for TreeLikelihood) -->
         <dependency>
             <groupId>io.github.compevol</groupId>
-            <artifactId>beast-mutable-alignment</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <artifactId>beagle</artifactId>
+            <version>1.0</version>
         </dependency>
 
-        <!-- CoupledMCMC (MC3) -->
-        <dependency>
-            <groupId>io.github.compevol</groupId>
-            <artifactId>beast-coupled-mcmc</artifactId>
-            <version>1.3.0-SNAPSHOT</version>
-        </dependency>
-
-        <!-- bdtree -->
-        <dependency>
-            <groupId>io.github.compevol</groupId>
-            <artifactId>beast-bdtree</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
-        </dependency>
+        <!-- Optional dependencies moved to extension modules:
+             feast              -> lphybeast-feast
+             beast-bdtree       -> lphybeast-bdtree
+             beast-coupled-mcmc -> lphybeast-mc3
+             beast-mutable-alignment -> lphybeast-ma
+        -->
 
         <!-- TODO: These BEAST2 package deps will be resolved at runtime
              via beast3 package manager, or made optional.
@@ -122,10 +108,28 @@
                     <commandlineArgs>-Dpicocli.disable.closures=true -classpath %classpath lphybeast.LPhyBeastCMD ${lphybeast.args}</commandlineArgs>
                 </configuration>
             </plugin>
+            <!-- Resolve dependency artifact paths as properties for surefire -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <goals><goal>properties</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Tell BEASTClassLoader.initServices() where to find
+                             beast-base's version.xml (embedded in the JAR) -->
+                        <BEAST_PACKAGE_PATH>${io.github.compevol:beast-base:jar}</BEAST_PACKAGE_PATH>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

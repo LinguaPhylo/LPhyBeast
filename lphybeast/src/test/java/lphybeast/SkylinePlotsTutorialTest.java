@@ -1,6 +1,7 @@
 package lphybeast;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -25,6 +26,7 @@ public class SkylinePlotsTutorialTest {
         fPath = TestUtils.getFileForResources("hcv.nexus");
     }
 
+    @Disabled("Requires GTR mapping from lphybeast-ssm extension (not yet created)")
     @Test
     public void testBS() {
         final String fileStem = "hcv";

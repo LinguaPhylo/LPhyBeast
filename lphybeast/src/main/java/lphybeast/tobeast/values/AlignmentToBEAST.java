@@ -15,8 +15,8 @@ import lphy.core.logger.LoggerUtils;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
+import lphybeast.spi.AlignmentHandler;
 import lphybeast.tobeast.DataTypeUtils;
-import mutablealignment.MutableAlignment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,11 +97,16 @@ public class AlignmentToBEAST implements ValueToBEAST<SimpleAlignment, beast.bas
                 sequences.add(createBEASTSequence(taxaNames[i], s));
             }
 
-            // TODO check if this is this enough
-            if (!context.isObserved(alignmentValue)) {
-                // MutableAlignment
-                beastAlignment = new MutableAlignment();
-            } else // normal Alignment
+            // Delegate to AlignmentHandler (e.g., MA extension provides MutableAlignment)
+            boolean isObserved = context.isObserved(alignmentValue);
+            beastAlignment = null;
+            for (AlignmentHandler handler : context.getAlignmentHandlers()) {
+                if (handler.appliesTo(isObserved)) {
+                    beastAlignment = handler.createAlignment();
+                    break;
+                }
+            }
+            if (beastAlignment == null)
                 beastAlignment = new beast.base.evolution.alignment.Alignment();
 
             beastAlignment.setInputValue("sequence", sequences);

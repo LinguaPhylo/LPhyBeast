@@ -7,7 +7,7 @@ import jebl.evolution.sequences.SequenceType;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.Generator;
 import lphy.core.model.Value;
-import lphybeast.spi.LPhyBEASTExt;
+import lphybeast.spi.*;
 import lphybeast.tobeast.operators.DefaultTreeOperatorStrategy;
 import lphybeast.tobeast.operators.TreeOperatorStrategy;
 
@@ -70,6 +70,14 @@ public class LPhyBEASTLoader {
      */
     public List<TreeOperatorStrategy> newTreeOperatorStrategies;
 
+    //*** new SPI registries ***//
+
+    public List<MCMCStrategy> mcmcStrategies;
+    public List<ValueHandler> valueHandlers;
+    public List<TreeLikelihoodStrategy> treeLikelihoodStrategies;
+    public List<OperatorContributor> operatorContributors;
+    public List<AlignmentHandler> alignmentHandlers;
+
     public static final String LPHY_BEAST_EXT = "lphybeast.spi.LPhyBEASTExt";
 
 
@@ -98,6 +106,11 @@ public class LPhyBEASTLoader {
                 System.out.println("Adding BEAST2 services from " + path.toAbsolutePath());
             }
         }
+        // Trigger classpath + BEAST_PACKAGE_PATH scanning for version.xml
+        // files embedded in dependency JARs (e.g. beast-base).
+        // Downstream projects must set BEAST_PACKAGE_PATH to include
+        // the beast-base JAR (or its target/classes directory).
+        BEASTClassLoader.initServices();
     }
 
     /**
@@ -144,6 +157,13 @@ public class LPhyBEASTLoader {
 
         newTreeOperatorStrategies = new ArrayList<>();
 
+        // New SPI registries
+        mcmcStrategies = new ArrayList<>();
+        valueHandlers = new ArrayList<>();
+        treeLikelihoodStrategies = new ArrayList<>();
+        operatorContributors = new ArrayList<>();
+        alignmentHandlers = new ArrayList<>();
+
         try {
 //            Iterator<LPhyBEASTExt> extensions = loader.iterator();
 //            while (extensions.hasNext()) { // TODO validation if add same name
@@ -183,18 +203,50 @@ public class LPhyBEASTLoader {
                 }
             }
 
+            // Discover new SPI services
+            discoverServices(MCMCStrategy.class, mcmcStrategies);
+            discoverServices(ValueHandler.class, valueHandlers);
+            discoverServices(TreeLikelihoodStrategy.class, treeLikelihoodStrategies);
+            discoverServices(OperatorContributor.class, operatorContributors);
+            discoverServices(AlignmentHandler.class, alignmentHandlers);
+
             System.out.println("Load " + valueToBEASTList.size() + " ValuesToBEAST = " + valueToBEASTList);
             System.out.println("Load " + generatorToBEASTMap.size() + " GeneratorToBEAST = " + generatorToBEASTMap);
             System.out.println("Map " + dataTypeMap.size() + " data type(s) = " + dataTypeMap);
             System.out.println("Exclude " + excludedGeneratorClasses.size() + " extra Generator(s) = " + excludedGeneratorClasses);
             System.out.println("Exclude " + excludedValueTypes.size() + " extra Value(s) = " + excludedValueTypes);
             System.out.println("Load " + newTreeOperatorStrategies.size() + " new Tree Operator Strategies = " + newTreeOperatorStrategies);
+            System.out.println("Load " + mcmcStrategies.size() + " MCMCStrategy(s), " +
+                    valueHandlers.size() + " ValueHandler(s), " +
+                    treeLikelihoodStrategies.size() + " TreeLikelihoodStrategy(s), " +
+                    operatorContributors.size() + " OperatorContributor(s), " +
+                    alignmentHandlers.size() + " AlignmentHandler(s)");
 
         } catch (ServiceConfigurationError serviceError) {
             System.err.println(serviceError);
             serviceError.printStackTrace();
         }
 
+    }
+
+    /**
+     * Discover and instantiate services of the given type via BEASTClassLoader.
+     */
+    private <T> void discoverServices(Class<T> serviceType, List<T> registry) {
+        Map<String, Set<String>> providers = BEASTClassLoader.getServices();
+        Set<String> providerNames = providers.get(serviceType.getName());
+        if (providerNames == null || providerNames.isEmpty()) return;
+
+        for (String clsStr : providerNames) {
+            try {
+                Class<?> cls = BEASTClassLoader.forName(clsStr, serviceType.getName());
+                Object obj = cls.getDeclaredConstructor().newInstance();
+                registry.add(serviceType.cast(obj));
+                System.out.println("Discovered " + serviceType.getSimpleName() + ": " + clsStr);
+            } catch (Exception e) {
+                // skip if cannot instantiate
+            }
+        }
     }
 
     private void registerValueToBEAST(final List<Class<? extends ValueToBEAST>> valuesToBEASTs) {

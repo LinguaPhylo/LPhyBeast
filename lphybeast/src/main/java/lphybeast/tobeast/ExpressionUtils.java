@@ -1,6 +1,5 @@
 package lphybeast.tobeast;
 
-import feast.expressions.ExpCalculator;
 import lphy.core.model.ExpressionNode;
 import lphy.core.model.GraphicalModelNode;
 import lphy.core.model.RandomVariable;
@@ -31,7 +30,7 @@ public final class ExpressionUtils {
 
     /**
      * Recursively find all random vars given a {@link ExpressionNode},
-     * so that they can be used as the list of arg when converting to the beast obj {@link ExpCalculator}.
+     * so that they can be used as the list of arg when converting to the beast obj.
      * @param expression  {@link ExpressionNode}, such as exp(a+b);
      * @return  list of {@link RandomVariable}.
      * @see lphybeast.tobeast.generators.ExpressionNodeToBEAST

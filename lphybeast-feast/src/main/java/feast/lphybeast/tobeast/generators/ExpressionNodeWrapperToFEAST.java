@@ -1,4 +1,4 @@
-package lphybeast.tobeast.generators;
+package feast.lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.core.Function;
@@ -36,7 +36,6 @@ public class ExpressionNodeWrapperToFEAST implements GeneratorToBEAST<Expression
     public void modifyBEASTValues(ExpressionNodeWrapper generator, BEASTInterface value, BEASTContext context) {
         Value lphyValue = (Value) context.getGraphicalModelNode(value);
         context.removeBEASTObject(value);
-        /** call {@link BEASTContext#addToContext(GraphicalModelNode, BEASTInterface)} **/
         context.putBEASTObject(lphyValue, generatorToBEAST(generator, value, context));
     }
 

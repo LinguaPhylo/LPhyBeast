@@ -1,18 +1,21 @@
-package lphybeast;
+package feast.lphybeast;
 
+import beast.pkgmgmt.BEASTClassLoader;
+import lphybeast.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 /**
- * Time stamped data
- * https://linguaphylo.github.io/tutorials/time-stamped-data/
- * @author Walter Xie
+ * Time stamped data — requires feast extension (WeightedDirichlet → Concatenate).
+ * Moved from core lphybeast module.
  */
 public class RSV2TutorialTest {
 
@@ -21,7 +24,15 @@ public class RSV2TutorialTest {
 
     @BeforeEach
     public void setUp() {
-        TestUtils.loadServices();
+        // Register feast extension services BEFORE loadServices triggers LPhyBEASTLoader singleton creation.
+        // Once module-info.java is added, JPMS will discover these automatically.
+        Map<String, Set<String>> feastServices = Map.of(
+                "lphybeast.spi.LPhyBEASTExt", Set.of("feast.lphybeast.spi.FeastLBImpl"),
+                "lphybeast.spi.ValueHandler", Set.of("feast.lphybeast.FeastValueHandler")
+        );
+        BEASTClassLoader.classLoader.addServices("lphybeast-feast", feastServices);
+        // Load core services
+        TestUtils.loadServices(System.getProperty("user.dir") + "/../lphybeast");
         fPath = TestUtils.getFileForResources("RSV2.nex");
     }
 
@@ -102,5 +113,4 @@ public class RSV2TutorialTest {
                 xml.contains("fileName=\"" + fileStem + ".log\"") && xml.contains("fileName=\"" + fileStem + ".trees\""),
                 "logger" );
     }
-
 }

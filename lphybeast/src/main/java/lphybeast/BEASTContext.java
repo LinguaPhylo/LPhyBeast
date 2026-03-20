@@ -21,9 +21,6 @@ import beastlabs.core.util.Slice;
 import beastlabs.util.BEASTVector;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import coupledMCMC.CoupledMCMC;
-import feast.expressions.ExpCalculator;
-import feast.function.Concatenate;
 import jebl.evolution.sequences.SequenceType;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.*;
@@ -35,7 +32,7 @@ import lphy.core.vectorization.VectorUtils;
 import lphy.core.vectorization.VectorizedRandomVariable;
 import lphy.core.vectorization.operation.ElementsAt;
 import lphy.core.vectorization.operation.SliceValue;
-import lphybeast.spi.LPhyBEASTExt;
+import lphybeast.spi.*;
 import lphybeast.tobeast.loggers.LoggerFactory;
 import lphybeast.tobeast.loggers.LoggerHelper;
 import lphybeast.tobeast.operators.DefaultOperatorStrategy;
@@ -115,6 +112,8 @@ public class BEASTContext {
 
     // required
     final private LPhyBeastConfig lPhyBeastConfig;
+    // cached loader for SPI access
+    private LPhyBEASTLoader loader;
 
     @Deprecated
     public BEASTContext(LPhyParserDictionary parserDictionary, LPhyBeastConfig lPhyBeastConfig) {
@@ -133,6 +132,7 @@ public class BEASTContext {
         this.parserDictionary = parserDictionary;
         if (loader == null)
             loader = LPhyBEASTLoader.getInstance();
+        this.loader = loader;
         this.lPhyBeastConfig = lPhyBeastConfig;
 
         valueToBEASTList = loader.valueToBEASTList;
@@ -145,8 +145,95 @@ public class BEASTContext {
         newTreeOperatorStrategies = loader.newTreeOperatorStrategies;
     }
 
+    //*** SPI accessors ***//
+
+    public List<ValueHandler> getValueHandlers() {
+        return loader.valueHandlers;
+    }
+
+    public List<TreeLikelihoodStrategy> getTreeLikelihoodStrategies() {
+        return loader.treeLikelihoodStrategies;
+    }
+
+    public List<OperatorContributor> getOperatorContributors() {
+        return loader.operatorContributors;
+    }
+
+    public List<AlignmentHandler> getAlignmentHandlers() {
+        return loader.alignmentHandlers;
+    }
+
+    /**
+     * Resolve the MCMCStrategy to use. If MC3 is requested, find an MC3 strategy
+     * from extensions. Otherwise use the default.
+     */
+    private MCMCStrategy resolveMCMCStrategy() {
+        if (lPhyBeastConfig.isUseMC3()) {
+            for (MCMCStrategy strategy : loader.mcmcStrategies) {
+                if (strategy.isMC3()) return strategy;
+            }
+            throw new UnsupportedOperationException(
+                    "MC3 (Coupled MCMC) requested but no MC3 strategy found. " +
+                    "Install the lphybeast-mc3 extension package.");
+        }
+        // Return first non-MC3 strategy, or the default
+        for (MCMCStrategy strategy : loader.mcmcStrategies) {
+            if (!strategy.isMC3()) return strategy;
+        }
+        return new DefaultMCMCStrategy();
+    }
+
+    /**
+     * Ask registered ValueHandlers if beastInterface is a function expression.
+     * @return the Function, or null if no handler recognizes it
+     */
+    public Function valueHandlerAsFunction(BEASTInterface beastInterface) {
+        for (ValueHandler handler : getValueHandlers()) {
+            Function f = handler.asFunction(beastInterface);
+            if (f != null) return f;
+        }
+        return null;
+    }
+
+    /**
+     * Ask registered ValueHandlers to extract parts from a compound value.
+     * @return the parts, or null if no handler recognizes it
+     */
+    public List<Function> valueHandlerExtractParts(BEASTInterface beastInterface) {
+        for (ValueHandler handler : getValueHandlers()) {
+            List<Function> parts = handler.extractParts(beastInterface);
+            if (parts != null) return parts;
+        }
+        return null;
+    }
+
+    /**
+     * Ask registered ValueHandlers to extract state nodes from a compound value.
+     * @return the state nodes, or null if no handler recognizes it
+     */
+    public List<StateNode> valueHandlerExtractStateNodes(BEASTInterface beastInterface) {
+        for (ValueHandler handler : getValueHandlers()) {
+            List<StateNode> nodes = handler.extractStateNodes(beastInterface);
+            if (nodes != null) return nodes;
+        }
+        return null;
+    }
+
+    /**
+     * Ask registered ValueHandlers to extract function arguments from an expression.
+     * @return the arguments, or null if no handler recognizes it
+     */
+    public List<Function> valueHandlerExtractArguments(BEASTInterface beastInterface) {
+        for (ValueHandler handler : getValueHandlers()) {
+            List<Function> args = handler.extractArguments(beastInterface);
+            if (args != null) return args;
+        }
+        return null;
+    }
+
     /**
      * Main method to process configurations to create BEAST 2 XML from LPhy objects.
+     * Uses {@link MCMCStrategy} to create either standard MCMC or MC3 run element.
      *
      * @param logFileStem  log file stem
      * @return BEAST 2 XML in String
@@ -178,44 +265,6 @@ public class BEASTContext {
         MCMC mcmc = createMCMC(chainLength, logEvery, logFileStem, preBurnin, sampleFromPrior);
 
         return new XMLProducer().toXML(mcmc, elements.keySet());
-    }
-
-    /**
-     * Similar to {@link #toBEASTXML}, but sets up an MC³ chain (Metropolis-coupled MCMC),
-     * which runs multiple chains at different temperatures for improved mixing.
-     * @param logFileStem  log file stem (no extension)
-     * @return             XML string configured for MC³
-     */
-
-    public String toBEASTXML_MC3(final String logFileStem) {
-
-        long chainLength = lPhyBeastConfig.getChainLength();
-        long logEvery = lPhyBeastConfig.getLogEvery();
-        int preBurnin = lPhyBeastConfig.getPreBurnin();
-
-        if (chainLength < NUM_OF_SAMPLES) {
-            throw new IllegalArgumentException("Invalid length for MC3 chain, len = " + chainLength);
-        }
-
-        int nsamp = toIntExact(chainLength / logEvery);
-        if (nsamp < NUM_OF_SAMPLES/2) {
-            LoggerUtils.log.warning("The number of logged sample (" + nsamp + ") is too small ! Prefer " + NUM_OF_SAMPLES);
-        }
-
-        createBEASTObjects();
-        assert state.size() > 0;
-
-        if (preBurnin < 0) {
-            preBurnin = getAllStatesSize(state) * 10;
-        }
-
-        LoggerUtils.log.info("Set MC3 chain length = " + chainLength + ", log every = "
-                + logEvery + ", samples = " + NUM_OF_SAMPLES + ", preBurnin = " + preBurnin);
-
-
-        CoupledMCMC mc3 = createMC3(chainLength, logEvery, logFileStem, preBurnin);
-
-        return new XMLProducer().toXML(mc3, elements.keySet());
     }
 
 
@@ -331,8 +380,11 @@ public class BEASTContext {
                     return function;
                 }
             }
-        } else if (beastInterface instanceof ExpCalculator expCalculator)
-            return expCalculator;
+        } else {
+            // Check if a ValueHandler recognizes this as a function expression (e.g., ExpCalculator)
+            Function handledFunction = valueHandlerAsFunction(beastInterface);
+            if (handledFunction != null) return handledFunction;
+        }
 
         return getAsRealParameter(value);
     }
@@ -439,6 +491,15 @@ public class BEASTContext {
             String[] parts = id.split(VectorUtils.INDEX_SEPARATOR);
             if (parts.length == 2) {
                 int index = Integer.parseInt(parts[1]);
+                // If parent is a compound value (e.g., Concatenate), extract the element directly
+                // instead of wrapping in Slice — beast3 strong typing requires RealParameter, not Slice
+                BEASTInterface parentNode = getBEASTObject(Symbols.getCanonical(parts[0]));
+                List<Function> compoundParts = valueHandlerExtractParts(parentNode);
+                if (compoundParts != null && index < compoundParts.size()) {
+                    BEASTInterface element = (BEASTInterface) compoundParts.get(index);
+                    addToContext(node, element);
+                    return element;
+                }
                 Slice slice = createSliceFromVector(node, parts[0], index);
                 beastObjects.put(node, slice);
                 return slice;
@@ -488,17 +549,18 @@ public class BEASTContext {
 
 
         if (slicedBEASTValue != null) {
-            if (!(slicedBEASTValue instanceof Concatenate)) {
+            // Check if a ValueHandler can extract parts (e.g., Concatenate from feast)
+            List<Function> parts = valueHandlerExtractParts(slicedBEASTValue);
+            if (parts != null) {
+                // handle compound value by extracting the part at the slice index
+                Function slice = parts.get(sliceValue.getIndex());
+                addToContext(sliceValue, (BEASTInterface) slice);
+                return (BEASTInterface) slice;
+            } else {
                 String id = lPhyBeastConfig.isLogUnicode() ? sliceValue.getId() : sliceValue.getCanonicalId();
                 Slice slice = SliceFactory.createSlice(slicedBEASTValue, sliceValue.getIndex(), id);
                 addToContext(sliceValue, slice);
                 return slice;
-            } else {
-                // handle by concatenating
-                List<Function> parts = ((Concatenate) slicedBEASTValue).functionsInput.get();
-                Function slice = parts.get(sliceValue.getIndex());
-                addToContext(sliceValue, (BEASTInterface) slice);
-                return (BEASTInterface) slice;
             }
         } else return null;
     }
@@ -617,112 +679,31 @@ public class BEASTContext {
     }
 
     /**
-     * The main class to init BEAST 2 MCMC
+     * Create the MCMC run element using the resolved {@link MCMCStrategy}.
      */
     private MCMC createMCMC(long chainLength, long logEvery, String logFileStem, int preBurnin, boolean sampleFromPrior) {
 
         CompoundDistribution posterior = createBEASTPosterior();
 
-        MCMC mcmc = new MCMC();
-        mcmc.setInputValue("distribution", posterior);
-        mcmc.setInputValue("chainLength", chainLength);
-
-        // TODO eventually all operator related code should go there
-        // create XML operator section, with the capability to replace default operators
+        // create operators
         OperatorStrategy operatorStrategy = new DefaultOperatorStrategy(this);
-        // create all operators, where tree operators strategy can be changed in an extension.
         List<Operator> operators = operatorStrategy.createOperators();
-        for (int i = 0; i < operators.size(); i++) {
-            System.out.println(operators.get(i));
-        }
-        mcmc.setInputValue("operator", operators);
 
-        // TODO eventually all logging related code should go there
-        // create XML logger section
+        // create loggers
         topDist = createTopCompoundDist();
         LoggerFactory loggerFactory = new LoggerFactory(this, topDist);
-        // 3 default loggers: parameter logger, screen logger, tree logger.
         List<Logger> loggers = loggerFactory.createLoggers(logEvery, logFileStem);
-        // extraLoggers processed in LoggerFactory
-        mcmc.setInputValue("logger", loggers);
 
-        State state = new State();
-        state.setInputValue("stateNode", this.state);
-        state.initAndValidate();
-        elements.put(state, null);
+        // create state
+        State beastState = new State();
+        beastState.setInputValue("stateNode", this.state);
+        beastState.initAndValidate();
+        elements.put(beastState, null);
 
-        // TODO make sure the stateNode list is being correctly populated
-        mcmc.setInputValue("state", state);
-
-        if (inits.size() > 0) mcmc.setInputValue("init", inits);
-
-        if (preBurnin > 0)
-            mcmc.setInputValue("preBurnin", preBurnin);
-
-        mcmc.initAndValidate();
-        if (sampleFromPrior){
-            mcmc.setInputValue("sampleFromPrior", sampleFromPrior);
-        }
-
-        return mcmc;
-    }
-
-    // ----- MC3 Construction -----
-    /**
-     * Builds the {@link CoupledMCMC} object for multiple chains at different temperatures.
-     * This method sets the chain count, temperature increment, and other MC³ parameters.
-     */
-    private CoupledMCMC createMC3(long chainLength, long logEvery, String logFileStem, int preBurnin) {
-
-        CompoundDistribution posterior = createBEASTPosterior();
-
-        CoupledMCMC mc3 = new CoupledMCMC();
-        mc3.setID("mcmcmc");
-
-        mc3.setInputValue("distribution", posterior);
-        mc3.setInputValue("chainLength", chainLength);
-
-        // mc3 inputs here
-        mc3.setInputValue("chains",          lPhyBeastConfig.getChains());
-        mc3.setInputValue("deltaTemperature", lPhyBeastConfig.getDeltaTemperature());
-        mc3.setInputValue("resampleEvery",    lPhyBeastConfig.getResampleEvery());
-        mc3.setInputValue("target",           lPhyBeastConfig.getTarget());
-
-
-        // TODO eventually all operator related code should go there
-        // create XML operator section, with the capability to replace default operators
-        OperatorStrategy operatorStrategy = new DefaultOperatorStrategy(this);
-        // create all operators, where tree operators strategy can be changed in an extension.
-        List<Operator> operators = operatorStrategy.createOperators();
-        for (int i = 0; i < operators.size(); i++) {
-            System.out.println(operators.get(i));
-        }
-        mc3.setInputValue("operator", operators);
-
-        // TODO eventually all logging related code should go there
-        // create XML logger section
-        topDist = createTopCompoundDist();
-        LoggerFactory loggerFactory = new LoggerFactory(this, topDist);
-        // 3 default loggers: parameter logger, screen logger, tree logger.
-        List<Logger> loggers = loggerFactory.createLoggers(logEvery, logFileStem);
-        // extraLoggers processed in LoggerFactory
-        mc3.setInputValue("logger", loggers);
-
-        State state = new State();
-        state.setInputValue("stateNode", this.state);
-        state.initAndValidate();
-        elements.put(state, null);
-
-        // TODO make sure the stateNode list is being correctly populated
-        mc3.setInputValue("state", state);
-
-        if (inits.size() > 0) mc3.setInputValue("init", inits);
-
-        if (preBurnin > 0)
-            mc3.setInputValue("preBurnin", preBurnin);
-
-        mc3.initAndValidate();
-        return mc3;
+        // delegate to strategy
+        MCMCStrategy strategy = resolveMCMCStrategy();
+        return strategy.createRun(posterior, operators, loggers, beastState, inits,
+                chainLength, preBurnin, sampleFromPrior, lPhyBeastConfig);
     }
 
     // posterior, likelihood, prior
@@ -965,12 +946,11 @@ public class BEASTContext {
                 if (beastInterface instanceof StateNode) {
                     // include MutableAlignment
                     state.add((StateNode) beastInterface);
-                } else if (beastInterface instanceof Concatenate) {
-                    Concatenate concatenate = (Concatenate) beastInterface;
-                    for (Function function : concatenate.functionsInput.get()) {
-                        if (function instanceof StateNode && !state.contains(function)) {
-                            state.add((StateNode) function);
-                        }
+                } else if (valueHandlerExtractStateNodes(beastInterface) != null) {
+                    // Compound value (e.g., Concatenate from feast): add its state node parts
+                    List<StateNode> nodes = valueHandlerExtractStateNodes(beastInterface);
+                    for (StateNode sn : nodes) {
+                        if (!state.contains(sn)) state.add(sn);
                     }
                 } else if (beastInterface instanceof BEASTVector) {
                     for (BEASTInterface beastElement : ((BEASTVector) beastInterface).getObjectList()) {

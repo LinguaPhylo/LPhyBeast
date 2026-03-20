@@ -2,11 +2,19 @@ package lphybeast.tobeast.values;
 
 import beast.base.inference.parameter.Parameter;
 import beast.base.inference.parameter.RealParameter;
+import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
 public class NumberArrayValueToBEAST implements ValueToBEAST<Number[], RealParameter> {
+
+    @Override
+    public boolean match(Value value) {
+        // WeightedDirichlet requires Concatenate (feast extension)
+        if (value.getGenerator() instanceof WeightedDirichlet) return false;
+        return Number[].class.isAssignableFrom(value.value().getClass());
+    }
 
     @Override
     public RealParameter valueToBEAST(Value<Number[]> value, BEASTContext context) {

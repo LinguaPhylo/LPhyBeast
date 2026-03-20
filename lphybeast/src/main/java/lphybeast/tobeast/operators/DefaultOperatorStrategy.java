@@ -19,7 +19,6 @@ import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
 import com.google.common.collect.Multimap;
-import feast.expressions.ExpCalculator;
 import lphy.base.distribution.Dirichlet;
 import lphy.base.distribution.RandomComposition;
 import lphy.base.distribution.WeightedDirichlet;
@@ -27,8 +26,7 @@ import lphy.core.logger.LoggerUtils;
 import lphy.core.model.*;
 import lphy.core.vectorization.IID;
 import lphybeast.BEASTContext;
-import mutablealignment.MutableAlignment;
-import mutablealignment.MutableAlignmentOperator;
+import lphybeast.spi.OperatorContributor;
 
 import java.util.*;
 
@@ -107,14 +105,20 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                     List<Operator> noDuplicatedOperators = getNoDuplicatedOperators(treeOperators, extraOperators);
 
                     operators.addAll(noDuplicatedOperators);
-                } else if (stateNode instanceof MutableAlignment mutableAlignment) {
-                    MutableAlignmentOperator operator = new MutableAlignmentOperator();
-                    operator.setInputValue("mutableAlignment", mutableAlignment);
-                    operator.setInputValue("weight", getOperatorWeight(mutableAlignment.getTaxonCount()* mutableAlignment.getSiteCount()-1, 0.5));
-                    operator.initAndValidate();
-                    operator.setID("alignmentOperator");
-                    operators.add(operator);
-                    LoggerUtils.log.severe("Missing mutable alignment operator !");
+                } else {
+                    // Delegate to OperatorContributors (e.g., MutableAlignment from MA extension)
+                    boolean handled = false;
+                    for (OperatorContributor contributor : context.getOperatorContributors()) {
+                        if (contributor.canHandle(stateNode)) {
+                            operators.addAll(contributor.createOperators(stateNode, context));
+                            handled = true;
+                            break;
+                        }
+                    }
+                    if (!handled) {
+                        LoggerUtils.log.warning("No operator created for state node: " + stateNode.getID() +
+                                " of type " + stateNode.getClass().getSimpleName());
+                    }
                 }
             }
         }
@@ -288,22 +292,29 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         }
     }
 
-    // This is used when clockRate is computed by ExpCalculator
-    public static void addUpDownOperator(Tree tree, ExpCalculator clockRate, BEASTContext context) {
-        String idStr = clockRate.getID() + "Up" + tree.getID() + "DownOperator";
+    /**
+     * Add an up-down operator when the clock rate is computed by an expression
+     * (e.g., ExpCalculator from feast). The underlying function arguments
+     * are scaled upward against the tree.
+     *
+     * @param tree       the tree to scale down
+     * @param upArgs     the function arguments to scale up
+     * @param expression the expression BEASTInterface (for ID)
+     * @param context    the BEAST context
+     */
+    public static void addUpDownOperator(Tree tree, List<Function> upArgs, BEASTInterface expression, BEASTContext context) {
+        String idStr = expression.getID() + "Up" + tree.getID() + "DownOperator";
         // avoid to duplicate updown ops from the same pair of rate and tree
         if (!context.hasExtraOperator(idStr)) {
             Operator upDownOperator = new BactrianUpDownOperator();
             upDownOperator.setID(idStr);
 
-            List<Function> args = clockRate.functionsInput.get();
-            for (Function function : args) {
+            for (Function function : upArgs) {
                 upDownOperator.setInputValue("up", function);
             }
-            LoggerUtils.log.warning("The clock rate is computed as " +
-                    clockRate.expressionInput.get() +
-                    ", where all arguments are assumed to scale upward in the up–down operator !");
-//            upDownOperator.setInputValue("up", clockRate);
+            LoggerUtils.log.warning("The clock rate is computed by expression " +
+                    expression.getID() +
+                    ", where all arguments are assumed to scale upward in the up-down operator !");
             upDownOperator.setInputValue("down", tree);
             upDownOperator.setInputValue("scaleFactor", 0.9);
             upDownOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getInternalNodeCount()+1));

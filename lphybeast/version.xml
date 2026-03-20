@@ -1,24 +1,16 @@
-<package name='lphybeast' version='1.3.0'>
+<package name='lphybeast' version='2.0.0'>
     <depends on='BEAST.base' atleast='2.7.8'/>
     <depends on='BEAST.app' atleast='2.7.8'/>
 
     <depends on='BEASTLabs' atleast='2.0.3'/>
     <depends on='BEAST_CLASSIC' atleast='1.6.4'/>
-    <depends on='feast' atleast='10.5.0'
-             projectURL="https://github.com/tgvaughan/feast"
-             description="Expands the flexibility of BEAST 2 XML."/>
-    <depends on='SSM' atleast='1.2.0'
-             description="Standard Nucleotide Substitution Models"
-             projectURL="https://github.com/BEAST2-Dev/substmodels/"/>
-    <depends on='ORC' atleast='1.2.0'/>
-    <depends on='bdtree' atleast='0.0.1'/>
-    <depends on="CoupledMCMC" atleast="1.2.2"
-             description="Adaptive coupled MCMC (adaptive parallel tempering or MC3)"
-             projectURL="https://github.com/nicfel/CoupledMCMC/"/>
-    <depends on='BICEPS' atleast='1.1.2'/>
 
-<!-- uncomment this after MutableAlignment is released   -->
-<!--    <depends on='MutableAlignment' atleast='0.0.2'/>-->
+    <!-- Optional dependencies moved to extension modules:
+         feast       -> lphybeast-feast
+         bdtree      -> lphybeast-bdtree
+         CoupledMCMC -> lphybeast-mc3
+         MutableAlignment -> lphybeast-ma
+    -->
 
     <!-- add BEAST2 service below  -->
 
@@ -26,12 +18,20 @@
         <provider classname="lphybeast.spi.LPhyBEASTExtImpl"/>
     </service>
 
+    <service type="lphybeast.spi.MCMCStrategy">
+        <provider classname="lphybeast.spi.DefaultMCMCStrategy"/>
+    </service>
+    <service type="lphybeast.spi.TreeLikelihoodStrategy">
+        <provider classname="lphybeast.spi.DefaultTreeLikelihoodStrategy"/>
+    </service>
+    <service type="lphybeast.spi.AlignmentHandler">
+        <provider classname="lphybeast.spi.DefaultAlignmentHandler"/>
+    </service>
 
     <packageapp description="A command-line program that takes an LPhy model specification including a data block, and produces a BEAST 2 XML input file."
                 class="lphybeast.LPhyBeastCMD"
                 args=""
     />
-
 
 </package>
 

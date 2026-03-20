@@ -78,11 +78,9 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
         return Arrays.asList( BernoulliMultiToBEAST.class, // cannot be replaced by IID
                 BetaToBEAST.class,
                 BinaryCovarionToBEAST.class, // language
-                BirthDeathSerialSamplingToBEAST.class,
                 BirthDeathSampleTreeDTToBEAST.class,
                 DirichletToBEAST.class,
                 ExpToBEAST.class,
-                ExpressionNodeToBEAST.class,
                 F81ToBEAST.class,
 //                FossilBirthDeathTreeToBEAST.class,
                 GammaToBEAST.class,
@@ -107,7 +105,6 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 // BICEPSToBEAST.class, // TODO: move to lphybeast-biceps extension
                 SkylineToBSP.class,
 //                SimulateToAlignments.class,
-                SliceDoubleArrayToBEAST.class,
 //                StructuredCoalescentToMascot.class,
                 TreeLengthToBEAST.class,
                 TN93ToBEAST.class,

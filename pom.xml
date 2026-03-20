@@ -21,6 +21,10 @@
 
     <modules>
         <module>lphybeast</module>
+        <module>lphybeast-bdtree</module>
+        <module>lphybeast-feast</module>
+        <module>lphybeast-mc3</module>
+        <module>lphybeast-ma</module>
         <!-- Extension modules: uncomment as dependencies become available -->
         <!-- <module>lphybeast-sa</module> -->
         <!-- <module>lphybeast-mm</module> -->

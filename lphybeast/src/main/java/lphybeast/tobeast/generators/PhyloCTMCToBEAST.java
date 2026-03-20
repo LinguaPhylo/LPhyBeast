@@ -25,8 +25,7 @@ import beast.base.inference.parameter.RealParameter;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
 import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModelLogger;
-import beastlabs.evolution.tree.RNNIMetric;
-import feast.expressions.ExpCalculator;
+import lphybeast.spi.TreeLikelihoodStrategy;
 import lphy.base.distribution.DiscretizedGamma;
 import lphy.base.distribution.LogNormal;
 import lphy.base.distribution.UCLNMean1;
@@ -43,7 +42,6 @@ import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.loggers.TraitTreeLogger;
 import lphybeast.tobeast.operators.DefaultOperatorStrategy;
-import mutablealignment.MATreeLikelihood;
 // TODO: move to lphybeast-orc extension module
 //import orc.consoperators.InConstantDistanceOperator;
 //import orc.consoperators.SimpleDistance;
@@ -147,14 +145,17 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         beast.base.evolution.alignment.Alignment alignment = (beast.base.evolution.alignment.Alignment)value;
 
         Value alignmentValue = (Value)context.getBEASTToLPHYMap().get(alignment);
+        boolean isObserved = context.isObserved(alignmentValue);
 
-        if (!context.isObserved(alignmentValue)) {
-            // MutableAlignment
-            treeLikelihood = new MATreeLikelihood();
-            treeLikelihood.setInputValue("useAmbiguities", false);
-
-        } else {
-            // normal Alignment
+        // Delegate to TreeLikelihoodStrategy (e.g., MA extension provides MATreeLikelihood)
+        for (TreeLikelihoodStrategy strategy : context.getTreeLikelihoodStrategies()) {
+            if (strategy.appliesTo(alignment, isObserved)) {
+                treeLikelihood = strategy.createTreeLikelihood(alignment, isObserved);
+                break;
+            }
+        }
+        // Default: ThreadedTreeLikelihood for observed data
+        if (treeLikelihood == null) {
             treeLikelihood = new ThreadedTreeLikelihood();
             treeLikelihood.setInputValue("useAmbiguities", true);
         }
@@ -207,12 +208,15 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         Function clockRateParam = getClockRateParam(clockRateValue, context);
         // add updown op when estimating clock.rate
         if (timeTreeValue instanceof RandomVariable && skipBranchOperators == false) {
-            if (clockRateValue instanceof RandomVariable && clockRateParam instanceof StateNode clockRate)
+            if (clockRateValue instanceof RandomVariable && clockRateParam instanceof StateNode clockRate) {
                 // clockRate must be state node here
                 DefaultOperatorStrategy.addUpDownOperator(tree, clockRate, context);
-            else if (clockRateParam instanceof ExpCalculator expression)
-                // clockRate is computed by expression
-                DefaultOperatorStrategy.addUpDownOperator(tree, expression, context);
+            } else if (clockRateParam instanceof BEASTInterface bi) {
+                // clockRate may be computed by an expression (e.g., ExpCalculator from feast)
+                java.util.List<Function> args = context.valueHandlerExtractArguments(bi);
+                if (args != null && !args.isEmpty())
+                    DefaultOperatorStrategy.addUpDownOperator(tree, args, bi, context);
+            }
         }
 
         // relaxed or local clock
@@ -337,6 +341,15 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             RateMatrix rateMatrix = (RateMatrix)qGenerator;
             Value<Double> meanRate = rateMatrix.getMeanRate();
             BEASTInterface mutationRate = meanRate==null ? null : context.getBEASTObject(meanRate);
+            // beast3 strong typing: SiteModel.mutationRate requires RealParameter.
+            // If the value is a Slice wrapping a RealParameter, unwrap it.
+            if (mutationRate instanceof beastlabs.core.util.Slice slice) {
+                beast.base.core.Function inner = slice.functionInput.get();
+                if (inner instanceof RealParameter rp) {
+                    // Slice of a single RealParameter — use the RealParameter directly
+                    mutationRate = rp;
+                }
+            }
             if (mutationRate != null) siteModel.setInputValue("mutationRate", mutationRate);
 
             siteModel.initAndValidate();
