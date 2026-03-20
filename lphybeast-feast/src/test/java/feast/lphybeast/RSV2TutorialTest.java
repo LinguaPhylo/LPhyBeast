@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -26,20 +25,11 @@ public class RSV2TutorialTest {
 
     @BeforeEach
     public void setUp() {
-        // Register feast extension services before loading core services
-        Map<String, Set<String>> feastServices = Map.of(
+        BEASTClassLoader.classLoader.addServices("lphybeast-feast", Map.of(
                 "lphybeast.spi.LPhyBEASTMapping", Set.of("feast.lphybeast.spi.FeastLBImpl"),
                 "lphybeast.spi.ValueHandler", Set.of("feast.lphybeast.FeastValueHandler")
-        );
-        BEASTClassLoader.classLoader.addServices("lphybeast-feast", feastServices);
-
-        // Load core services from version.xml
-        String parentDir = System.getProperty("user.dir") + "/../lphybeast";
-        Path vfPath = Paths.get(parentDir, "version.xml");
-        if (!Files.exists(vfPath))
-            throw new IllegalArgumentException("Can't find LPhyBeast version.xml under dir : " + vfPath);
-        LPhyBEASTLoader.addBEAST2Services(new String[]{vfPath.toAbsolutePath().toString()});
-
+        ));
+        LPhyBEASTLoader.loadServicesForTest(System.getProperty("user.dir") + "/../lphybeast");
         fPath = Paths.get("src", "test", "resources", "RSV2.nex");
     }
 

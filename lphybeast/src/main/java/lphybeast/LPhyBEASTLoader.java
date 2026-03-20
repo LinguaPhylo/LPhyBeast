@@ -114,6 +114,20 @@ public class LPhyBEASTLoader {
     }
 
     /**
+     * Convenience method for extension module tests.
+     * Loads core services from version.xml relative to the given directory
+     * (typically {@code ../lphybeast} from an extension module's working directory).
+     *
+     * @param coreModuleDir path to the core lphybeast module directory containing version.xml
+     */
+    public static void loadServicesForTest(String coreModuleDir) {
+        Path vfPath = Paths.get(coreModuleDir, "version.xml");
+        if (!java.nio.file.Files.exists(vfPath))
+            throw new IllegalArgumentException("Can't find LPhyBeast version.xml at: " + vfPath.toAbsolutePath());
+        addBEAST2Services(new String[]{vfPath.toAbsolutePath().toString()});
+    }
+
+    /**
      * Use {@link PackageManager} to load the container classes from LPhyBEAST extensions,
      * which include all extended classes.
      * @return  the list of container classes (one per extension).

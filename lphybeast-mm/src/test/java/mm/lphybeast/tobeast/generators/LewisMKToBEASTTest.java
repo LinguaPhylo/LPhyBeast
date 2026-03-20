@@ -7,9 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,10 +25,7 @@ public class LewisMKToBEASTTest {
         BEASTClassLoader.classLoader.addServices("lphybeast-mm", Map.of(
                 "lphybeast.spi.LPhyBEASTMapping", Set.of("mm.lphybeast.spi.MMLBImpl")
         ));
-        Path vfPath = Paths.get(System.getProperty("user.dir"), "../lphybeast/version.xml");
-        if (!Files.exists(vfPath))
-            throw new IllegalArgumentException("Can't find version.xml: " + vfPath);
-        LPhyBEASTLoader.addBEAST2Services(new String[]{vfPath.toAbsolutePath().toString()});
+        LPhyBEASTLoader.loadServicesForTest(System.getProperty("user.dir") + "/../lphybeast");
     }
 
     @Test

@@ -22,16 +22,8 @@ public class TestUtils {
      * user.dir/version.xml
      */
     public static void loadServices() {
-        // folder: LPhyBeast/lphybeast
-        loadServices(UserDir.getUserDir().toAbsolutePath().toString());
-    }
-
-    public static void loadServices(String parentDir) {
-        // TODO better way?
-        Path vfPath = Paths.get(parentDir, "version.xml");
-        if (!Files.exists(vfPath))
-            throw new IllegalArgumentException("Can't find LPhyBeast version.xml under dir : " + vfPath);
-        LPhyBEASTLoader.addBEAST2Services(new String[]{vfPath.toAbsolutePath().toString()});
+        LPhyBEASTLoader.loadServicesForTest(
+                UserDir.getUserDir().toAbsolutePath().toString());
     }
 
     public static LPhyBeast getLPhyBeast() {
