@@ -1210,8 +1210,8 @@ public class BEASTContext {
         for (StateNode stateNode : stateNodes) {
             if (stateNode instanceof TreeInterface)
                 size += ((TreeInterface) stateNode).getInternalNodeCount();
-            else
-                size += stateNode.getDimension();
+            else if (stateNode instanceof Function)
+                size += ((Function) stateNode).getDimension();
         }
         return size;
     }

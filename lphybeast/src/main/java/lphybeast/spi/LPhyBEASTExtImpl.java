@@ -87,7 +87,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
 //                FossilBirthDeathTreeToBEAST.class,
                 GammaToBEAST.class,
                 GTRToDiscretePhylogeo.class,
-                GTRToBEAST.class,
+                // GTRToBEAST.class, // TODO: move to lphybeast-ssm extension
                 HKYToBEAST.class,
                 IIDToBEAST.class,
                 InternalNodesIDToBEAST.class,
@@ -104,7 +104,7 @@ public class LPhyBEASTExtImpl implements LPhyBEASTExt {
                 RandomBooleanArrayToBEAST.class,
                 SerialCoalescentToBEAST.class,
 //                SimFBDAgeToBEAST.class,
-                BICEPSToBEAST.class,
+                // BICEPSToBEAST.class, // TODO: move to lphybeast-biceps extension
                 SkylineToBSP.class,
 //                SimulateToAlignments.class,
                 SliceDoubleArrayToBEAST.class,

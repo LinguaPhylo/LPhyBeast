@@ -32,20 +32,53 @@
             <version>33.2.1-jre</version>
         </dependency>
 
-        <!-- TODO Phase 2-4: These BEAST2 package deps are commented out.
-             They will be resolved at runtime via beast3 package manager,
-             or vendored where needed.
+        <!-- BEASTLabs (4 classes: BEASTVector, RNNIMetric, Slice, BernoulliDistribution) -->
+        <dependency>
+            <groupId>io.github.compevol</groupId>
+            <artifactId>beast-labs</artifactId>
+            <version>2.1.0-SNAPSHOT</version>
+        </dependency>
 
-             BEASTLabs (4 classes needed: BEASTVector, RNNIMetric, Slice, BernoulliDistribution)
-             feast (2 classes: ExpCalculator, Concatenate)
+        <!-- BEAST Classic -->
+        <dependency>
+            <groupId>io.github.compevol</groupId>
+            <artifactId>beast-classic</artifactId>
+            <version>1.7.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- feast -->
+        <dependency>
+            <groupId>feast</groupId>
+            <artifactId>feast</artifactId>
+            <version>11.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- MutableAlignment -->
+        <dependency>
+            <groupId>io.github.compevol</groupId>
+            <artifactId>beast-mutable-alignment</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- CoupledMCMC (MC3) -->
+        <dependency>
+            <groupId>io.github.compevol</groupId>
+            <artifactId>beast-coupled-mcmc</artifactId>
+            <version>1.3.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- bdtree -->
+        <dependency>
+            <groupId>io.github.compevol</groupId>
+            <artifactId>beast-bdtree</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- TODO: These BEAST2 package deps will be resolved at runtime
+             via beast3 package manager, or made optional.
+
              ORC (6 operator classes)
-             BEAST_CLASSIC
-             CoupledMCMC
-             bdtree
-             SSM
-             MutableAlignment
              BICEPS
-             nashorn
         -->
 
         <!-- Testing -->
