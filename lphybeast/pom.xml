@@ -44,6 +44,20 @@
             <groupId>io.github.compevol</groupId>
             <artifactId>beast-classic</artifactId>
             <version>1.7.0-SNAPSHOT</version>
+            <exclusions>
+                <!-- netlib natives JARs have filenames that contain 'native',
+                     a Java keyword, making them invalid as JPMS automatic
+                     modules. Exclude from module path; mtj loads them via
+                     the system class loader at runtime. -->
+                <exclusion>
+                    <groupId>com.github.fommil.netlib</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.fommil</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- BEAGLE (optional in beast-base, needed at runtime for TreeLikelihood) -->
@@ -105,7 +119,10 @@
                 <configuration>
                     <executable>java</executable>
                     <classpathScope>compile</classpathScope>
-                    <commandlineArgs>-Dpicocli.disable.closures=true -classpath %classpath lphybeast.LPhyBeastCMD ${lphybeast.args}</commandlineArgs>
+                    <!-- Put all deps on the module path so BEAST modules are
+                         in the boot layer with proper JPMS service discovery.
+                         LPhyBEAST (no module-info) becomes an automatic module. -->
+                    <commandlineArgs>-Dpicocli.disable.closures=true --module-path %classpath --add-modules beast.base,beast.pkgmgmt -classpath %classpath lphybeast.LPhyBeastMain ${lphybeast.args}</commandlineArgs>
                 </configuration>
             </plugin>
             <!-- Resolve dependency artifact paths as properties for surefire -->

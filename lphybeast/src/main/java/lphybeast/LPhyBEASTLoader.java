@@ -78,6 +78,16 @@ public class LPhyBEASTLoader {
     public List<OperatorContributor> operatorContributors;
     public List<AlignmentHandler> alignmentHandlers;
 
+    /**
+     * Maps each registered generator class to the extension that provided it.
+     * Used for diagnostics when a mapping is missing.
+     */
+    private Map<Class<?>, String> generatorSources;
+    /**
+     * Names of all loaded extension classes.
+     */
+    private List<String> loadedExtensions;
+
     public static final String LPHY_BEAST_EXT = "lphybeast.spi.LPhyBEASTMapping";
 
 
@@ -178,6 +188,9 @@ public class LPhyBEASTLoader {
         operatorContributors = new ArrayList<>();
         alignmentHandlers = new ArrayList<>();
 
+        generatorSources = new LinkedHashMap<>();
+        loadedExtensions = new ArrayList<>();
+
         try {
 //            Iterator<LPhyBEASTMapping> extensions = loader.iterator();
 //            while (extensions.hasNext()) { // TODO validation if add same name
@@ -199,14 +212,16 @@ public class LPhyBEASTLoader {
 //                LPhyBEASTMapping ext = extensions.next();
                 // clsName == null then register all
                 if (spiClsNames == null || spiClsNames.contains(ext.getClass().getName())) {
-                    System.out.println("Registering extension from " + ext.getClass().getName());
+                    String extName = ext.getClass().getName();
+                    System.out.println("Registering extension from " + extName);
+                    loadedExtensions.add(extName);
 
                     final List<Class<? extends ValueToBEAST>> valuesToBEASTs = ext.getValuesToBEASTs();
                     final List<Class<? extends GeneratorToBEAST>> generatorToBEASTs = ext.getGeneratorToBEASTs();
                     final Map<SequenceType, DataType> dataTypeMap = ext.getDataTypeMap();
 
                     registerValueToBEAST(valuesToBEASTs);
-                    registerGeneratorToBEAST(generatorToBEASTs);
+                    registerGeneratorToBEAST(generatorToBEASTs, extName);
                     registerDataTypes(dataTypeMap);
 
                     excludedGeneratorClasses.addAll(ext.getExcludedGenerator());
@@ -277,14 +292,17 @@ public class LPhyBEASTLoader {
         }
     }
 
-    private void registerGeneratorToBEAST(final List<Class<? extends GeneratorToBEAST>> generatorToBEASTs) {
+    private void registerGeneratorToBEAST(final List<Class<? extends GeneratorToBEAST>> generatorToBEASTs,
+                                          String extensionName) {
         for (Class<? extends GeneratorToBEAST> c : generatorToBEASTs) {
             try {
                 // https://docs.oracle.com/javase/9/docs/api/java/lang/Class.html#newInstance--
                 GeneratorToBEAST<?,?> generatorToBEAST = (GeneratorToBEAST<?,?>) c.getDeclaredConstructor().newInstance();
                 if (this.generatorToBEASTMap.containsKey(generatorToBEAST))
                     LoggerUtils.log.warning(generatorToBEAST + " exists in register, overwrite previous one !");
-                this.generatorToBEASTMap.put(generatorToBEAST.getGeneratorClass(), generatorToBEAST);
+                Class<?> genClass = generatorToBEAST.getGeneratorClass();
+                this.generatorToBEASTMap.put(genClass, generatorToBEAST);
+                this.generatorSources.put(genClass, extensionName);
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 e.printStackTrace();
             }
@@ -297,6 +315,34 @@ public class LPhyBEASTLoader {
                 LoggerUtils.log.warning(entry.getKey() + " exists in register, overwrite previous one !");
             this.dataTypeMap.put(entry.getKey(), entry.getValue());
         }
+    }
+
+    /**
+     * @return the extension that registered a GeneratorToBEAST for the given generator class,
+     *         or null if no mapping is loaded for that generator.
+     */
+    public String getGeneratorSource(Class<?> generatorClass) {
+        return generatorSources != null ? generatorSources.get(generatorClass) : null;
+    }
+
+    /**
+     * @return names of all loaded LPhyBEASTMapping extension classes.
+     */
+    public List<String> getLoadedExtensions() {
+        return loadedExtensions != null ? loadedExtensions : List.of();
+    }
+
+    /**
+     * Build a summary of which generators are provided by each loaded extension.
+     */
+    public Map<String, List<String>> getExtensionGeneratorSummary() {
+        Map<String, List<String>> summary = new LinkedHashMap<>();
+        if (generatorSources == null) return summary;
+        for (var entry : generatorSources.entrySet()) {
+            summary.computeIfAbsent(entry.getValue(), k -> new ArrayList<>())
+                    .add(entry.getKey().getSimpleName());
+        }
+        return summary;
     }
 
 }

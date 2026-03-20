@@ -28,8 +28,8 @@
         <provider classname="lphybeast.spi.DefaultAlignmentHandler"/>
     </service>
 
-    <packageapp description="A command-line program that takes an LPhy model specification including a data block, and produces a BEAST 2 XML input file."
-                class="lphybeast.LPhyBeastCMD"
+    <packageapp description="LPhyBEAST: convert LPhy scripts to BEAST XML and manage packages."
+                class="lphybeast.LPhyBeastMain"
                 args=""
     />
 
