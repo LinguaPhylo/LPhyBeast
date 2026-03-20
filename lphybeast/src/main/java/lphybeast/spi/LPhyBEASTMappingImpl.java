@@ -52,7 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * to extend.
  * @author Walter Xie
  */
-public class LPhyBEASTExtImpl implements LPhyBEASTExt {
+public class LPhyBEASTMappingImpl implements LPhyBEASTMapping {
 
     // the first matching converter is used.
     @Override

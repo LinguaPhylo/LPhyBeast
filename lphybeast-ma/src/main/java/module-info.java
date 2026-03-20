@@ -7,7 +7,7 @@ open module lphy.beast.ma {
     exports ma.lphybeast;
     exports ma.lphybeast.spi;
 
-    provides lphybeast.spi.LPhyBEASTExt with ma.lphybeast.spi.MALBImpl;
+    provides lphybeast.spi.LPhyBEASTMapping with ma.lphybeast.spi.MALBImpl;
     provides lphybeast.spi.TreeLikelihoodStrategy with ma.lphybeast.MATreeLikelihoodStrategy;
     provides lphybeast.spi.OperatorContributor with ma.lphybeast.MAOperatorContributor;
     provides lphybeast.spi.AlignmentHandler with ma.lphybeast.MAAlignmentHandler;

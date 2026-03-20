@@ -14,8 +14,8 @@
 
     <!-- add BEAST2 service below  -->
 
-    <service type="lphybeast.spi.LPhyBEASTExt">
-        <provider classname="lphybeast.spi.LPhyBEASTExtImpl"/>
+    <service type="lphybeast.spi.LPhyBEASTMapping">
+        <provider classname="lphybeast.spi.LPhyBEASTMappingImpl"/>
     </service>
 
     <service type="lphybeast.spi.MCMCStrategy">

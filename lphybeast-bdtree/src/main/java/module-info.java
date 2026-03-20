@@ -7,5 +7,5 @@ open module lphy.beast.bdtree {
     exports bdtree.lphybeast.spi;
     exports bdtree.lphybeast.tobeast.generators;
 
-    provides lphybeast.spi.LPhyBEASTExt with bdtree.lphybeast.spi.BDTreeLBImpl;
+    provides lphybeast.spi.LPhyBEASTMapping with bdtree.lphybeast.spi.BDTreeLBImpl;
 }

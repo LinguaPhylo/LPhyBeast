@@ -5,7 +5,7 @@ import jebl.evolution.sequences.SequenceType;
 import lphy.core.model.Generator;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
-import lphybeast.spi.LPhyBEASTExt;
+import lphybeast.spi.LPhyBEASTMapping;
 import lphybeast.tobeast.operators.DefaultTreeOperatorStrategy;
 import lphybeast.tobeast.operators.TreeOperatorStrategy;
 import bdtree.lphybeast.tobeast.generators.BirthDeathSerialSamplingToBEAST;
@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class BDTreeLBImpl implements LPhyBEASTExt {
+public class BDTreeLBImpl implements LPhyBEASTMapping {
 
     @Override
     public List<Class<? extends ValueToBEAST>> getValuesToBEASTs() {

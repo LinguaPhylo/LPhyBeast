@@ -78,7 +78,7 @@ public class LPhyBEASTLoader {
     public List<OperatorContributor> operatorContributors;
     public List<AlignmentHandler> alignmentHandlers;
 
-    public static final String LPHY_BEAST_EXT = "lphybeast.spi.LPhyBEASTExt";
+    public static final String LPHY_BEAST_EXT = "lphybeast.spi.LPhyBEASTMapping";
 
 
     /**
@@ -118,7 +118,7 @@ public class LPhyBEASTLoader {
      * which include all extended classes.
      * @return  the list of container classes (one per extension).
      */
-    public List<LPhyBEASTExt> getExtClasses() throws IOException, ClassNotFoundException,
+    public List<LPhyBEASTMapping> getExtClasses() throws IOException, ClassNotFoundException,
             InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         Map<String, Set<String>> providers = BEASTClassLoader.getServices();
@@ -127,14 +127,14 @@ public class LPhyBEASTLoader {
         if (extStr==null || extStr.isEmpty())
             throw new IllegalArgumentException("Cannot find the BEAST2 service implementing " + LPHY_BEAST_EXT + " !");
 
-        List<LPhyBEASTExt> extensionList = new ArrayList<>();
+        List<LPhyBEASTMapping> extensionList = new ArrayList<>();
         for (String clsStr : extStr) {
             // get beast service
             Class<?> cls = BEASTClassLoader.forName(clsStr, LPHY_BEAST_EXT);
             // https://docs.oracle.com/javase/9/docs/api/java/lang/Class.html#newInstance--
             try {
                 Object obj = cls.getDeclaredConstructor().newInstance();
-                extensionList.add((LPhyBEASTExt) obj);
+                extensionList.add((LPhyBEASTMapping) obj);
             } catch (InvocationTargetException | InstantiationException |
                      IllegalAccessException | NoSuchMethodException e) {
                 // do nothing
@@ -146,7 +146,7 @@ public class LPhyBEASTLoader {
     }
 
 
-    //    private void registerExtensions(ServiceLoader<LPhyBEASTExt> loader, String clsName) {
+    //    private void registerExtensions(ServiceLoader<LPhyBEASTMapping> loader, String clsName) {
     private void registerExtensions(List<String> spiClsNames) {
         valueToBEASTList = new ArrayList<>();
         generatorToBEASTMap = new LinkedHashMap<>();
@@ -165,10 +165,10 @@ public class LPhyBEASTLoader {
         alignmentHandlers = new ArrayList<>();
 
         try {
-//            Iterator<LPhyBEASTExt> extensions = loader.iterator();
+//            Iterator<LPhyBEASTMapping> extensions = loader.iterator();
 //            while (extensions.hasNext()) { // TODO validation if add same name
 
-            List<LPhyBEASTExt> extList = null;
+            List<LPhyBEASTMapping> extList = null;
             try {
                 try {
                     extList = getExtClasses();
@@ -180,9 +180,9 @@ public class LPhyBEASTLoader {
                 throw new RuntimeException(e);
             }
 
-            for (LPhyBEASTExt ext : extList) {
-                //*** LPhyBEASTExtImpl must have a public no-args constructor ***//
-//                LPhyBEASTExt ext = extensions.next();
+            for (LPhyBEASTMapping ext : extList) {
+                //*** LPhyBEASTMappingImpl must have a public no-args constructor ***//
+//                LPhyBEASTMapping ext = extensions.next();
                 // clsName == null then register all
                 if (spiClsNames == null || spiClsNames.contains(ext.getClass().getName())) {
                     System.out.println("Registering extension from " + ext.getClass().getName());

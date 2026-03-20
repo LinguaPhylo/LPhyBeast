@@ -28,7 +28,7 @@ public class RSV2TutorialTest {
     public void setUp() {
         // Register feast extension services before loading core services
         Map<String, Set<String>> feastServices = Map.of(
-                "lphybeast.spi.LPhyBEASTExt", Set.of("feast.lphybeast.spi.FeastLBImpl"),
+                "lphybeast.spi.LPhyBEASTMapping", Set.of("feast.lphybeast.spi.FeastLBImpl"),
                 "lphybeast.spi.ValueHandler", Set.of("feast.lphybeast.FeastValueHandler")
         );
         BEASTClassLoader.classLoader.addServices("lphybeast-feast", feastServices);

@@ -28,7 +28,7 @@ import java.util.Map;
  *
  * @author Walter Xie
  */
-public interface LPhyBEASTExt {
+public interface LPhyBEASTMapping {
 
     List<Class<? extends ValueToBEAST>> getValuesToBEASTs();
 
@@ -57,7 +57,7 @@ public interface LPhyBEASTExt {
      * For a complex logic, or arrays.
      * @param val  Value
      * @return     if the value type is excluded.
-     * @see LPhyBEASTExtImpl#getExcludedValueType()
+     * @see LPhyBEASTMappingImpl#getExcludedValueType()
      */
     static boolean isExcludedValue(Value<?> val) {
         return isExcludedValue(val.value());
@@ -86,7 +86,7 @@ public interface LPhyBEASTExt {
      * For a complex logic, or arrays.
      * @param generator   Generator
      * @return     if the Generator is excluded.
-     * @see LPhyBEASTExtImpl#getExcludedGenerator()
+     * @see LPhyBEASTMappingImpl#getExcludedGenerator()
      */
     static boolean isExcludedGenerator(Generator generator) {
 

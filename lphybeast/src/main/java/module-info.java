@@ -17,14 +17,14 @@ open module lphy.beast {
     exports lphybeast.tobeast.loggers;
     exports lphybeast.tobeast.operators;
 
-    uses lphybeast.spi.LPhyBEASTExt;
+    uses lphybeast.spi.LPhyBEASTMapping;
     uses lphybeast.spi.MCMCStrategy;
     uses lphybeast.spi.ValueHandler;
     uses lphybeast.spi.TreeLikelihoodStrategy;
     uses lphybeast.spi.OperatorContributor;
     uses lphybeast.spi.AlignmentHandler;
 
-    provides lphybeast.spi.LPhyBEASTExt with lphybeast.spi.LPhyBEASTExtImpl;
+    provides lphybeast.spi.LPhyBEASTMapping with lphybeast.spi.LPhyBEASTMappingImpl;
     provides lphybeast.spi.MCMCStrategy with lphybeast.spi.DefaultMCMCStrategy;
     provides lphybeast.spi.TreeLikelihoodStrategy with lphybeast.spi.DefaultTreeLikelihoodStrategy;
     provides lphybeast.spi.AlignmentHandler with lphybeast.spi.DefaultAlignmentHandler;

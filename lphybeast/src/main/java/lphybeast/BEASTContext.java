@@ -861,7 +861,7 @@ public class BEASTContext {
     }
 
     private boolean isExcludedGenerator(Generator generator) {
-        if (LPhyBEASTExt.isExcludedGenerator(generator))
+        if (LPhyBEASTMapping.isExcludedGenerator(generator))
             return true;
         for (Class<? extends Generator> gCls : excludedGeneratorClasses)
             // if generator.getClass() is either the same as, or is a superclass or superinterface of, gCls.
@@ -894,7 +894,7 @@ public class BEASTContext {
 
     // handle the classes in excludedValueTypes, and also their types in an array.
     private boolean isExcludedValue(Value value) {
-        if (LPhyBEASTExt.isExcludedValue(value)) // takes Value
+        if (LPhyBEASTMapping.isExcludedValue(value)) // takes Value
             return true;
         Class valueType = value.getType();
         // value.value() is array
@@ -902,7 +902,7 @@ public class BEASTContext {
             Class componentClass;
             if (value.value() instanceof Object[] objects) {
                 // this can be used to exclude String[][]
-                if (LPhyBEASTExt.isExcludedValue(objects[0]))
+                if (LPhyBEASTMapping.isExcludedValue(objects[0]))
                     return true;
                 // Object[] can be different classes, such as TimeTreeNode[],
                 // getComponentType() only returns Object.
