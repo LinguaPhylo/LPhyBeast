@@ -26,15 +26,6 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Core test utilities (TestUtils, LPhyBeast test helpers) -->
-        <dependency>
-            <groupId>io.github.linguaphylo</groupId>
-            <artifactId>lphybeast</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>io.github.compevol</groupId>
             <artifactId>beagle</artifactId>
@@ -72,6 +63,10 @@
                     <systemPropertyVariables>
                         <BEAST_PACKAGE_PATH>${io.github.compevol:beast-base:jar}</BEAST_PACKAGE_PATH>
                     </systemPropertyVariables>
+                    <argLine>
+                        --add-reads lphy.beast.feast=ALL-UNNAMED
+                        --add-reads lphy.beast=ALL-UNNAMED
+                    </argLine>
                 </configuration>
             </plugin>
         </plugins>

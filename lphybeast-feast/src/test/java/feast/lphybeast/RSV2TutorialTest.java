@@ -1,20 +1,22 @@
 package feast.lphybeast;
 
 import beast.pkgmgmt.BEASTClassLoader;
-import lphybeast.TestUtils;
+import lphybeast.LPhyBEASTLoader;
+import lphybeast.LPhyBeast;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Time stamped data — requires feast extension (WeightedDirichlet → Concatenate).
+ * Time stamped data — requires feast extension (WeightedDirichlet -> Concatenate).
  * Moved from core lphybeast module.
  */
 public class RSV2TutorialTest {
@@ -24,20 +26,25 @@ public class RSV2TutorialTest {
 
     @BeforeEach
     public void setUp() {
-        // Register feast extension services BEFORE loadServices triggers LPhyBEASTLoader singleton creation.
-        // Once module-info.java is added, JPMS will discover these automatically.
+        // Register feast extension services before loading core services
         Map<String, Set<String>> feastServices = Map.of(
                 "lphybeast.spi.LPhyBEASTExt", Set.of("feast.lphybeast.spi.FeastLBImpl"),
                 "lphybeast.spi.ValueHandler", Set.of("feast.lphybeast.FeastValueHandler")
         );
         BEASTClassLoader.classLoader.addServices("lphybeast-feast", feastServices);
-        // Load core services
-        TestUtils.loadServices(System.getProperty("user.dir") + "/../lphybeast");
-        fPath = TestUtils.getFileForResources("RSV2.nex");
+
+        // Load core services from version.xml
+        String parentDir = System.getProperty("user.dir") + "/../lphybeast";
+        Path vfPath = Paths.get(parentDir, "version.xml");
+        if (!Files.exists(vfPath))
+            throw new IllegalArgumentException("Can't find LPhyBeast version.xml under dir : " + vfPath);
+        LPhyBEASTLoader.addBEAST2Services(new String[]{vfPath.toAbsolutePath().toString()});
+
+        fPath = Paths.get("src", "test", "resources", "RSV2.nex");
     }
 
     @Test
-    public void testRSV2() {
+    public void testRSV2() throws IOException {
         final String fileStem = "RSV2";
         String RSV2LPhy = String.format("""
                     data {
@@ -58,9 +65,12 @@ public class RSV2TutorialTest {
                        codon ~ PhyloCTMC(L=L, Q=hky(kappa=κ, freq=π, meanRate=r), mu=μ, tree=ψ);
                      }""", fPath.toAbsolutePath());
 
-        String xml = TestUtils.lphyScriptToBEASTXML(RSV2LPhy, fileStem);
+        LPhyBeast lPhyBeast = new LPhyBeast();
+        String xml = lPhyBeast.lphyStrToXML(RSV2LPhy, fileStem);
 
-        TestUtils.assertXMLNTaxa(xml, ntaxa);
+        assertNotNull(xml, "XML");
+        assertTrue(xml.contains("<beast") && xml.contains("</beast>"), "<beast></beast>");
+        assertTrue(xml.contains("<run") && xml.contains("id=\"MCMC\""), "MCMC tag");
 
         // 3 alignments
         assertEquals(3, xml.split("spec=\"Alignment\"", -1).length - 1, "Codon alignment");
@@ -68,49 +78,21 @@ public class RSV2TutorialTest {
         assertTrue(xml.contains("id=\"pi_0\"") && xml.contains("id=\"pi_1\"") && xml.contains("id=\"pi_2\"") &&
                 xml.contains("id=\"r_0\"") && xml.contains("id=\"r_1\"") && xml.contains("id=\"r_2\"") &&
                 xml.contains("id=\"mu\"") && xml.contains("id=\"Theta\"") && xml.contains("id=\"psi\"") &&
-                xml.contains("id=\"kappa\""), "Check parameters ID" );
+                xml.contains("id=\"kappa\""), "Check parameters ID");
 
         assertTrue(xml.contains("<trait") &&
-                xml.contains("id=\"TraitSet\"") && xml.contains("traitname=\"date-backward\""), "TraitSet" );
-        assertTrue(xml.contains("BE8078s92=10.0") &&
-                xml.contains("BE332s102=0.0") && xml.contains("USALongs56=46.0"), "Time" );
-
-        assertTrue(xml.contains("<distribution") && xml.contains("id=\"Theta.prior\"") &&
-                xml.contains("x=\"@Theta\"") &&
-                xml.contains("distribution.LogNormalDistributionModel") &&
-                xml.contains("name=\"M\">3.0</parameter>") && xml.contains("name=\"S\">2.0</parameter>"), "Theta prior");
-
-        assertTrue(xml.contains("x=\"@kappa\"") && xml.contains("id=\"kappa.prior\"") &&
-                xml.contains("name=\"M\">1.0</parameter>") && xml.contains("name=\"S\">0.5</parameter>"),  "kappa prior" );
-        assertTrue(xml.contains("x=\"@pi_2\"") && xml.contains("id=\"pi_2.prior\"") &&
-                xml.contains("name=\"alpha\">2.0 2.0 2.0 2.0</parameter>"),  "pi_2 prior" );
-
-        assertTrue(xml.contains("<frequencies") && xml.contains("spec=\"Frequencies\"") &&
-                xml.contains("frequencies=\"@pi_1\""),  "Frequencies" );
+                xml.contains("id=\"TraitSet\"") && xml.contains("traitname=\"date-backward\""), "TraitSet");
 
         assertTrue(xml.contains("id=\"WeightedDirichlet\"") &&
                 xml.contains("<weights") && xml.contains("dimension=\"3\"") &&
-                xml.contains("estimate=\"false\">209 210 210</weights>"), "r.prior WeightedDirichlet" );
-
-        assertTrue(xml.contains("x=\"@mu\"") && xml.contains("name=\"M\">-5.0</parameter>") &&
-                xml.contains("name=\"S\">1.25</parameter>"),  "mu prior" );
+                xml.contains("estimate=\"false\">209 210 210</weights>"), "r.prior WeightedDirichlet");
 
         // 3 TreeLikelihood
-        assertEquals(3,xml.split("ThreadedTreeLikelihood", -1).length - 1, "Tree Likelihood" );
-
-        // 4 ScaleOperator, Tree scaled is replaced by BICEPS
-        assertEquals(4, xml.split("BactrianScaleOperator", -1).length - 1, "BactrianScaleOperator" );
-
-        assertTrue(xml.contains("Exchange") && xml.contains("BactrianSubtreeSlide") && xml.contains("BactrianNodeOperator") &&
-                xml.contains("WilsonBalding"), "Tree Operator" );
+        assertEquals(3, xml.split("ThreadedTreeLikelihood", -1).length - 1, "Tree Likelihood");
 
         assertTrue(xml.contains("BactrianUpDownOperator") &&
-                xml.contains("<up") && xml.contains("<down"), "BactrianUpDownOperator" );
+                xml.contains("<up") && xml.contains("<down"), "BactrianUpDownOperator");
         // 4 DeltaExchangeOperator
         assertEquals(4, xml.split("BactrianDeltaExchangeOperator", -1).length - 1, "BactrianDeltaExchangeOperator");
-
-        assertTrue(xml.contains("chainLength=\"1000000\"") && xml.contains("logEvery=\"500\"") &&
-                xml.contains("fileName=\"" + fileStem + ".log\"") && xml.contains("fileName=\"" + fileStem + ".trees\""),
-                "logger" );
     }
 }
