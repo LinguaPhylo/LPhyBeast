@@ -83,11 +83,6 @@
                 <version>3.15.0</version>
                 <configuration>
                     <release>25</release>
-                    <compilerArgs>
-                        <!-- lphy.core does not export this package yet -->
-                        <arg>--add-exports</arg>
-                        <arg>lphy.core/lphy.core.vectorization.array=lphy.beast</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -136,7 +131,6 @@
                     </systemPropertyVariables>
                     <argLine>
                         --add-reads lphy.beast=ALL-UNNAMED
-                        --add-exports lphy.core/lphy.core.vectorization.array=lphy.beast
                     </argLine>
                 </configuration>
             </plugin>
