@@ -5,7 +5,7 @@ import jebl.evolution.sequences.SequenceType;
 import lphy.core.model.Generator;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
-import lphybeast.spi.LPhyBEASTExt;
+import lphybeast.spi.LPhyBEASTMapping;
 import lphybeast.tobeast.operators.TreeOperatorStrategy;
 import sa.lphybeast.operators.SATreeOperatorStrategy;
 import sa.lphybeast.tobeast.generators.FossilBirthDeathTreeDTToBEAST;
@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * to extend.
  * @author Walter Xie
  */
-public class SALBImpl implements LPhyBEASTExt {
+public class SALBImpl implements LPhyBEASTMapping {
 
     @Override
     public List<Class<? extends ValueToBEAST>> getValuesToBEASTs() {

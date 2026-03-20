@@ -5,7 +5,7 @@ import jebl.evolution.sequences.SequenceType;
 import lphy.core.model.Generator;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
-import lphybeast.spi.LPhyBEASTExt;
+import lphybeast.spi.LPhyBEASTMapping;
 import mm.lphybeast.tobeast.generators.LewisMKToBeast;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * to extend.
  * @author Walter Xie
  */
-public class MMLBImpl implements LPhyBEASTExt {
+public class MMLBImpl implements LPhyBEASTMapping {
 
     @Override
     public List<Class<? extends ValueToBEAST>> getValuesToBEASTs() {

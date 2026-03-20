@@ -1,46 +1,49 @@
 package sa.lphybeast.tobeast.generators;
 
-import lphy.core.io.UserDir;
-import lphybeast.TestUtils;
+import beast.pkgmgmt.BEASTClassLoader;
+import lphybeast.LPhyBEASTLoader;
+import lphybeast.LPhyBeast;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * XML can be used to sample from SA prior.
- * @author Walter Xie
- */
 class SimFBDAgeToBEASTTest {
 
     private String simFBDAge = """
             tree ~ SimFBDAge(lambda=1, mu=0.6, frac=0.3, psi=0.4, originAge=4);
             daCount = tree.directAncestorCount();""";
-    //TODO It requires 2nd cmd to make "tree" added into List<StateNode> state in BEASTContext
-
 
     @BeforeEach
     public void setUp() {
-        // load ../LPhyBeast/version.xml
-        Path lphybeastDir = Paths.get(UserDir.getUserDir().toAbsolutePath().getParent().toString(),
-                "..","LPhyBeast", "lphybeast");
-        TestUtils.loadServices(lphybeastDir.toString());
-        // load sa/version.xml
-        Path parentDir = UserDir.getUserDir().toAbsolutePath();
-        TestUtils.loadServices(parentDir.toString());
+        BEASTClassLoader.classLoader.addServices("lphybeast-sa", Map.of(
+                "lphybeast.spi.LPhyBEASTMapping", Set.of("sa.lphybeast.spi.SALBImpl")
+        ));
+        Path vfPath = Paths.get(System.getProperty("user.dir"), "../lphybeast/version.xml");
+        if (!Files.exists(vfPath))
+            throw new IllegalArgumentException("Can't find version.xml: " + vfPath);
+        LPhyBEASTLoader.addBEAST2Services(new String[]{vfPath.toAbsolutePath().toString()});
     }
 
     @Test
-    public void testSimFBDAge() {
-        String xml = TestUtils.lphyScriptToBEASTXML(simFBDAge, "simFBDAge");
+    public void testSimFBDAge() throws IOException {
+        LPhyBeast lPhyBeast = new LPhyBeast();
+        String xml = lPhyBeast.lphyStrToXML(simFBDAge, "simFBDAge");
+
+        assertNotNull(xml);
+        assertTrue(xml.contains("<beast") && xml.contains("</beast>"));
 
         assertFalse(xml.contains("<data") && xml.contains("</data>"), "No alignment tag");
 
         assertTrue(xml.contains("<trait") && xml.contains("id=\"TraitSet\"") &&
-                xml.contains("traitname=\"date-backward\""), "TraitSet" );
+                xml.contains("traitname=\"date-backward\""), "TraitSet");
         assertTrue(xml.contains("id=\"SABirthDeathModel\"") &&
                 xml.contains("conditionOnSampling=\"true\"") && xml.contains("origin=\"@tree.origin\"") &&
                 xml.contains("sa.evolution.speciation.SABirthDeathModel"), "SABirthDeathModel");
@@ -50,14 +53,11 @@ class SimFBDAgeToBEASTTest {
                 xml.contains("\"removalProbability\">0.0</parameter>") && xml.contains("\"rho\">0.3</parameter>"),
                 "SABirthDeath parameters");
 
-        // operators
-        assertEquals(8,xml.split("<operator", -1).length - 1, "operators" );
+        assertEquals(8, xml.split("<operator", -1).length - 1, "operators");
         assertTrue(xml.contains("sa.evolution.operators.SAScaleOperator") &&
                 xml.contains("sa.evolution.operators.SAExchange") &&
                 xml.contains("sa.evolution.operators.SAUniform") &&
                 xml.contains("sa.evolution.operators.SAWilsonBalding") &&
                 xml.contains("sa.evolution.operators.LeafToSampledAncestorJump"), "SA operators");
-
     }
-
 }
