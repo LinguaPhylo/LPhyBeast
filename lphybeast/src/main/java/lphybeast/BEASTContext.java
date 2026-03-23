@@ -1016,8 +1016,7 @@ public class BEASTContext {
 
     /**
      * Convert a legacy {@link RealParameter} to a beast3 {@link beast.base.spec.inference.parameter.RealVectorParam}
-     * with the given domain. This bridge method supports the incremental migration
-     * from beast2 value types to beast3 strong-typed parameters.
+     * with the given domain. Bridge method for incremental migration.
      */
     public static <D extends beast.base.spec.domain.Real> beast.base.spec.inference.parameter.RealVectorParam<D> toRealVector(
             RealParameter param, D domain) {
@@ -1027,6 +1026,17 @@ public class BEASTContext {
         var vec = new beast.base.spec.inference.parameter.RealVectorParam<>(values, domain);
         vec.setID(param.getID());
         return vec;
+    }
+
+    /**
+     * Convert a legacy {@link RealParameter} to a beast3 {@link beast.base.spec.inference.parameter.RealScalarParam}
+     * with the given domain. Bridge method for incremental migration.
+     */
+    public static <D extends beast.base.spec.domain.Real> beast.base.spec.inference.parameter.RealScalarParam<D> toRealScalar(
+            RealParameter param, D domain) {
+        var scalar = new beast.base.spec.inference.parameter.RealScalarParam<>(param.getValue(), domain);
+        scalar.setID(param.getID());
+        return scalar;
     }
 
     public static Prior createPrior(ParametricDistribution distr, Function function) {

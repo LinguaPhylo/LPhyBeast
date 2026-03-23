@@ -58,6 +58,8 @@ public class LPhyBEASTMappingImpl implements LPhyBEASTMapping {
     @Override
     public List<Class<? extends ValueToBEAST>> getValuesToBEASTs() {
         return Arrays.asList( DirichletValueToBEAST.class,     // SimplexParam (must precede generic Double[])
+                ExpMarkovChainValueToBEAST.class, // RealVectorParam<PositiveReal> (must precede generic Double[])
+                LogNormalValueToBEAST.class,     // RealScalarParam<PositiveReal> (must precede generic Double)
                 DoubleArrayValueToBEAST.class,  // KeyRealParameter
                 IntegerArrayValueToBEAST.class, // KeyIntegerParameter
                 NumberArrayValueToBEAST.class,

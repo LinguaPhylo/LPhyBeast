@@ -1,26 +1,27 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.inference.distribution.MarkovChainDistribution;
-import beastlabs.core.util.Slice;
+import beast.base.inference.Distribution;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.inference.distribution.MarkovChainDistribution;
+import beast.base.spec.type.RealVector;
 import lphy.base.distribution.ExpMarkovChain;
 import lphy.core.model.Generator;
-import lphy.core.model.GraphicalModelNode;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
-import lphybeast.SliceFactory;
+import lphybeast.tobeast.ScalarSlice;
 
 import static lphy.base.distribution.ExpMarkovChain.firstValueParamName;
 import static lphy.base.distribution.ExpMarkovChain.initialMeanParamName;
 
-public class ExpMarkovChainToBEAST implements GeneratorToBEAST<ExpMarkovChain, MarkovChainDistribution> {
+public class ExpMarkovChainToBEAST implements GeneratorToBEAST<ExpMarkovChain, Distribution> {
     @Override
-    public MarkovChainDistribution generatorToBEAST(ExpMarkovChain generator, BEASTInterface value, BEASTContext context) {
+    public Distribution generatorToBEAST(ExpMarkovChain generator, BEASTInterface value, BEASTContext context) {
 
         MarkovChainDistribution mcd = new MarkovChainDistribution();
         mcd.setInputValue("shape", 1.0);
-        mcd.setInputValue("parameter", value);
+        mcd.setInputValue("param", value);
 
         Value firstValue = generator.getParams().get(firstValueParamName);
         if (firstValue != null) {
@@ -28,14 +29,15 @@ public class ExpMarkovChainToBEAST implements GeneratorToBEAST<ExpMarkovChain, M
             // rm firstValue from maps
             context.removeBEASTObject(firstV);
 
-            // create theta[0]
-            Slice feastSlice = SliceFactory.createSlice(value,0, firstValue.getCanonicalId());
+            // create scalar view of element 0
+            ScalarSlice scalarSlice = new ScalarSlice(
+                    (RealVector<PositiveReal>) value, 0);
+            scalarSlice.setID(firstValue.getCanonicalId());
 
-            // replace Prior x = theta[0]
+            // replace prior's param with scalar view of chain[0]
             Generator dist = firstValue.getGenerator();
             BEASTInterface prior = context.getBEASTObject(dist);
-            prior.setInputValue("x", feastSlice);
-            /** call {@link BEASTContext#addToContext(GraphicalModelNode, BEASTInterface)} **/
+            prior.setInputValue("param", scalarSlice);
             context.putBEASTObject(dist, prior);
 
         } else {
@@ -43,30 +45,7 @@ public class ExpMarkovChainToBEAST implements GeneratorToBEAST<ExpMarkovChain, M
             mcd.setInputValue("initialMean", context.getBEASTObject(initialMean));
         }
         mcd.initAndValidate();
-
-//        Value<Double> initialMean = generator.getInitialMean();
-//        GenerativeDistribution initialMeanGenerator = (GenerativeDistribution)initialMean.getGenerator();
-//
-//        // replace prior on initialMean with excludable prior on the first element of value
-//        beast.base.inference.distribution.Prior prior = (beast.base.inference.distribution.Prior)context.getBEASTObject(initialMeanGenerator);
-//
-//        ExcludablePrior excludablePrior = new ExcludablePrior();
-//        BooleanParameter include = new BooleanParameter();
-//        List<Boolean> includeList = new ArrayList<>();
-//        int n = generator.getN().value();
-//        includeList.add(true);
-//        for (int i = 1; i < n; i++) {
-//            includeList.add(false);
-//        }
-//        include.setInputValue("value", includeList);
-//        include.setInputValue("dimension", n);
-//        include.initAndValidate();
-//        excludablePrior.setInputValue("xInclude", include);
-//        excludablePrior.setInputValue("x", value);
-//        excludablePrior.setInputValue("distr",prior.distInput.get());
-//        excludablePrior.initAndValidate();
-//
-//        context.putBEASTObject(initialMeanGenerator, excludablePrior);
+        mcd.setID(((BEASTInterface) value).getID() + ".prior");
 
         return mcd;
     }
@@ -77,7 +56,7 @@ public class ExpMarkovChainToBEAST implements GeneratorToBEAST<ExpMarkovChain, M
     }
 
     @Override
-    public Class<MarkovChainDistribution> getBEASTClass() {
-        return MarkovChainDistribution.class;
+    public Class<Distribution> getBEASTClass() {
+        return Distribution.class;
     }
 }

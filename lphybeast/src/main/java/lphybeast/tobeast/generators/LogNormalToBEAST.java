@@ -1,22 +1,30 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.inference.distribution.LogNormalDistributionModel;
-import beast.base.inference.distribution.Prior;
+import beast.base.inference.Distribution;
 import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.domain.Real;
+import beast.base.spec.type.RealScalar;
 import lphy.base.distribution.LogNormal;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
-public class LogNormalToBEAST implements GeneratorToBEAST<LogNormal, Prior> {
+public class LogNormalToBEAST implements GeneratorToBEAST<LogNormal, Distribution> {
     @Override
-    public Prior generatorToBEAST(LogNormal generator, BEASTInterface value, BEASTContext context) {
-        LogNormalDistributionModel logNormalDistributionModel = new LogNormalDistributionModel();
-        logNormalDistributionModel.setInputValue("M", context.getAsRealParameter(generator.getMeanLog()));
-        logNormalDistributionModel.setInputValue("S", context.getAsRealParameter(generator.getSDLog()));
-        logNormalDistributionModel.initAndValidate();
+    public Distribution generatorToBEAST(LogNormal generator, BEASTInterface value, BEASTContext context) {
 
-        return BEASTContext.createPrior(logNormalDistributionModel, (RealParameter) value);
+        RealScalar<Real> M = BEASTContext.toRealScalar(
+                context.getAsRealParameter(generator.getMeanLog()), Real.INSTANCE);
+        RealScalar<PositiveReal> S = BEASTContext.toRealScalar(
+                context.getAsRealParameter(generator.getSDLog()), PositiveReal.INSTANCE);
+
+        beast.base.spec.inference.distribution.LogNormal dist =
+                new beast.base.spec.inference.distribution.LogNormal(
+                        (RealScalar<PositiveReal>) value, M, S);
+
+        dist.setID(((BEASTInterface) value).getID() + ".prior");
+        return dist;
     }
 
     @Override
@@ -25,7 +33,7 @@ public class LogNormalToBEAST implements GeneratorToBEAST<LogNormal, Prior> {
     }
 
     @Override
-    public Class<Prior> getBEASTClass() {
-        return Prior.class;
+    public Class<Distribution> getBEASTClass() {
+        return Distribution.class;
     }
 }
