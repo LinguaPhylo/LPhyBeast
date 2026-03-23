@@ -1,11 +1,9 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.evolution.substitutionmodel.Frequencies;
 import beast.base.inference.parameter.BooleanParameter;
-import beast.base.inference.parameter.RealParameter;
-import beast.base.spec.inference.parameter.RealVectorParam;
-import beast.base.spec.inference.parameter.SimplexParam;
+import beast.base.spec.evolution.substitutionmodel.Frequencies;
+import beast.base.spec.type.Simplex;
 import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModel;
 import lphy.base.evolution.substitutionmodel.GeneralTimeReversible;
 import lphy.base.function.Select;
@@ -36,52 +34,22 @@ public class GTRToDiscretePhylogeo implements
             throw new IllegalStateException("Expecting 'select' function to produce traits rates, given rates and boolean indicators");
 
         GraphicalModelNode<?> rateNode = (GraphicalModelNode<?>) selectFunParams.get(Select.valueParamName);
-        BEASTInterface ratesBeast = context.getBEASTObject(rateNode);
-        // SVSGeneralSubstitutionModel (beast-classic) expects Function for rates.
-        // Bridge spec SimplexParam back to RealParameter until beast-classic is migrated.
-        if (ratesBeast instanceof SimplexParam simplex) {
-            RealParameter rp = toRealParameter(simplex);
-            context.putBEASTObject(rateNode, rp);
-            ratesBeast = rp;
-        }
-        svs.setInputValue("rates", ratesBeast);
+        svs.setInputValue("rates", context.getBEASTObject(rateNode));
 
         GraphicalModelNode<?> indicatorNode = (GraphicalModelNode<?>) selectFunParams.get(Select.indicatorParamName);
         BooleanParameter rateIndicators = (BooleanParameter) context.getBEASTObject(indicatorNode);
 
-        BEASTInterface freqBeast = context.getBEASTObject(gtr.getFreq());
-        // Bridge spec SimplexParam to old Frequencies for beast-classic
-        if (freqBeast instanceof SimplexParam simplex) {
-            RealParameter freqRP = toRealParameter(simplex);
-            context.putBEASTObject(gtr.getFreq(), freqRP);
-            Frequencies traitfreqs = new Frequencies();
-            traitfreqs.setInputValue("frequencies", freqRP);
-            traitfreqs.initAndValidate();
-            svs.setInputValue("frequencies", traitfreqs);
-        } else if (freqBeast instanceof RealParameter rp) {
-            Frequencies traitfreqs = new Frequencies();
-            traitfreqs.setInputValue("frequencies", rp);
-            traitfreqs.initAndValidate();
-            svs.setInputValue("frequencies", traitfreqs);
-        }
+        Simplex freqSimplex = (Simplex) context.getBEASTObject(gtr.getFreq());
+        Frequencies traitfreqs = new Frequencies(freqSimplex);
+        svs.setInputValue("frequencies", traitfreqs);
 
-        int stateCount = ((Frequencies) svs.frequenciesInput.get()).getFreqs().length;
+        int stateCount = traitfreqs.getFreqs().length;
         validateIndicators(rateIndicators, stateCount);
         svs.setInputValue("rateIndicator", rateIndicators);
 
         svs.initAndValidate();
 
         return svs;
-    }
-
-    /** Bridge: convert spec SimplexParam back to legacy RealParameter for beast-classic */
-    private static RealParameter toRealParameter(RealVectorParam<?> vec) {
-        Double[] values = new Double[vec.size()];
-        for (int i = 0; i < values.length; i++)
-            values[i] = vec.get(i);
-        RealParameter rp = new RealParameter(values);
-        rp.setID(vec.getID());
-        return rp;
     }
 
     private void validateIndicators(BooleanParameter rateIndicators, int stateCount) {
