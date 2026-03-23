@@ -18,6 +18,10 @@ import beast.base.inference.operator.kernel.BactrianUpDownOperator;
 import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.inference.parameter.IntSimplexParam;
+import beast.base.spec.inference.parameter.RealScalarParam;
+import beast.base.spec.inference.parameter.RealVectorParam;
+import beast.base.spec.inference.parameter.SimplexParam;
 import com.google.common.collect.Multimap;
 import lphy.base.distribution.Dirichlet;
 import lphy.base.distribution.RandomComposition;
@@ -86,7 +90,17 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         for (StateNode stateNode : context.getState()) {
             if (!skipOperators.contains(stateNode)) {
                 // The default template to create operators
-                if (stateNode instanceof RealParameter realParameter) {
+                // beast3 spec types first
+                if (stateNode instanceof SimplexParam simplex) {
+                    operators.add(createSimplexOperator(simplex));
+                } else if (stateNode instanceof IntSimplexParam<?> intSimplex) {
+                    operators.add(createIntSimplexOperator(intSimplex));
+                } else if (stateNode instanceof RealVectorParam<?> realVector) {
+                    operators.add(createRealVectorOperator(realVector));
+                } else if (stateNode instanceof RealScalarParam<?> realScalar) {
+                    operators.add(createRealScalarOperator(realScalar));
+                // legacy beast2 types
+                } else if (stateNode instanceof RealParameter realParameter) {
                     Operator operator = createBEASTOperator(realParameter);
                     if (operator != null) operators.add(operator);
                 } else if (stateNode instanceof IntegerParameter integerParameter) {
@@ -272,6 +286,57 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         operator.initAndValidate();
         operator.setID(parameter.getID() + ".bitFlip");
 
+        return operator;
+    }
+
+    //*** beast3 spec parameter operators ***//
+
+    private Operator createSimplexOperator(SimplexParam simplex) {
+        var operator = new beast.base.spec.inference.operator.DeltaExchangeOperator();
+        operator.setInputValue("rvparameter", simplex);
+        operator.setInputValue("weight", getOperatorWeight(simplex.size() - 1));
+        operator.setInputValue("delta", 1.0 / simplex.size());
+        operator.initAndValidate();
+        operator.setID(simplex.getID() + ".deltaExchange");
+        Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
+        elements.put(operator, null);
+        return operator;
+    }
+
+    private Operator createIntSimplexOperator(IntSimplexParam<?> intSimplex) {
+        var operator = new beast.base.spec.inference.operator.DeltaExchangeOperator();
+        operator.setInputValue("ivparameter", intSimplex);
+        operator.setInputValue("weight", getOperatorWeight(intSimplex.size() - 1));
+        operator.setInputValue("delta", 2.0);
+        operator.setInputValue("integer", true);
+        operator.initAndValidate();
+        operator.setID(intSimplex.getID() + ".deltaExchange");
+        Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
+        elements.put(operator, null);
+        return operator;
+    }
+
+    private Operator createRealVectorOperator(RealVectorParam<?> realVector) {
+        var operator = new beast.base.spec.inference.operator.ScaleOperator();
+        operator.setInputValue("parameter", realVector);
+        operator.setInputValue("weight", getOperatorWeight(realVector.size()));
+        operator.setInputValue("scaleFactor", 0.75);
+        operator.initAndValidate();
+        operator.setID(realVector.getID() + ".scale");
+        Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
+        elements.put(operator, null);
+        return operator;
+    }
+
+    private Operator createRealScalarOperator(RealScalarParam<?> realScalar) {
+        var operator = new beast.base.spec.inference.operator.ScaleOperator();
+        operator.setInputValue("parameter", realScalar);
+        operator.setInputValue("weight", getOperatorWeight(1));
+        operator.setInputValue("scaleFactor", 0.75);
+        operator.initAndValidate();
+        operator.setID(realScalar.getID() + ".scale");
+        Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
+        elements.put(operator, null);
         return operator;
     }
 

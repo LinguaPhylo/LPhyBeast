@@ -77,15 +77,16 @@ public class SkylinePlotsTutorialTest {
                 xml.contains("spec=\"beast.base.spec.inference.distribution.LogNormal\""),  "gamma shape prior" );
         assertTrue(xml.contains("gammaCategoryCount=\"4\"") && xml.contains("shape=\"@gamma\""), "SiteModel" );
 
-        // TODO: operator count will change once spec parameter operators are added
-        assertTrue(xml.split("BactrianScaleOperator", -1).length - 1 >= 1,
-                "BactrianScaleOperator" );
+        // 1 ScaleOperator (Theta via spec ScaleOperator) + tree operators via BICEPS
+        // gamma and theta1 get spec ScaleOperator
+        assertTrue(xml.contains("spec=\"beast.base.spec.inference.operator.ScaleOperator\""), "spec ScaleOperator");
 
         assertTrue(xml.contains("Exchange") && xml.contains("BactrianSubtreeSlide") &&
                 xml.contains("BactrianNodeOperator") && xml.contains("WilsonBalding"), "Tree Operator" );
 
-       // TODO: operator count will change once spec parameter operators are added
-       // DeltaExchangeOperator count depends on SimplexParam/IntSimplexParam operator support
+        // 3 DeltaExchangeOperators: pi, rates (SimplexParam), A (IntSimplexParam)
+        assertTrue(xml.contains("spec=\"beast.base.spec.inference.operator.DeltaExchangeOperator\""),
+                "spec DeltaExchangeOperator");
 
         assertTrue(xml.contains("chainLength=\"1000000\"") && xml.contains("logEvery=\"500\"") &&
                 xml.contains("fileName=\"" + fileStem + ".log\"") && xml.contains("fileName=\"" + fileStem + ".trees\"") &&
