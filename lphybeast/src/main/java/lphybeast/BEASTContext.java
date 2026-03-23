@@ -1014,6 +1014,21 @@ public class BEASTContext {
         return frequencies;
     }
 
+    /**
+     * Convert a legacy {@link RealParameter} to a beast3 {@link beast.base.spec.inference.parameter.RealVectorParam}
+     * with the given domain. This bridge method supports the incremental migration
+     * from beast2 value types to beast3 strong-typed parameters.
+     */
+    public static <D extends beast.base.spec.domain.Real> beast.base.spec.inference.parameter.RealVectorParam<D> toRealVector(
+            RealParameter param, D domain) {
+        double[] values = new double[param.getDimension()];
+        for (int i = 0; i < values.length; i++)
+            values[i] = param.getValue(i);
+        var vec = new beast.base.spec.inference.parameter.RealVectorParam<>(values, domain);
+        vec.setID(param.getID());
+        return vec;
+    }
+
     public static Prior createPrior(ParametricDistribution distr, Function function) {
         Prior prior = new Prior();
         prior.setInputValue("distr", distr);

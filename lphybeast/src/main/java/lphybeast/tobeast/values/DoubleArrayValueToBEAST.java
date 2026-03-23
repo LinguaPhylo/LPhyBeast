@@ -3,7 +3,6 @@ package lphybeast.tobeast.values;
 import beast.base.core.BEASTInterface;
 import beast.base.inference.parameter.Parameter;
 import beast.base.inference.parameter.RealParameter;
-import lphy.base.distribution.Dirichlet;
 import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
@@ -21,15 +20,7 @@ public class DoubleArrayValueToBEAST implements ValueToBEAST<Double[], BEASTInte
     @Override
     public BEASTInterface valueToBEAST(Value<Double[]> value, BEASTContext context) {
 
-        Double lower = null;
-        Double upper = null;
-        // check domain
-        if (value.getGenerator() instanceof Dirichlet) {
-            lower = 0.0;
-            upper = 1.0;
-        }
-
-        Parameter parameter = BEASTContext.createParameterWithBound(value, lower, upper, false);
+        Parameter parameter = BEASTContext.createParameterWithBound(value, null, null, false);
         if (!(parameter instanceof RealParameter))
             throw new IllegalStateException("Expecting to create KeyRealParameter from " + value.getCanonicalId());
 

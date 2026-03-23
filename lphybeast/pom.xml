@@ -67,6 +67,13 @@
             <version>1.0</version>
         </dependency>
 
+        <!-- SubstModels (GTR and other nucleotide substitution models) -->
+        <dependency>
+            <groupId>substmodels</groupId>
+            <artifactId>substmodels</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
         <!-- Optional dependencies moved to extension modules:
              feast              -> lphybeast-feast
              beast-bdtree       -> lphybeast-bdtree

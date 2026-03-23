@@ -57,7 +57,8 @@ public class LPhyBEASTMappingImpl implements LPhyBEASTMapping {
     // the first matching converter is used.
     @Override
     public List<Class<? extends ValueToBEAST>> getValuesToBEASTs() {
-        return Arrays.asList( DoubleArrayValueToBEAST.class,  // KeyRealParameter
+        return Arrays.asList( DirichletValueToBEAST.class,     // SimplexParam (must precede generic Double[])
+                DoubleArrayValueToBEAST.class,  // KeyRealParameter
                 IntegerArrayValueToBEAST.class, // KeyIntegerParameter
                 NumberArrayValueToBEAST.class,
                 CompoundVectorToBEAST.class, // TODO handle primitive CompoundVector properly
@@ -85,7 +86,7 @@ public class LPhyBEASTMappingImpl implements LPhyBEASTMapping {
 //                FossilBirthDeathTreeToBEAST.class,
                 GammaToBEAST.class,
                 GTRToDiscretePhylogeo.class,
-                // GTRToBEAST.class, // TODO: move to lphybeast-ssm extension
+                GTRToBEAST.class,
                 HKYToBEAST.class,
                 IIDToBEAST.class,
                 InternalNodesIDToBEAST.class,

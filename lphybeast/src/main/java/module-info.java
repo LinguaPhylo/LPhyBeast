@@ -7,6 +7,7 @@ open module lphy.beast {
     requires info.picocli;
     requires com.google.common;
     requires beagle;
+    requires substmodel;
     requires java.xml;
 
     exports lphybeast;
