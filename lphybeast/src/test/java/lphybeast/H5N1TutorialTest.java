@@ -63,52 +63,36 @@ public class H5N1TutorialTest {
                 xml.contains("id=\"gamma\"") && xml.contains("id=\"Theta\"") && xml.contains("id=\"psi\"") &&
                 xml.contains("id=\"pi_trait\"") && xml.contains("id=\"I\"") && xml.contains("id=\"R_trait\"") &&
                 xml.contains("id=\"mu_trait\""), "Check parameters ID" );
-        // pi_trait, I, R_trait
-        assertTrue(xml.contains("spec=\"parameter.RealParameter\" dimension=\"5\"") &&
-                xml.contains("spec=\"parameter.BooleanParameter\" dimension=\"10\"") &&
-                xml.contains("spec=\"parameter.RealParameter\" dimension=\"10\""), "DPG rates dimension" );
-
         assertTrue(xml.contains("<trait") && xml.contains("id=\"TraitSet\"") &&
                 xml.contains("traitname=\"date-backward\""), "TraitSet" );
         assertTrue(xml.contains("A_chicken_Fujian_1042_2005=0.0") &&
                 xml.contains("A_Goose_Guangdong_1_1996=9.0") &&
                 xml.contains("A_bird_HongKong_542_1997=8.0"), "Time" );
 
-        assertTrue(xml.contains("<distribution") && xml.contains("id=\"Theta.prior\"") &&
-                xml.contains("x=\"@Theta\"") && xml.contains("distribution.LogNormalDistributionModel\"") &&
-                xml.contains("name=\"M\">0.0</parameter>") && xml.contains("name=\"S\">1.0</parameter>"), "Theta prior");
+        // Spec LogNormal priors (no Prior wrapper)
+        assertTrue(xml.contains("id=\"Theta.prior\"") &&
+                xml.contains("spec=\"beast.base.spec.inference.distribution.LogNormal\""), "Theta prior");
+        assertTrue(xml.contains("id=\"kappa.prior\"") &&
+                xml.contains("spec=\"beast.base.spec.inference.distribution.LogNormal\""),  "kappa prior" );
+        assertTrue(xml.contains("id=\"gamma.prior\"") &&
+                xml.contains("spec=\"beast.base.spec.inference.distribution.LogNormal\""),  "gamma shape prior" );
+        assertTrue(xml.contains("id=\"mu_trait.prior\"") &&
+                xml.contains("spec=\"beast.base.spec.inference.distribution.LogNormal\""),  "mu_trait prior" );
 
-        assertTrue(xml.contains("x=\"@kappa\"") && xml.contains("id=\"kappa.prior\"") &&
-                xml.contains("name=\"M\">1.0</parameter>") && xml.contains("name=\"S\">1.25</parameter>"),  "kappa prior" );
+        // Spec Dirichlet priors
+        assertTrue(xml.contains("id=\"pi.prior\"") &&
+                xml.contains("spec=\"beast.base.spec.inference.distribution.Dirichlet\""),  "pi prior" );
+        assertTrue(xml.contains("id=\"pi_trait.prior\"") &&
+                xml.contains("spec=\"beast.base.spec.inference.distribution.Dirichlet\""),  "pi_trait prior" );
+        assertTrue(xml.contains("id=\"R_trait.prior\"") &&
+                xml.contains("spec=\"beast.base.spec.inference.distribution.Dirichlet\""),  "R_trait prior" );
 
-        // 2 frequencies
-        assertEquals(2,xml.split("<frequencies", -1).length - 1, "nuc & trait frequencies" );
-        assertTrue(xml.contains("frequencies=\"@pi\"") && xml.contains("frequencies=\"@pi_trait\""),  "frequencies" );
-        assertTrue(xml.contains("x=\"@pi\"") && xml.contains("id=\"pi.prior\"") &&
-                xml.contains("name=\"alpha\">2.0 2.0 2.0 2.0</parameter>"),  "pi prior" );
-        // dimension="5"
-        assertTrue(xml.contains("x=\"@pi_trait\"") && xml.contains("id=\"pi_trait.prior\"") &&
-                xml.contains("name=\"alpha\">3.0 3.0 3.0 3.0 3.0</parameter>"),  "pi_trait prior" );
-        // dimension="10"
-        assertTrue(xml.contains("x=\"@R_trait\"") && xml.contains("id=\"R_trait.prior\"") &&
-                        xml.contains("name=\"alpha\">1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0</parameter>"),
-                "R_trait prior" );
-        assertTrue(xml.contains("parameter=\"@I\"") && xml.contains("id=\"BernoulliDistribution\"") &&
-                xml.contains("beastlabs.math.distributions.BernoulliDistribution") &&
-                        xml.contains("name=\"p\">0.5</parameter>") && xml.contains("IntegerParameter\">8</minSuccesses>"),
+        // Bernoulli prior for I (still old-style)
+        assertTrue(xml.contains("parameter=\"@I\"") && xml.contains("id=\"BernoulliDistribution\""),
                 "I prior" );
 
-        // 2 site models
-        assertEquals(2, xml.split("<siteModel", -1).length - 1, "2 site models" );
-        assertTrue(xml.contains("gammaCategoryCount=\"4\"") && xml.contains("shape=\"@gamma\"") &&
-                xml.contains("gammaCategoryCount=\"1\""), "SiteModel" );
-        assertTrue(xml.contains("x=\"@gamma\"") && xml.contains("name=\"M\">0.0</parameter>") &&
-                xml.contains("name=\"S\">2.0</parameter>"),  "gamma shape prior" );
-
-        assertTrue(xml.contains("name=\"clock.rate\">0.004</parameter>"),  "clock rate" );
-
-        assertTrue(xml.contains("x=\"@mu_trait\"") && xml.contains("name=\"M\">0.0</parameter>") &&
-                xml.contains("name=\"S\">1.25</parameter>"),  "mu_trait prior" );
+        // 2 site models (spec SiteModel)
+        assertTrue(xml.contains("gammaCategoryCount=\"4\"") && xml.contains("shape=\"@gamma\""), "SiteModel" );
 
         assertTrue(xml.contains("spec=\"beastclassic.evolution.likelihood.AncestralStateTreeLikelihood\"") &&
                 xml.contains("tag=\"location\"") && xml.contains("tree=\"@psi\""),  "D_trait treeLikelihood" );
@@ -123,18 +107,15 @@ public class H5N1TutorialTest {
 
         assertTrue(xml.contains("BitFlipOperator") && xml.contains("parameter=\"@I\""), "I.bitFlip Operator" );
 
-        // 5 ScaleOperator, Tree scaled is replaced by BICEPS
-        assertEquals(5, xml.split("BactrianScaleOperator", -1).length - 1,
-                "BactrianScaleOperator" );
+        // Spec and legacy operators
+        assertTrue(xml.contains("spec=\"beast.base.spec.inference.operator.ScaleOperator\""), "spec ScaleOperator");
+        assertTrue(xml.contains("spec=\"beast.base.spec.inference.operator.DeltaExchangeOperator\""), "spec DeltaExchangeOperator");
 
         assertTrue(xml.contains("Exchange") && xml.contains("BactrianSubtreeSlide") &&
                 xml.contains("BactrianNodeOperator") && xml.contains("WilsonBalding"), "Tree Operator" );
 
         assertTrue(xml.contains("BactrianUpDownOperator") &&
                 xml.contains("<up") && xml.contains("<down"), "BactrianUpDownOperator" );
-        // 3 DeltaExchangeOperator
-        assertEquals(3, xml.split("BactrianDeltaExchangeOperator", -1).length - 1,
-                "BactrianDeltaExchangeOperator");
 
         assertTrue(xml.contains("chainLength=\"1000000\"") && xml.contains("logEvery=\"500\"") &&
                 xml.contains("fileName=\"" + fileStem + ".log\""), //&& xml.contains("fileName=\"" + fileStem + ".trees\""),

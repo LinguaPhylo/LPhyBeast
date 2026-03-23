@@ -284,10 +284,21 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
     public static Function getClockRateParam(Value<Number> clockRateValue, BEASTContext context) {
         Function clockRateParam;
         if (clockRateValue != null) {
-            clockRateParam = context.getAsFunctionOrRealParameter(clockRateValue);
-
+            BEASTInterface beastObj = context.getBEASTObject(clockRateValue);
+            if (beastObj instanceof Function f) {
+                clockRateParam = f;
+            } else if (beastObj instanceof beast.base.spec.inference.parameter.RealScalarParam<?> scalar) {
+                // Bridge: StrictClockModel expects Function, spec types don't implement it.
+                // Replace context object so state and operators stay consistent.
+                RealParameter rp = BEASTContext.createRealParameter(scalar.get());
+                rp.setID(scalar.getID());
+                context.putBEASTObject(clockRateValue, rp);
+                clockRateParam = rp;
+            } else {
+                clockRateParam = context.getAsFunctionOrRealParameter(clockRateValue);
+            }
         } else {
-            clockRateParam =  BEASTContext.createRealParameter(1.0);
+            clockRateParam = BEASTContext.createRealParameter(1.0);
         }
         return clockRateParam;
     }

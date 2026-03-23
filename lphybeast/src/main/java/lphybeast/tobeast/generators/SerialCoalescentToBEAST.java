@@ -2,17 +2,17 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.tree.TreeIntervals;
-import beast.base.evolution.tree.coalescent.ConstantPopulation;
+import beast.base.evolution.tree.coalescent.Coalescent;
+import beast.base.spec.evolution.tree.coalescent.ConstantPopulation;
 import lphy.base.evolution.coalescent.SerialCoalescent;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
-public class SerialCoalescentToBEAST implements
-        GeneratorToBEAST<SerialCoalescent, beast.base.evolution.tree.coalescent.Coalescent> {
+public class SerialCoalescentToBEAST implements GeneratorToBEAST<SerialCoalescent, Coalescent> {
     @Override
-    public beast.base.evolution.tree.coalescent.Coalescent generatorToBEAST(SerialCoalescent coalescent, BEASTInterface value, BEASTContext context) {
+    public Coalescent generatorToBEAST(SerialCoalescent coalescent, BEASTInterface value, BEASTContext context) {
 
-        beast.base.evolution.tree.coalescent.Coalescent beastCoalescent = new beast.base.evolution.tree.coalescent.Coalescent();
+        Coalescent beastCoalescent = new Coalescent();
 
         TreeIntervals treeIntervals = new TreeIntervals();
         treeIntervals.setInputValue("tree", value);
@@ -25,7 +25,6 @@ public class SerialCoalescentToBEAST implements
         populationFunction.initAndValidate();
 
         beastCoalescent.setInputValue("populationModel", populationFunction);
-
         beastCoalescent.initAndValidate();
 
         return beastCoalescent;
@@ -37,7 +36,7 @@ public class SerialCoalescentToBEAST implements
     }
 
     @Override
-    public Class<beast.base.evolution.tree.coalescent.Coalescent> getBEASTClass() {
-        return beast.base.evolution.tree.coalescent.Coalescent.class;
+    public Class<Coalescent> getBEASTClass() {
+        return Coalescent.class;
     }
 }
