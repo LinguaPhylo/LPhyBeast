@@ -13,7 +13,7 @@ import beast.base.evolution.likelihood.ThreadedTreeLikelihood;
 import beast.base.evolution.operator.AdaptableOperatorSampler;
 import beast.base.evolution.operator.Exchange;
 import beast.base.evolution.operator.kernel.BactrianScaleOperator;
-import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.spec.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.StateNode;
@@ -322,7 +322,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             } else {
                 throw new UnsupportedOperationException("Only discretized gamma site rates are supported by LPhyBEAST !");
             }
-            siteModel.setInputValue("shape", context.getAsRealParameter(shape));
+            siteModel.setInputValue("shape", context.getBEASTObject(shape));
             siteModel.setInputValue("gammaCategoryCount", ncat.value());
 
             //TODO need a better solution than rm RandomVariable siteRates
@@ -341,14 +341,10 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
             RateMatrix rateMatrix = (RateMatrix)qGenerator;
             Value<Double> meanRate = rateMatrix.getMeanRate();
             BEASTInterface mutationRate = meanRate==null ? null : context.getBEASTObject(meanRate);
-            // beast3 strong typing: SiteModel.mutationRate requires RealParameter.
-            // If the value is a Slice wrapping a RealParameter, unwrap it.
-            if (mutationRate instanceof beastlabs.core.util.Slice slice) {
-                beast.base.core.Function inner = slice.functionInput.get();
-                if (inner instanceof RealParameter rp) {
-                    // Slice of a single RealParameter — use the RealParameter directly
-                    mutationRate = rp;
-                }
+            // spec SiteModel expects RealScalar<PositiveReal> for mutationRate
+            if (mutationRate instanceof RealParameter rp) {
+                mutationRate = BEASTContext.toRealScalar(rp,
+                        beast.base.spec.domain.PositiveReal.INSTANCE);
             }
             if (mutationRate != null) siteModel.setInputValue("mutationRate", mutationRate);
 
