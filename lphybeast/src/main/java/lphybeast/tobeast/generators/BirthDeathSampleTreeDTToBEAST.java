@@ -1,21 +1,21 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.evolution.speciation.BirthDeathGernhard08Model;
 import beast.base.evolution.tree.MRCAPrior;
 import beast.base.evolution.tree.Tree;
+import beast.base.inference.Distribution;
 import beast.base.inference.distribution.Prior;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.evolution.speciation.BirthDeathGernhard08Model;
+import beast.base.spec.type.RealScalar;
 import lphy.base.evolution.birthdeath.BirthDeathSamplingTreeDT;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
 public class BirthDeathSampleTreeDTToBEAST implements
-        GeneratorToBEAST<BirthDeathSamplingTreeDT,BirthDeathGernhard08Model> {
+        GeneratorToBEAST<BirthDeathSamplingTreeDT, BirthDeathGernhard08Model> {
 
     @Override
     public BirthDeathGernhard08Model generatorToBEAST(BirthDeathSamplingTreeDT generator, BEASTInterface tree, BEASTContext context) {
-
 
         BirthDeathGernhard08Model beastBirthDeath = new BirthDeathGernhard08Model();
         beastBirthDeath.setInputValue("birthDiffRate", context.getBEASTObject(generator.getDiversificationRate()));
@@ -29,16 +29,26 @@ public class BirthDeathSampleTreeDTToBEAST implements
         BEASTInterface beastRootAge = context.getBEASTObject(generator.getRootAge());
         BEASTInterface beastRootAgeGenerator = context.getBEASTObject(generator.getRootAge().getGenerator());
 
-        if (beastRootAge instanceof RealParameter && beastRootAgeGenerator instanceof Prior) {
-            RealParameter rootAgeParameter = (RealParameter) beastRootAge;
-            Prior rootAgePrior = (Prior) beastRootAgeGenerator;
+        if (beastRootAge instanceof RealScalar && beastRootAgeGenerator instanceof Distribution) {
+            // spec distributions go straight into posterior — wrap root age as MRCAPrior
+            Distribution rootAgeDist = (Distribution) beastRootAgeGenerator;
 
+            MRCAPrior prior = new MRCAPrior();
+            prior.setInputValue("distr", rootAgeDist);
+            prior.setInputValue("tree", tree);
+            prior.setInputValue("taxonset", ((Tree) tree).getTaxonset());
+            prior.initAndValidate();
+            context.addBEASTObject(prior, generator.getRootAge().getGenerator());
+            context.removeBEASTObject(beastRootAge);
+            context.removeBEASTObject(beastRootAgeGenerator);
+        } else if (beastRootAgeGenerator instanceof Prior rootAgePrior) {
+            // fallback for old-style Prior wrapper
             MRCAPrior prior = new MRCAPrior();
             prior.setInputValue("distr", rootAgePrior.distInput.get());
             prior.setInputValue("tree", tree);
             prior.setInputValue("taxonset", ((Tree) tree).getTaxonset());
             prior.initAndValidate();
-            context.addBEASTObject(prior,generator.getRootAge().getGenerator());
+            context.addBEASTObject(prior, generator.getRootAge().getGenerator());
             context.removeBEASTObject(beastRootAge);
             context.removeBEASTObject(beastRootAgeGenerator);
         } else {

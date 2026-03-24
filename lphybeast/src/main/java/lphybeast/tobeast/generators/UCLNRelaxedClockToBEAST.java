@@ -2,11 +2,14 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.RateStatistic;
-import beast.base.evolution.branchratemodel.UCRelaxedClockModel;
 import beast.base.evolution.tree.TreeInterface;
-import beast.base.inference.distribution.LogNormalDistributionModel;
-import beast.base.inference.distribution.Prior;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.domain.Real;
+import beast.base.spec.evolution.branchratemodel.UCRelaxedClockModel;
+import beast.base.spec.inference.distribution.LogNormal;
+import beast.base.spec.inference.parameter.RealScalarParam;
+import beast.base.spec.type.RealScalar;
+import beast.base.spec.type.RealVector;
 import lphy.base.distribution.UCLNMean1;
 import lphy.base.evolution.likelihood.PhyloCTMC;
 import lphy.base.evolution.tree.TimeTree;
@@ -17,9 +20,6 @@ import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.LoggerUtils;
 import lphybeast.tobeast.loggers.MetaDataTreeLogger;
 
-/**
- * For ORC package.
- */
 public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRelaxedClockModel> {
     @Override
     public UCRelaxedClockModel generatorToBEAST(UCLNMean1 ucln, BEASTInterface value, BEASTContext context) {
@@ -34,38 +34,34 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
         for (GraphicalModelNode treeOut : tree.getOutputs()) {
             if (treeOut instanceof PhyloCTMC phyloCTMC) {
                 Value mu = phyloCTMC.getClockRate();
-                if (mu != null) // BEAST clock.rate default to 1.0
-                    ucRelaxedClockModel.setInputValue("clock.rate", context.getAsRealParameter(mu));
-//                else
-//                    ucRelaxedClockModel.setInputValue("clock.rate", new RealParameter("1.0"));
+                if (mu != null)
+                    ucRelaxedClockModel.setInputValue("clock.rate", context.getBEASTObject(mu));
             }
         }
 
         GraphicalModelNode branchRates = context.getGraphicalModelNode(value);
-        if (value instanceof RealParameter rates) {
+        if (value instanceof RealVector<?> rates) {
             ucRelaxedClockModel.setInputValue("rates", rates);
 
-            LogNormalDistributionModel logNormDist = new LogNormalDistributionModel();
-            // Note: the mean of log-normal distr on branch rates in real space must be fixed to 1.
-            logNormDist.initByName("M", new RealParameter("1.0"), "meanInRealSpace", "true",
-                    "S", context.getAsRealParameter(ucln.getUclnSigma()));
+            // spec LogNormal: mean fixed to 1 in real space
+            RealScalarParam<Real> M = new RealScalarParam<>(1.0, Real.INSTANCE);
+            RealScalar<PositiveReal> S = (RealScalar<PositiveReal>) context.getBEASTObject(ucln.getUclnSigma());
+
+            LogNormal logNormDist = new LogNormal();
+            logNormDist.initByName("M", M, "meanInRealSpace", true, "S", S);
             logNormDist.setID("LogNormalDistr." + branchRates.getUniqueId());
             ucRelaxedClockModel.setInputValue("distr", logNormDist);
 
-            // branch rates LogNormal prior, which is same LogNormal as UCLN
-            Prior ratesPrior = BEASTContext.createPrior(logNormDist, rates);
-            context.addBEASTObject(ratesPrior, ucln);
-
             // rm rates from log
-            context.addSkipLoggable(rates);
+            if (rates instanceof beast.base.core.Loggable loggable)
+                context.addSkipLoggable(loggable);
             // replaced by <log id="" ... branchratemodel="@" tree="@"/>
             RateStatistic rateStatistic = LoggerUtils.createRateStatistic("RatesStat." + branchRates.getUniqueId(), ucRelaxedClockModel, beastTree);
             context.addExtraLoggable(rateStatistic);
-            
-        } else throw new IllegalArgumentException("Value sampled from LPhy UCLN should be mapped to RealParameter ! " + value);
+
+        } else throw new IllegalArgumentException("Value sampled from LPhy UCLN should be mapped to RealVector ! " + value);
 
         ucRelaxedClockModel.initAndValidate();
-        // in case to duplicate with RandomValue id also called "branchRates"
         ucRelaxedClockModel.setID(branchRates.getUniqueId() + ".model");
 
         // Extra Logger <log ... branchratemodel="@..." tree="@..."/>

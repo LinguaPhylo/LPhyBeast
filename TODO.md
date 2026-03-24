@@ -98,26 +98,22 @@ Then remove `BEASTContext.createPrior()` (after Poisson done).
 
 Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated).
 
-## TODO: Other generators (blocked by beast-base old types)
+## DONE: Other generators (25 Mar)
 
-These generators can't be fully migrated until beast-base tree priors and clock models accept spec types.
-
-**Blocked by beast-base `Input<RealParameter>` in tree priors:**
-- `YuleToBEAST` — `YuleModel.birthDiffRate` is `Input<RealParameter>`
-- `CalibratedYuleToBeast` — `CalibratedYuleModel.birthRate` is `Input<RealParameter>`
-- `BirthDeathSampleTreeDTToBEAST` — `BirthDeathGernhard08Model` uses old types
-
-**Blocked by beast-base clock model old types:**
-- `UCLNRelaxedClockToBEAST` — `UCRelaxedClockModel` uses old types, creates `new RealParameter`
-
-**Blocked by Prior/Function infrastructure:**
-- `WeightedDirichletToBEAST` — needs `createPrior` (WeightedDirichlet is ParametricDistribution, not Distribution)
-- `RandomBooleanArrayToBEAST` — complex Poisson→Sum→Prior chain
-- `IIDToBEAST` — expects `Prior` from sub-generators, uses `Parameter.getDimension()`
+**Migrated to spec types:**
+- ✅ `YuleToBEAST` → spec `YuleModel`
+- ✅ `CalibratedYuleToBeast` → spec `CalibratedYuleModel`
+- ✅ `BirthDeathSampleTreeDTToBEAST` → spec `BirthDeathGernhard08Model`
+- ✅ `UCLNRelaxedClockToBEAST` → spec `UCRelaxedClockModel` + spec `LogNormal`
 
 **Already fine (no old types used directly):**
-- `PopFuncCoalescentToBEAST` — passes through `context.getBEASTObject()`
-- `BernoulliMultiToBEAST` — passes through `context.getBEASTObject()`
+- ✅ `PopFuncCoalescentToBEAST` — passes through `context.getBEASTObject()`
+- ✅ `BernoulliMultiToBEAST` — passes through `context.getBEASTObject()`
+
+**Blocked by Prior/Function infrastructure:**
+- TODO `WeightedDirichletToBEAST` — needs `createPrior` (WeightedDirichlet is ParametricDistribution, not Distribution). Fixed weights to use `getAsRealParameter`.
+- TODO `RandomBooleanArrayToBEAST` — complex Poisson→Sum→Prior chain
+- TODO `IIDToBEAST` — expects `Prior` from sub-generators, uses `Parameter.getDimension()`
 
 ## TODO: Infrastructure
 

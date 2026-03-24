@@ -3,14 +3,13 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.alignment.Taxon;
 import beast.base.evolution.alignment.TaxonSet;
-import beast.base.evolution.speciation.CalibratedYuleModel;
+import beast.base.spec.evolution.speciation.CalibratedYuleModel;
 import beast.base.evolution.speciation.CalibrationPoint;
 import beast.base.evolution.tree.MRCAPrior;
 import beast.base.evolution.tree.TreeInterface;
 import beast.base.inference.Distribution;
 import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.distribution.Prior;
-import beast.base.inference.parameter.RealParameter;
 import lphy.base.evolution.Taxa;
 import lphy.base.evolution.birthdeath.CalibratedYule;
 import lphy.base.evolution.tree.TimeTreeNode;
@@ -35,7 +34,7 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
         CalibratedYuleModel calibratedYuleModel = new CalibratedYuleModel();
 
         calibratedYuleModel.setInputValue("tree", value);
-        calibratedYuleModel.setInputValue("birthRate", context.getAsRealParameter(generator.getBirthRate()));
+        calibratedYuleModel.setInputValue("birthRate", context.getBEASTObject(generator.getBirthRate()));
 
 
         Value<Number[]> cladeMRCAAge = generator.getCladeMRCAAge();
