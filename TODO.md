@@ -98,13 +98,26 @@ Then remove `BEASTContext.createPrior()` (after Poisson done).
 
 Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated).
 
-## TODO: Other generators
+## TODO: Other generators (blocked by beast-base old types)
 
-- `YuleToBEAST`, `CalibratedYuleToBeast`, `BirthDeathSampleTreeDTToBEAST`
-- `PopFuncCoalescentToBEAST`, `UCLNRelaxedClockToBEAST`
-- `IIDToBEAST` → spec `IID`
-- `VectorizedDistributionToBEAST`, `VectorizedFunctionToBEAST`
-- `BernoulliMultiToBEAST`, `WeightedDirichletToBEAST`, `RandomBooleanArrayToBEAST`
+These generators can't be fully migrated until beast-base tree priors and clock models accept spec types.
+
+**Blocked by beast-base `Input<RealParameter>` in tree priors:**
+- `YuleToBEAST` — `YuleModel.birthDiffRate` is `Input<RealParameter>`
+- `CalibratedYuleToBeast` — `CalibratedYuleModel.birthRate` is `Input<RealParameter>`
+- `BirthDeathSampleTreeDTToBEAST` — `BirthDeathGernhard08Model` uses old types
+
+**Blocked by beast-base clock model old types:**
+- `UCLNRelaxedClockToBEAST` — `UCRelaxedClockModel` uses old types, creates `new RealParameter`
+
+**Blocked by Prior/Function infrastructure:**
+- `WeightedDirichletToBEAST` — needs `createPrior` (WeightedDirichlet is ParametricDistribution, not Distribution)
+- `RandomBooleanArrayToBEAST` — complex Poisson→Sum→Prior chain
+- `IIDToBEAST` — expects `Prior` from sub-generators, uses `Parameter.getDimension()`
+
+**Already fine (no old types used directly):**
+- `PopFuncCoalescentToBEAST` — passes through `context.getBEASTObject()`
+- `BernoulliMultiToBEAST` — passes through `context.getBEASTObject()`
 
 ## TODO: Infrastructure
 

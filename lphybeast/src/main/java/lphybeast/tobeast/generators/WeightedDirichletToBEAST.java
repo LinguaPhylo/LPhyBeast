@@ -17,7 +17,7 @@ public class WeightedDirichletToBEAST implements GeneratorToBEAST<WeightedDirich
         beastlabs.math.distributions.WeightedDirichlet beastDirichlet =
                 new beastlabs.math.distributions.WeightedDirichlet();
         beastDirichlet.setInputValue("alpha", context.getAsRealParameter(concentration));
-        beastDirichlet.setInputValue("weights", context.getAsIntegerParameter(generator.getWeights()));
+        beastDirichlet.setInputValue("weights", context.getAsRealParameter(generator.getWeights()));
         beastDirichlet.initAndValidate();
 
         return BEASTContext.createPrior(beastDirichlet, (Function) value);
@@ -32,11 +32,4 @@ public class WeightedDirichletToBEAST implements GeneratorToBEAST<WeightedDirich
     public Class<Prior> getBEASTClass() {
         return Prior.class;
     }
-
-//    private boolean allOne(Value<Number[]> concentration) {
-//        Number[] conc = concentration.value();
-//        for (Number num : conc)
-//            if (num.doubleValue() != 1.0) return false;
-//        return true;
-//    }
 }
