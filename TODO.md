@@ -61,13 +61,13 @@ Plan file: `~/.claude/plans/breezy-scribbling-sutherland.md`
 | `Poisson` | `IntScalarParam<NonNegativeInt>` | ✅ |
 | `RandomBooleanArray` | `BoolVectorParam` | ✅ |
 
-Then update generic fallbacks:
-- `DoubleArrayValueToBEAST` → `RealVectorParam<Real>`
-- `DoubleValueToBEAST` → `RealScalarParam<Real>`
-- `IntegerArrayValueToBEAST` → `IntVectorParam<Int>`
-- `IntegerValueToBEAST` → `IntScalarParam<Int>`
-- `BooleanValueToBEAST` → `BoolScalarParam`
-- `BooleanArrayValueToBEAST` → `BoolVectorParam`
+Generic fallback updates (25 Mar):
+- ✅ `DoubleValueToBEAST` → `RealScalarParam` (with domain inference from bounds)
+- ✅ `IntegerValueToBEAST` → `IntScalarParam` (with domain inference from bounds)
+- ✅ `BooleanValueToBEAST` → `BoolScalarParam`
+- ✅ `BooleanArrayValueToBEAST` → `BoolVectorParam`
+- TODO `DoubleArrayValueToBEAST` → `RealVectorParam<Real>` (needs `createParameterWithBound` refactor)
+- TODO `IntegerArrayValueToBEAST` → `IntVectorParam<Int>` (needs `createParameterWithBound` refactor)
 
 ## DONE: Distribution mappings (25 Mar)
 

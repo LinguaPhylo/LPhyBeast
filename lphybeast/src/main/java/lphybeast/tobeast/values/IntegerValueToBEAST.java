@@ -1,35 +1,36 @@
 package lphybeast.tobeast.values;
 
-import beast.base.inference.parameter.IntegerParameter;
+import beast.base.spec.domain.Int;
+import beast.base.spec.domain.NonNegativeInt;
+import beast.base.spec.domain.PositiveInt;
+import beast.base.spec.inference.parameter.IntScalarParam;
 import lphy.core.model.GenerativeDistribution1D;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
-import java.util.Collections;
-
-public class IntegerValueToBEAST implements ValueToBEAST<Integer, IntegerParameter> {
+public class IntegerValueToBEAST implements ValueToBEAST<Integer, IntScalarParam> {
 
     @Override
-    public IntegerParameter valueToBEAST(Value<Integer> value, BEASTContext context) {
+    public IntScalarParam valueToBEAST(Value<Integer> value, BEASTContext context) {
 
-        IntegerParameter parameter = new IntegerParameter();
-        parameter.setInputValue("value", Collections.singletonList(value.value()));
-        parameter.setInputValue("dimension", 1);
+        Int domain = Int.INSTANCE;
 
-        // check domain
         if (value.getGenerator() instanceof GenerativeDistribution1D) {
-            GenerativeDistribution1D<Integer> gd = (GenerativeDistribution1D<Integer>)value.getGenerator();
-
+            GenerativeDistribution1D<Integer> gd = (GenerativeDistribution1D<Integer>) value.getGenerator();
             Integer[] bounds = gd.getDomainBounds();
+            int lower = bounds[0];
 
-            if (bounds[0] > Integer.MIN_VALUE) parameter.setInputValue("lower", bounds[0]);
-            if (bounds[1] < Integer.MAX_VALUE) parameter.setInputValue("upper", bounds[1]);
+            if (lower >= 1) {
+                domain = PositiveInt.INSTANCE;
+            } else if (lower >= 0) {
+                domain = NonNegativeInt.INSTANCE;
+            }
         }
 
-        parameter.initAndValidate();
-        ValueToParameter.setID(parameter, value);
-        return parameter;
+        IntScalarParam param = new IntScalarParam<>(value.value(), domain);
+        param.setID(value.getCanonicalId());
+        return param;
     }
 
     @Override
@@ -38,8 +39,8 @@ public class IntegerValueToBEAST implements ValueToBEAST<Integer, IntegerParamet
     }
 
     @Override
-    public Class<IntegerParameter> getBEASTClass() {
-        return IntegerParameter.class;
+    public Class<IntScalarParam> getBEASTClass() {
+        return IntScalarParam.class;
     }
 
 }

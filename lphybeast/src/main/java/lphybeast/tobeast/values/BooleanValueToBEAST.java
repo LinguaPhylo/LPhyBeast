@@ -1,21 +1,17 @@
 package lphybeast.tobeast.values;
 
-import beast.base.inference.parameter.BooleanParameter;
+import beast.base.spec.inference.parameter.BoolScalarParam;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
-public class BooleanValueToBEAST implements ValueToBEAST<Boolean, BooleanParameter> {
+public class BooleanValueToBEAST implements ValueToBEAST<Boolean, BoolScalarParam> {
 
     @Override
-    public BooleanParameter valueToBEAST(Value<Boolean> value, BEASTContext context) {
+    public BoolScalarParam valueToBEAST(Value<Boolean> value, BEASTContext context) {
 
-        BooleanParameter parameter = new BooleanParameter();
-        parameter.setInputValue("value", value.value());
-        parameter.setInputValue("dimension", 1);
-
-        parameter.initAndValidate();
-        ValueToParameter.setID(parameter, value);
+        BoolScalarParam parameter = new BoolScalarParam(value.value());
+        parameter.setID(value.getCanonicalId());
         return parameter;
     }
 
@@ -25,7 +21,7 @@ public class BooleanValueToBEAST implements ValueToBEAST<Boolean, BooleanParamet
     }
 
     @Override
-    public Class<BooleanParameter> getBEASTClass() {
-        return BooleanParameter.class;
+    public Class<BoolScalarParam> getBEASTClass() {
+        return BoolScalarParam.class;
     }
 }

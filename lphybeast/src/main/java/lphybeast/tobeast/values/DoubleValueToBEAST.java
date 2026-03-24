@@ -1,34 +1,40 @@
 package lphybeast.tobeast.values;
 
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.NonNegativeReal;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.domain.Real;
+import beast.base.spec.domain.UnitInterval;
+import beast.base.spec.inference.parameter.RealScalarParam;
 import lphy.core.model.GenerativeDistribution1D;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
-import java.util.Collections;
-
-public class DoubleValueToBEAST implements ValueToBEAST<Double, RealParameter> {
+public class DoubleValueToBEAST implements ValueToBEAST<Double, RealScalarParam> {
 
     @Override
-    public RealParameter valueToBEAST(Value<Double> value, BEASTContext context) {
+    public RealScalarParam valueToBEAST(Value<Double> value, BEASTContext context) {
 
-        RealParameter parameter = new RealParameter();
-        parameter.setInputValue("value", Collections.singletonList(value.value()));
-        parameter.setInputValue("dimension", 1);
+        Real domain = Real.INSTANCE;
 
-        // check domain
         if (value.getGenerator() instanceof GenerativeDistribution1D) {
-            GenerativeDistribution1D<Double> gd = (GenerativeDistribution1D<Double>)value.getGenerator();
-
+            GenerativeDistribution1D<Double> gd = (GenerativeDistribution1D<Double>) value.getGenerator();
             Double[] bounds = gd.getDomainBounds();
+            double lower = bounds[0];
+            double upper = bounds[1];
 
-            if (bounds[0] != Double.NEGATIVE_INFINITY) parameter.setInputValue("lower", bounds[0]);
-            if (bounds[1] != Double.POSITIVE_INFINITY) parameter.setInputValue("upper", bounds[1]);
+            if (lower == 0.0 && upper == 1.0) {
+                domain = UnitInterval.INSTANCE;
+            } else if (lower == 0.0) {
+                domain = NonNegativeReal.INSTANCE;
+            } else if (lower > 0.0 || (lower == 0.0 && !Double.isInfinite(lower))) {
+                domain = PositiveReal.INSTANCE;
+            }
         }
-        parameter.initAndValidate();
-        ValueToParameter.setID(parameter, value);
-        return parameter;
+
+        RealScalarParam param = new RealScalarParam<>(value.value(), domain);
+        param.setID(value.getCanonicalId());
+        return param;
     }
 
     @Override
@@ -37,8 +43,8 @@ public class DoubleValueToBEAST implements ValueToBEAST<Double, RealParameter> {
     }
 
     @Override
-    public Class<RealParameter> getBEASTClass() {
-        return RealParameter.class;
+    public Class<RealScalarParam> getBEASTClass() {
+        return RealScalarParam.class;
     }
 
 }

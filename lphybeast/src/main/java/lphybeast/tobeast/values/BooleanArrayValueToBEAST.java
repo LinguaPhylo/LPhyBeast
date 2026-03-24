@@ -1,25 +1,21 @@
 package lphybeast.tobeast.values;
 
-import beast.base.inference.parameter.BooleanParameter;
+import beast.base.spec.inference.parameter.BoolVectorParam;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class BooleanArrayValueToBEAST implements ValueToBEAST<Boolean[], BooleanParameter> {
+public class BooleanArrayValueToBEAST implements ValueToBEAST<Boolean[], BoolVectorParam> {
 
     @Override
-    public BooleanParameter valueToBEAST(Value<Boolean[]> value, BEASTContext context) {
+    public BoolVectorParam valueToBEAST(Value<Boolean[]> value, BEASTContext context) {
 
-        BooleanParameter parameter = new BooleanParameter();
-        List<Boolean> values = Arrays.asList(value.value());
-        parameter.setInputValue("value", values);
-        parameter.setInputValue("dimension", values.size());
-
-        parameter.initAndValidate();
-        ValueToParameter.setID(parameter, value);
+        Boolean[] vals = value.value();
+        boolean[] bvals = new boolean[vals.length];
+        for (int i = 0; i < vals.length; i++)
+            bvals[i] = vals[i];
+        BoolVectorParam parameter = new BoolVectorParam(bvals);
+        parameter.setID(value.getCanonicalId());
         return parameter;
     }
 
@@ -29,7 +25,7 @@ public class BooleanArrayValueToBEAST implements ValueToBEAST<Boolean[], Boolean
     }
 
     @Override
-    public Class<BooleanParameter> getBEASTClass() {
-        return BooleanParameter.class;
+    public Class<BoolVectorParam> getBEASTClass() {
+        return BoolVectorParam.class;
     }
 }
