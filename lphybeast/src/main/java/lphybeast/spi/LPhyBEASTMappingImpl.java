@@ -60,7 +60,15 @@ public class LPhyBEASTMappingImpl implements LPhyBEASTMapping {
         return Arrays.asList( DirichletValueToBEAST.class,     // SimplexParam (must precede generic Double[])
                 ExpMarkovChainValueToBEAST.class, // RealVectorParam<PositiveReal> (must precede generic Double[])
                 RandomCompositionValueToBEAST.class, // IntSimplexParam<PositiveInt> (must precede generic Integer[])
+                RandomBooleanArrayValueToBEAST.class, // BoolVectorParam (must precede generic Boolean[])
                 LogNormalValueToBEAST.class,     // RealScalarParam<PositiveReal> (must precede generic Double)
+                GammaValueToBEAST.class,         // RealScalarParam<PositiveReal>
+                InverseGammaValueToBEAST.class,  // RealScalarParam<PositiveReal>
+                ExpValueToBEAST.class,           // RealScalarParam<NonNegativeReal>
+                BetaValueToBEAST.class,          // RealScalarParam<UnitInterval>
+                NormalValueToBEAST.class,        // RealScalarParam<Real>
+                UniformValueToBEAST.class,       // RealScalarParam<Real>
+                PoissonValueToBEAST.class,       // IntScalarParam<NonNegativeInt>
                 DoubleArrayValueToBEAST.class,  // KeyRealParameter
                 IntegerArrayValueToBEAST.class, // KeyIntegerParameter
                 NumberArrayValueToBEAST.class,

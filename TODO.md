@@ -48,20 +48,18 @@ Plan file: `~/.claude/plans/breezy-scribbling-sutherland.md`
 
 ---
 
-## TODO: Value converters needed
+## DONE: Value converters (25 Mar)
 
-Each LPhy distribution needs a `ValueToBEAST` registered before the generic fallback.
-
-| Generator | beast3 type | Notes |
-|-----------|------------|-------|
-| `Beta` | `RealScalarParam<UnitInterval>` | |
-| `Normal` | `RealScalarParam<Real>` | |
-| `Gamma` | `RealScalarParam<PositiveReal>` | |
-| `Exp` | `RealScalarParam<NonNegativeReal>` | |
-| `InverseGamma` | `RealScalarParam<PositiveReal>` | |
-| `Uniform` | `RealScalarParam<Real>` | |
-| `Poisson` | `IntScalarParam<NonNegativeInt>` | |
-| `RandomBooleanArray` | `BoolVectorParam` | |
+| Generator | beast3 type | Status |
+|-----------|------------|--------|
+| `Beta` | `RealScalarParam<UnitInterval>` | ✅ |
+| `Normal` | `RealScalarParam<Real>` | ✅ |
+| `Gamma` | `RealScalarParam<PositiveReal>` | ✅ |
+| `Exp` | `RealScalarParam<NonNegativeReal>` | ✅ |
+| `InverseGamma` | `RealScalarParam<PositiveReal>` | ✅ |
+| `Uniform` | `RealScalarParam<Real>` | ✅ |
+| `Poisson` | `IntScalarParam<NonNegativeInt>` | ✅ |
+| `RandomBooleanArray` | `BoolVectorParam` | ✅ |
 
 Then update generic fallbacks:
 - `DoubleArrayValueToBEAST` → `RealVectorParam<Real>`
