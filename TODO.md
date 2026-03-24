@@ -85,18 +85,18 @@ Each returns the spec distribution directly (pattern: `DirichletToBEAST`).
 
 Then remove `BEASTContext.createPrior()` (after Poisson done).
 
-## TODO: Substitution models
+## DONE: Substitution models (25 Mar)
 
-| Class | New class |
-|-------|-----------|
-| `JukesCantorToBEAST` | spec `JukesCantor` or `substmodels.nucleotide.JC` |
-| `K80ToBEAST` | spec or `substmodels.nucleotide.K80` |
-| `TN93ToBEAST` | spec `TN93` or `substmodels.nucleotide.TrN` |
-| `F81ToBEAST` | spec or `substmodels.nucleotide.F81` |
-| `WAGToBEAST` | spec `WAG` |
-| `BinaryCovarionToBEAST` | spec `BinaryCovarion` |
+| Class | New class | Status |
+|-------|-----------|--------|
+| `JukesCantorToBEAST` | spec `JukesCantor` | ✅ |
+| `K80ToBEAST` | spec `HKY` + equal `SimplexParam` | ✅ |
+| `TN93ToBEAST` | spec `TN93` + spec `Frequencies` | ✅ |
+| `F81ToBEAST` | spec `HKY` (kappa=1) + spec `Frequencies` | ✅ |
+| `WAGToBEAST` | spec `WAG` + optional spec `Frequencies` | ✅ |
+| `BinaryCovarionToBEAST` | spec `BinaryCovarion` | ✅ |
 
-Then remove `BEASTContext.createBEASTFrequencies()`.
+Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated).
 
 ## TODO: Other generators
 

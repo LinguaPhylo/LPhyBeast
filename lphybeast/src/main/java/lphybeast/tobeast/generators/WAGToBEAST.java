@@ -1,28 +1,30 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.inference.parameter.RealParameter;
-import lphy.base.evolution.substitutionmodel.WAG;
+import beast.base.spec.evolution.substitutionmodel.Frequencies;
+import beast.base.spec.evolution.substitutionmodel.WAG;
+import beast.base.spec.type.Simplex;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
-public class WAGToBEAST implements GeneratorToBEAST<WAG, beast.base.evolution.substitutionmodel.WAG> {
+public class WAGToBEAST implements GeneratorToBEAST<lphy.base.evolution.substitutionmodel.WAG, WAG> {
     @Override
-    public beast.base.evolution.substitutionmodel.WAG generatorToBEAST(WAG wag, BEASTInterface value, BEASTContext context) {
+    public WAG generatorToBEAST(lphy.base.evolution.substitutionmodel.WAG wag, BEASTInterface value, BEASTContext context) {
 
-        beast.base.evolution.substitutionmodel.WAG beastWAG = new beast.base.evolution.substitutionmodel.WAG();
+        WAG beastWAG = new WAG();
         if (wag.getFreq() != null) {
-            beastWAG.setInputValue("frequencies", BEASTContext.createBEASTFrequencies((RealParameter) context.getBEASTObject(wag.getFreq()), "A C D E F G H I K L M N P Q R S T V W Y"));
+            beastWAG.setInputValue("frequencies",
+                    new Frequencies((Simplex) context.getBEASTObject(wag.getFreq())));
         }
         beastWAG.initAndValidate();
         return beastWAG;
     }
 
     @Override
-    public Class<WAG> getGeneratorClass() { return WAG.class; }
+    public Class<lphy.base.evolution.substitutionmodel.WAG> getGeneratorClass() { return lphy.base.evolution.substitutionmodel.WAG.class; }
 
     @Override
-    public Class<beast.base.evolution.substitutionmodel.WAG> getBEASTClass() {
-        return beast.base.evolution.substitutionmodel.WAG.class;
+    public Class<WAG> getBEASTClass() {
+        return WAG.class;
     }
 }

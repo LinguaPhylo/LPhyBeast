@@ -1,18 +1,25 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.evolution.substitutionmodel.Frequencies;
+import beast.base.spec.evolution.substitutionmodel.HKY;
+import beast.base.spec.inference.parameter.RealScalarParam;
+import beast.base.spec.type.Simplex;
 import lphy.base.evolution.substitutionmodel.F81;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
-public class F81ToBEAST implements GeneratorToBEAST<F81, beast.base.evolution.substitutionmodel.HKY> {
+public class F81ToBEAST implements GeneratorToBEAST<F81, HKY> {
     @Override
-    public beast.base.evolution.substitutionmodel.HKY generatorToBEAST(F81 f81, BEASTInterface value, BEASTContext context) {
+    public HKY generatorToBEAST(F81 f81, BEASTInterface value, BEASTContext context) {
 
-        beast.base.evolution.substitutionmodel.HKY beastF81 = new beast.base.evolution.substitutionmodel.HKY();
-        beastF81.setInputValue("kappa", new RealParameter("1.0"));
-        beastF81.setInputValue("frequencies", BEASTContext.createBEASTFrequencies((RealParameter) context.getBEASTObject(f81.getFreq()),"A C G T"));
+        RealScalarParam<PositiveReal> kappa = new RealScalarParam<>(1.0, PositiveReal.INSTANCE);
+
+        HKY beastF81 = new HKY();
+        beastF81.setInputValue("kappa", kappa);
+        beastF81.setInputValue("frequencies",
+                new Frequencies((Simplex) context.getBEASTObject(f81.getFreq())));
         beastF81.initAndValidate();
         return beastF81;
     }
@@ -21,7 +28,7 @@ public class F81ToBEAST implements GeneratorToBEAST<F81, beast.base.evolution.su
     public Class<F81> getGeneratorClass() { return F81.class; }
 
     @Override
-    public Class<beast.base.evolution.substitutionmodel.HKY> getBEASTClass() {
-        return beast.base.evolution.substitutionmodel.HKY.class;
+    public Class<HKY> getBEASTClass() {
+        return HKY.class;
     }
 }
