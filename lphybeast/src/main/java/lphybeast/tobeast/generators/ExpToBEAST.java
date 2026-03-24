@@ -1,20 +1,27 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.inference.distribution.Exponential;
-import beast.base.inference.distribution.Prior;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.Distribution;
+import beast.base.spec.domain.NonNegativeReal;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.type.RealScalar;
 import lphy.base.distribution.Exp;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
-public class ExpToBEAST implements GeneratorToBEAST<Exp, Prior> {
+public class ExpToBEAST implements GeneratorToBEAST<Exp, Distribution> {
     @Override
-    public Prior generatorToBEAST(Exp generator, BEASTInterface value, BEASTContext context) {
-        Exponential exponential = new Exponential();
-        exponential.setInputValue("mean", context.getBEASTObject(generator.getParams().get("mean")));
-        exponential.initAndValidate();
-        return BEASTContext.createPrior(exponential, (RealParameter) value);
+    public Distribution generatorToBEAST(Exp generator, BEASTInterface value, BEASTContext context) {
+
+        RealScalar<PositiveReal> mean = BEASTContext.toRealScalar(
+                context.getAsRealParameter(generator.getParams().get("mean")), PositiveReal.INSTANCE);
+
+        beast.base.spec.inference.distribution.Exponential dist =
+                new beast.base.spec.inference.distribution.Exponential(
+                        (RealScalar<NonNegativeReal>) value, mean);
+
+        dist.setID(((BEASTInterface) value).getID() + ".prior");
+        return dist;
     }
 
     @Override
@@ -23,7 +30,7 @@ public class ExpToBEAST implements GeneratorToBEAST<Exp, Prior> {
     }
 
     @Override
-    public Class<Prior> getBEASTClass() {
-        return Prior.class;
+    public Class<Distribution> getBEASTClass() {
+        return Distribution.class;
     }
 }

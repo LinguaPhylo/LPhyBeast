@@ -1,21 +1,29 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.inference.distribution.Prior;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.Distribution;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.domain.Real;
+import beast.base.spec.type.RealScalar;
 import lphy.base.distribution.Normal;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
-public class NormalToBEAST implements GeneratorToBEAST<Normal, Prior> {
+public class NormalToBEAST implements GeneratorToBEAST<Normal, Distribution> {
     @Override
-    public Prior generatorToBEAST(Normal generator, BEASTInterface value, BEASTContext context) {
-        beast.base.inference.distribution.Normal normal = new beast.base.inference.distribution.Normal();
-        normal.setInputValue("mean", context.getBEASTObject(generator.getMean()));
-        normal.setInputValue("sigma", context.getBEASTObject(generator.getSd()));
-        normal.initAndValidate();
+    public Distribution generatorToBEAST(Normal generator, BEASTInterface value, BEASTContext context) {
 
-        return BEASTContext.createPrior(normal, (RealParameter)value);
+        RealScalar<Real> mean = BEASTContext.toRealScalar(
+                context.getAsRealParameter(generator.getMean()), Real.INSTANCE);
+        RealScalar<PositiveReal> sigma = BEASTContext.toRealScalar(
+                context.getAsRealParameter(generator.getSd()), PositiveReal.INSTANCE);
+
+        beast.base.spec.inference.distribution.Normal dist =
+                new beast.base.spec.inference.distribution.Normal(
+                        (RealScalar<Real>) value, mean, sigma);
+
+        dist.setID(((BEASTInterface) value).getID() + ".prior");
+        return dist;
     }
 
     @Override
@@ -24,7 +32,7 @@ public class NormalToBEAST implements GeneratorToBEAST<Normal, Prior> {
     }
 
     @Override
-    public Class<Prior> getBEASTClass() {
-        return Prior.class;
+    public Class<Distribution> getBEASTClass() {
+        return Distribution.class;
     }
 }

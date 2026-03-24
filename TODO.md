@@ -69,21 +69,21 @@ Then update generic fallbacks:
 - `BooleanValueToBEAST` → `BoolScalarParam`
 - `BooleanArrayValueToBEAST` → `BoolVectorParam`
 
-## TODO: Distribution mappings (eliminate Prior + Function)
+## DONE: Distribution mappings (25 Mar)
 
 Each returns the spec distribution directly (pattern: `DirichletToBEAST`).
 
-| Class | Old type | New spec type |
-|-------|----------|--------------|
-| `BetaToBEAST` | `Prior` | `beast...spec...distribution.Beta` |
-| `NormalToBEAST` | `Prior` | `beast...spec...distribution.Normal` |
-| `GammaToBEAST` | `Prior` | `beast...spec...distribution.Gamma` |
-| `ExpToBEAST` | `Prior` | `beast...spec...distribution.Exponential` |
-| `UniformToBEAST` | `Prior` | `beast...spec...distribution.Uniform` |
-| `InverseGammaToBEAST` | `Prior` | `beast...spec...distribution.InverseGamma` |
-| `PoissonToBEAST` | `Prior` | `beast...spec...distribution.Poisson` |
+| Class | Status | Notes |
+|-------|--------|-------|
+| `BetaToBEAST` | ✅ | `spec.distribution.Beta` |
+| `NormalToBEAST` | ✅ | `spec.distribution.Normal` |
+| `GammaToBEAST` | ✅ | `spec.distribution.Gamma` |
+| `ExpToBEAST` | ✅ | `spec.distribution.Exponential` |
+| `UniformToBEAST` | ✅ | `spec.distribution.Uniform` |
+| `InverseGammaToBEAST` | ✅ | `spec.distribution.InverseGamma` |
+| `PoissonToBEAST` | TODO | Needs offset handling (spec Poisson has no offset) |
 
-Then remove `BEASTContext.createPrior()`.
+Then remove `BEASTContext.createPrior()` (after Poisson done).
 
 ## TODO: Substitution models
 

@@ -1,20 +1,29 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.inference.distribution.Prior;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.Distribution;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.domain.UnitInterval;
+import beast.base.spec.type.RealScalar;
 import lphy.base.distribution.InverseGamma;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
-public class InverseGammaToBEAST implements GeneratorToBEAST<InverseGamma, Prior> {
+public class InverseGammaToBEAST implements GeneratorToBEAST<InverseGamma, Distribution> {
     @Override
-    public Prior generatorToBEAST(InverseGamma generator, BEASTInterface value, BEASTContext context) {
-        beast.base.inference.distribution.InverseGamma inverseGamma = new beast.base.inference.distribution.InverseGamma();
-        inverseGamma.setInputValue("alpha", context.getBEASTObject(generator.getAlpha()));
-        inverseGamma.setInputValue("beta", context.getBEASTObject(generator.getBeta()));
-        inverseGamma.initAndValidate();
-        return BEASTContext.createPrior(inverseGamma, (RealParameter) value);
+    public Distribution generatorToBEAST(InverseGamma generator, BEASTInterface value, BEASTContext context) {
+
+        RealScalar<PositiveReal> alpha = BEASTContext.toRealScalar(
+                context.getAsRealParameter(generator.getAlpha()), PositiveReal.INSTANCE);
+        RealScalar<PositiveReal> beta = BEASTContext.toRealScalar(
+                context.getAsRealParameter(generator.getBeta()), PositiveReal.INSTANCE);
+
+        beast.base.spec.inference.distribution.InverseGamma dist =
+                new beast.base.spec.inference.distribution.InverseGamma(
+                        (RealScalar<UnitInterval>) value, alpha, beta);
+
+        dist.setID(((BEASTInterface) value).getID() + ".prior");
+        return dist;
     }
 
     @Override
@@ -23,7 +32,7 @@ public class InverseGammaToBEAST implements GeneratorToBEAST<InverseGamma, Prior
     }
 
     @Override
-    public Class<Prior> getBEASTClass() {
-        return Prior.class;
+    public Class<Distribution> getBEASTClass() {
+        return Distribution.class;
     }
 }
