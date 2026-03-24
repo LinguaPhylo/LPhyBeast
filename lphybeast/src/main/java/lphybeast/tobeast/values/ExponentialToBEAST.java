@@ -1,7 +1,6 @@
 package lphybeast.tobeast.values;
 
-import beast.base.evolution.tree.coalescent.ExponentialGrowth;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.evolution.tree.coalescent.ExponentialGrowth;
 import lphy.base.evolution.coalescent.populationmodel.ExponentialPopulation;
 import lphy.base.evolution.coalescent.populationmodel.ExponentialPopulationFunction;
 import lphy.core.model.Value;
@@ -13,17 +12,11 @@ public class ExponentialToBEAST implements ValueToBEAST<ExponentialPopulation, E
 
     public ExponentialGrowth valueToBEAST(Value<ExponentialPopulation> lphyPopFuncVal, BEASTContext context) {
 
-        ExponentialGrowth beastPopFunc;
-
         ExponentialPopulationFunction gen = (ExponentialPopulationFunction) lphyPopFuncVal.getGenerator();
 
-        RealParameter GrowthRateParam = context.getAsRealParameter(gen.getGrowthRate());
-        RealParameter N0Param = context.getAsRealParameter(gen.getN0());
-
-        beastPopFunc = new ExponentialGrowth();
-
-        beastPopFunc.setInputValue("growthRate", GrowthRateParam);
-        beastPopFunc.setInputValue("popSize", N0Param);
+        ExponentialGrowth beastPopFunc = new ExponentialGrowth();
+        beastPopFunc.setInputValue("growthRate", context.getBEASTObject(gen.getGrowthRate()));
+        beastPopFunc.setInputValue("popSize", context.getBEASTObject(gen.getN0()));
         beastPopFunc.initAndValidate();
 
         ValueToParameter.setID(beastPopFunc, lphyPopFuncVal);
