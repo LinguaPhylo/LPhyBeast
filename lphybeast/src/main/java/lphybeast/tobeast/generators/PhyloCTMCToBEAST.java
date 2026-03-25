@@ -3,7 +3,6 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.core.Function;
 import beast.base.evolution.alignment.TaxonSet;
-import beast.base.evolution.branchratemodel.BranchRateModel;
 import beast.base.spec.evolution.branchratemodel.StrictClockModel;
 import beast.base.spec.evolution.branchratemodel.UCRelaxedClockModel;
 import beast.base.evolution.datatype.DataType;
@@ -270,9 +269,9 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, BEASTInterf
                     //addORCOperators(tree, relaxedClockModel, context);
                 }
 
-            } else if (beastBranchModel instanceof BranchRateModel branchRateModel) {
+            } else if (beastBranchModel instanceof beast.base.spec.evolution.branchratemodel.Base specBranchRateModel) {
                 // this replaces generator instanceof LocalBranchRates, generator instanceof LocalClock
-                treeLikelihood.setInputValue("branchRateModel", branchRateModel);
+                treeLikelihood.setInputValue("branchRateModel", specBranchRateModel);
             } else {
                 throw new UnsupportedOperationException("Only localBranchRates and lognormally distributed branchRates currently supported for LPhyBEAST !");
             }

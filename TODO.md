@@ -124,25 +124,29 @@ Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated)
 - ✅ `BirthDeathSampleTreeDTToBEAST` — removed old Prior fallback
 - ✅ `PhyloCTMCToBEAST` — removed old Prior fallback for IID(LogNormal)
 
-**Still needs work:**
-- TODO `IIDToBEAST` — uses `Parameter.getDimension()`
+**Already migrated:**
+- ✅ `IIDToBEAST` — uses spec `IID`, `ScalarDistribution`, `Vector` (no old Parameter usage)
 
 ## TODO: Infrastructure
 
-- `BranchRateModel.clock.rate` expects `Function` — needs beast3 fix
-  (currently bridged in `PhyloCTMCToBEAST.getClockRateParam`)
+- ✅ `PhyloCTMCToBEAST` migrated to spec `branchratemodel.Base` (old `BranchRateModel` import removed)
 - Remove `BEASTContext.getAsRealParameter()` once all callers migrated
 - Remove `BEASTContext.createRealParameter()` factory methods
-- Remove `BEASTContext.createParameterWithBound()` — no callers remain
-- Remaining old-type files: BEASTContext, DefaultOperatorStrategy, PhyloCTMCToBEAST,
-  LeafCalibrationsToBEAST, MapValueToBEAST, MapStringDoubleArrayValueToBEAST,
-  ContinuousCharacterDataToBEAST, LogisticToBEAST, ValueHandler
+- ✅ Removed `BEASTContext.createParameterWithBound()`
+- ✅ `LeafCalibrationsToBEAST` migrated to spec `MRCAPrior` + spec distributions + `OffsetReal`
+- ✅ `ValueHandler` — no old types (uses core `Function`/`StateNode` interfaces)
+- `MapStringDoubleArrayValueToBEAST`, `ContinuousCharacterDataToBEAST` — blocked: uses `RealParameter.minordimension` (no spec equivalent)
+- ✅ `MapValueToBEAST` migrated to `RealVectorParam<Real>` with keys
+- Remaining old-type files: BEASTContext, DefaultOperatorStrategy, PhyloCTMCToBEAST
+
+## DONE: Extension modules
+
+- ✅ `lphybeast-sa` — all 4 generators use spec types (`RealScalarParam<PositiveReal>`, `RealScalarParam<UnitInterval>`)
 
 ## TODO: Extension modules
 
 | Module | Scope |
 |--------|-------|
-| `lphybeast-sa` | 4 generators, SA operator strategy |
 | `lphybeast-bdtree` | 1 generator, complex prior handling |
 | `lphybeast-feast` | 3 generators, `Function` dependency |
 | `lphybeast-mm` | 1 generator (LewisMK) |

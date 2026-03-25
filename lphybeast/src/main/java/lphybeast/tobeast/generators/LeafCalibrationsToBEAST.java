@@ -4,12 +4,15 @@ import beast.base.core.BEASTInterface;
 import beast.base.evolution.alignment.Taxon;
 import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.operator.TipDatesRandomWalker;
-import beast.base.evolution.tree.MRCAPrior;
 import beast.base.evolution.tree.TraitSet;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.Operator;
-import beast.base.inference.distribution.*;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.StateNode;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.domain.Real;
+import beast.base.spec.evolution.tree.MRCAPrior;
+import beast.base.spec.inference.distribution.*;
+import beast.base.spec.inference.parameter.RealScalarParam;
 import lphy.base.evolution.tree.LeafCalibrations;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
@@ -25,11 +28,11 @@ public class LeafCalibrationsToBEAST implements GeneratorToBEAST<LeafCalibration
 
         // Remove the tipDates RealParameter from the context, and suppress its auto-generated operator.
         context.getElements().keySet().stream()
-                .filter(b -> b instanceof RealParameter && "tipDates".equals(b.getID()))
+                .filter(b -> b instanceof StateNode && "tipDates".equals(b.getID()))
                 .findFirst()
                 .ifPresent(tipDatesParam -> {
                     // Suppress any auto-generated operator for this state node
-                    context.addSkipOperator((RealParameter) tipDatesParam);
+                    context.addSkipOperator((StateNode) tipDatesParam);
                     // Remove it from the context entirely
                     context.removeBEASTObject(tipDatesParam);
                 });
@@ -134,70 +137,79 @@ public class LeafCalibrationsToBEAST implements GeneratorToBEAST<LeafCalibration
 
         if (distributionName.equals("normal")) {
             Normal normalDist = new Normal();
-            normalDist.setInputValue("mean", new RealParameter(Double.toString(p[0])));
-            normalDist.setInputValue("sigma", new RealParameter(Double.toString(p[1])));
+            normalDist.setInputValue("mean", new RealScalarParam<>(p[0], Real.INSTANCE));
+            normalDist.setInputValue("sigma", new RealScalarParam<>(p[1], PositiveReal.INSTANCE));
             normalDist.initAndValidate();
             prior.setInputValue("distr", normalDist);
 
         } else if (distributionName.equals("uniform")) {
             Uniform uniformDist = new Uniform();
-            uniformDist.setInputValue("lower", p[0]);
-            uniformDist.setInputValue("upper", p[1]);
+            uniformDist.setInputValue("lower", new RealScalarParam<>(p[0], Real.INSTANCE));
+            uniformDist.setInputValue("upper", new RealScalarParam<>(p[1], Real.INSTANCE));
             uniformDist.initAndValidate();
             prior.setInputValue("distr", uniformDist);
 
         } else if (distributionName.equals("exponential")) {
             Exponential expDist = new Exponential();
-            expDist.setInputValue("mean", new RealParameter(Double.toString(p[0])));
+            expDist.setInputValue("mean", new RealScalarParam<>(p[0], PositiveReal.INSTANCE));
             expDist.initAndValidate();
             prior.setInputValue("distr", expDist);
 
         } else if (distributionName.equals("offsetexponential")) {
             Exponential expDist = new Exponential();
-            expDist.setInputValue("mean", new RealParameter(Double.toString(p[1])));
-            expDist.setInputValue("offset", p[0]);
+            expDist.setInputValue("mean", new RealScalarParam<>(p[1], PositiveReal.INSTANCE));
             expDist.initAndValidate();
-            prior.setInputValue("distr", expDist);
+            OffsetReal offsetDist = new OffsetReal();
+            offsetDist.setInputValue("distribution", expDist);
+            offsetDist.setInputValue("offset", new RealScalarParam<>(p[0], Real.INSTANCE));
+            offsetDist.initAndValidate();
+            prior.setInputValue("distr", offsetDist);
 
         } else if (distributionName.equals("truncatednormal")) {
             Normal truncNormalDist = new Normal();
-            truncNormalDist.setInputValue("mean", new RealParameter(Double.toString(p[1])));
-            truncNormalDist.setInputValue("sigma", new RealParameter(Double.toString(p[2])));
-            truncNormalDist.setInputValue("offset", p[0]);
+            truncNormalDist.setInputValue("mean", new RealScalarParam<>(p[1], Real.INSTANCE));
+            truncNormalDist.setInputValue("sigma", new RealScalarParam<>(p[2], PositiveReal.INSTANCE));
             truncNormalDist.initAndValidate();
-            prior.setInputValue("distr", truncNormalDist);
+            OffsetReal offsetDist = new OffsetReal(truncNormalDist, p[0]);
+            prior.setInputValue("distr", offsetDist);
 
         } else if (distributionName.equals("lognormal")) {
-            LogNormalDistributionModel logNormalDist = new LogNormalDistributionModel();
-            logNormalDist.setInputValue("M", new RealParameter(Double.toString(p[0])));
-            logNormalDist.setInputValue("S", new RealParameter(Double.toString(p[1])));
+            LogNormal logNormalDist = new LogNormal();
+            logNormalDist.setInputValue("M", new RealScalarParam<>(p[0], Real.INSTANCE));
+            logNormalDist.setInputValue("S", new RealScalarParam<>(p[1], PositiveReal.INSTANCE));
             logNormalDist.setInputValue("meanInRealSpace", false);
             logNormalDist.initAndValidate();
             prior.setInputValue("distr", logNormalDist);
 
         } else if (distributionName.equals("offsetlognormal")) {
-            LogNormalDistributionModel offsetLogNormalDist = new LogNormalDistributionModel();
-            offsetLogNormalDist.setInputValue("M", new RealParameter(Double.toString(p[1])));
-            offsetLogNormalDist.setInputValue("S", new RealParameter(Double.toString(p[2])));
-            offsetLogNormalDist.setInputValue("offset", p[0]);
-            offsetLogNormalDist.setInputValue("meanInRealSpace", false);
-            offsetLogNormalDist.initAndValidate();
-            prior.setInputValue("distr", offsetLogNormalDist);
+            LogNormal logNormalDist = new LogNormal();
+            logNormalDist.setInputValue("M", new RealScalarParam<>(p[1], Real.INSTANCE));
+            logNormalDist.setInputValue("S", new RealScalarParam<>(p[2], PositiveReal.INSTANCE));
+            logNormalDist.setInputValue("meanInRealSpace", false);
+            logNormalDist.initAndValidate();
+            OffsetReal offsetDist = new OffsetReal();
+            offsetDist.setInputValue("distribution", logNormalDist);
+            offsetDist.setInputValue("offset", new RealScalarParam<>(p[0], Real.INSTANCE));
+            offsetDist.initAndValidate();
+            prior.setInputValue("distr", offsetDist);
 
         } else if (distributionName.equals("gamma")) {
             Gamma gammaDist = new Gamma();
-            gammaDist.setInputValue("alpha", new RealParameter(Double.toString(p[0])));
-            gammaDist.setInputValue("beta", new RealParameter(Double.toString(p[1])));
+            gammaDist.setInputValue("alpha", new RealScalarParam<>(p[0], PositiveReal.INSTANCE));
+            gammaDist.setInputValue("beta", new RealScalarParam<>(p[1], PositiveReal.INSTANCE));
             gammaDist.initAndValidate();
             prior.setInputValue("distr", gammaDist);
 
         } else if (distributionName.equals("offsetgamma")) {
-            Gamma offsetGammaDist = new Gamma();
-            offsetGammaDist.setInputValue("alpha", new RealParameter(Double.toString(p[1])));
-            offsetGammaDist.setInputValue("beta", new RealParameter(Double.toString(p[2])));
-            offsetGammaDist.setInputValue("offset", p[0]);
-            offsetGammaDist.initAndValidate();
-            prior.setInputValue("distr", offsetGammaDist);
+            Gamma gammaDist = new Gamma();
+            gammaDist.setInputValue("alpha", new RealScalarParam<>(p[1], PositiveReal.INSTANCE));
+            gammaDist.setInputValue("beta", new RealScalarParam<>(p[2], PositiveReal.INSTANCE));
+            gammaDist.initAndValidate();
+            OffsetReal offsetDist = new OffsetReal();
+            offsetDist.setInputValue("distribution", gammaDist);
+            offsetDist.setInputValue("offset", new RealScalarParam<>(p[0], Real.INSTANCE));
+            offsetDist.initAndValidate();
+            prior.setInputValue("distr", offsetDist);
 
         } else {
             throw new IllegalArgumentException("Unknown distribution name: " + distributionName);

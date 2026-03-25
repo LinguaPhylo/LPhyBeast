@@ -1,27 +1,25 @@
 package lphybeast.tobeast.values;
 
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.Real;
+import beast.base.spec.inference.parameter.RealVectorParam;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
 import java.util.*;
 
-public class MapValueToBEAST implements ValueToBEAST<Map<String, Double>, RealParameter> {
+public class MapValueToBEAST implements ValueToBEAST<Map<String, Double>, RealVectorParam> {
 
     @Override
-    public RealParameter valueToBEAST(Value<Map<String, Double>> value, BEASTContext context) {
+    public RealVectorParam valueToBEAST(Value<Map<String, Double>> value, BEASTContext context) {
 
         Map<String, Double> map = value.value();
 
-        RealParameter parameter = new RealParameter();
-
-        SortedMap<String, Double> sortedMap = null;
+        SortedMap<String, Double> sortedMap;
         if (map instanceof SortedMap) {
             sortedMap = (SortedMap<String, Double>)map;
         } else {
-            sortedMap = new TreeMap<>();
-            sortedMap.putAll(map);
+            sortedMap = new TreeMap<>(map);
         }
 
         String[] keys = new String[sortedMap.size()];
@@ -38,7 +36,7 @@ public class MapValueToBEAST implements ValueToBEAST<Map<String, Double>, RealPa
             builder.append(keys[i]);
         }
 
-
+        RealVectorParam<Real> parameter = new RealVectorParam<>();
         parameter.setInputValue("value", values);
         parameter.setInputValue("keys", builder.toString());
         parameter.initAndValidate();
@@ -53,8 +51,8 @@ public class MapValueToBEAST implements ValueToBEAST<Map<String, Double>, RealPa
     }
 
     @Override
-    public Class<RealParameter> getBEASTClass() {
-        return RealParameter.class;
+    public Class<RealVectorParam> getBEASTClass() {
+        return RealVectorParam.class;
     }
 
 }
