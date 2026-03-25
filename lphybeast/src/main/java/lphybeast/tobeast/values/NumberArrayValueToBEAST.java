@@ -1,13 +1,14 @@
 package lphybeast.tobeast.values;
 
-import beast.base.inference.parameter.Parameter;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.Real;
+import beast.base.spec.inference.parameter.RealVectorParam;
 import lphy.base.distribution.WeightedDirichlet;
+import lphy.core.model.RandomVariable;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
-public class NumberArrayValueToBEAST implements ValueToBEAST<Number[], RealParameter> {
+public class NumberArrayValueToBEAST implements ValueToBEAST<Number[], RealVectorParam> {
 
     @Override
     public boolean match(Value value) {
@@ -17,20 +18,16 @@ public class NumberArrayValueToBEAST implements ValueToBEAST<Number[], RealParam
     }
 
     @Override
-    public RealParameter valueToBEAST(Value<Number[]> value, BEASTContext context) {
-
-//        KeyRealParameter parameter = new KeyRealParameter();
-//        List<Double> values = new ArrayList<>();
-//        for (int i = 0; i < value.value().length; i++) {
-//            values.add(value.value()[i].doubleValue());
-//        }
-//        parameter.setInputValue("value", values);
-//        parameter.setInputValue("dimension", values.size());
-        Parameter parameter = BEASTContext.createParameterWithBound(value, null, null, true);
-        if (!(parameter instanceof RealParameter))
-            throw new IllegalStateException("Expecting to create KeyRealParameter from " + value.getCanonicalId());
-
-        return (RealParameter) parameter;
+    public RealVectorParam valueToBEAST(Value<Number[]> value, BEASTContext context) {
+        Number[] vals = value.value();
+        double[] dvals = new double[vals.length];
+        for (int i = 0; i < vals.length; i++)
+            dvals[i] = vals[i].doubleValue();
+        RealVectorParam<Real> param = new RealVectorParam<>(dvals, Real.INSTANCE);
+        if (!(value instanceof RandomVariable))
+            param.setInputValue("estimate", false);
+        param.setID(value.getCanonicalId());
+        return param;
     }
 
     @Override
@@ -39,8 +36,8 @@ public class NumberArrayValueToBEAST implements ValueToBEAST<Number[], RealParam
     }
 
     @Override
-    public Class<RealParameter> getBEASTClass() {
-        return RealParameter.class;
+    public Class<RealVectorParam> getBEASTClass() {
+        return RealVectorParam.class;
     }
 
 }

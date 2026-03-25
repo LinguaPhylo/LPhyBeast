@@ -1,37 +1,33 @@
 package lphybeast.tobeast.values;
 
-import beast.base.inference.parameter.IntegerParameter;
-import beast.base.inference.parameter.Parameter;
+import beast.base.spec.domain.Int;
+import beast.base.spec.domain.PositiveInt;
+import beast.base.spec.inference.parameter.IntVectorParam;
 import lphy.base.distribution.RandomComposition;
+import lphy.core.model.RandomVariable;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
-public class IntegerArrayValueToBEAST implements ValueToBEAST<Integer[], IntegerParameter> {
+public class IntegerArrayValueToBEAST implements ValueToBEAST<Integer[], IntVectorParam> {
 
     @Override
-    public IntegerParameter valueToBEAST(Value<Integer[]> value, BEASTContext context) {
+    public IntVectorParam valueToBEAST(Value<Integer[]> value, BEASTContext context) {
+        Integer[] vals = value.value();
+        int[] ivals = new int[vals.length];
+        for (int i = 0; i < vals.length; i++)
+            ivals[i] = vals[i];
 
-//        KeyIntegerParameter parameter = new KeyIntegerParameter();
-//        List<Integer> values = Arrays.asList(value.value());
-//        parameter.setInputValue("value", values);
-//        parameter.setInputValue("dimension", values.size());
-//        // set estimate="false" for IntegerArray values that are not RandomVariables.
-//        if (!(value instanceof RandomVariable)) parameter.setInputValue("estimate", false);
-
-        // check domain
-        Integer lower = null;
+        IntVectorParam<?> param;
         if (value.getGenerator() instanceof RandomComposition) {
-//            parameter.setInputValue("lower", 1);
-            lower = 1;
+            param = new IntVectorParam<>(ivals, PositiveInt.INSTANCE);
+        } else {
+            param = new IntVectorParam<>(ivals, Int.INSTANCE);
         }
-        Integer upper = null;
-
-        Parameter parameter = BEASTContext.createParameterWithBound(value, lower, upper, false);
-        if (!(parameter instanceof IntegerParameter))
-            throw new IllegalStateException("Expecting to create KeyIntegerParameter from " + value.getCanonicalId());
-
-        return (IntegerParameter) parameter;
+        if (!(value instanceof RandomVariable))
+            param.setInputValue("estimate", false);
+        param.setID(value.getCanonicalId());
+        return param;
     }
 
     @Override
@@ -40,8 +36,8 @@ public class IntegerArrayValueToBEAST implements ValueToBEAST<Integer[], Integer
     }
 
     @Override
-    public Class<IntegerParameter> getBEASTClass() {
-        return IntegerParameter.class;
+    public Class<IntVectorParam> getBEASTClass() {
+        return IntVectorParam.class;
     }
 
 }

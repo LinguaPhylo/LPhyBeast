@@ -1,35 +1,26 @@
 package lphybeast.tobeast.values;
 
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.Real;
+import beast.base.spec.inference.parameter.RealVectorParam;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-public class DoubleArray3DValueToBEAST implements ValueToBEAST<Double[][][], RealParameter> {
+public class DoubleArray3DValueToBEAST implements ValueToBEAST<Double[][][], RealVectorParam> {
 
     @Override
-    public RealParameter valueToBEAST(Value<Double[][][]> value, BEASTContext context) {
-
-        RealParameter parameter = new RealParameter();
-
+    public RealVectorParam valueToBEAST(Value<Double[][][]> value, BEASTContext context) {
         Double[][][] val = value.value();
-
-        List<Double> values = new ArrayList<>(val.length * val[0].length * val[0][0].length);
-        for (Double[][] doubles : val) {
-            for (Double[] doubleArray: doubles) {
-                values.addAll(Arrays.asList(doubleArray));
-            }
-        }
-        parameter.setInputValue("value", values);
-        parameter.setInputValue("dimension", values.size());
-        parameter.setInputValue("minordimension", val[0].length * val[0][0].length); // TODO check this!
-        parameter.initAndValidate();
-        ValueToParameter.setID(parameter, value);
-        return parameter;
+        int total = val.length * val[0].length * val[0][0].length;
+        double[] dvals = new double[total];
+        int k = 0;
+        for (Double[][] plane : val)
+            for (Double[] row : plane)
+                for (Double d : row)
+                    dvals[k++] = d;
+        RealVectorParam<Real> param = new RealVectorParam<>(dvals, Real.INSTANCE);
+        param.setID(value.getCanonicalId());
+        return param;
     }
 
     @Override
@@ -38,8 +29,8 @@ public class DoubleArray3DValueToBEAST implements ValueToBEAST<Double[][][], Rea
     }
 
     @Override
-    public Class<RealParameter> getBEASTClass() {
-        return RealParameter.class;
+    public Class<RealVectorParam> getBEASTClass() {
+        return RealVectorParam.class;
     }
 
 }
