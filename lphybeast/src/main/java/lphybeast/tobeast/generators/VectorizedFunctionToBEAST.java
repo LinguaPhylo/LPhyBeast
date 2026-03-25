@@ -2,7 +2,6 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.core.BEASTObject;
-import beast.base.inference.parameter.RealParameter;
 import beastlabs.util.BEASTVector;
 import lphy.core.model.DeterministicFunction;
 import lphy.core.model.GraphicalModelNode;
@@ -20,15 +19,14 @@ public class VectorizedFunctionToBEAST implements GeneratorToBEAST<VectorizedFun
         List<BEASTInterface> values = null;
         if (value instanceof BEASTVector) {
             values = ((BEASTVector)value).getObjectList();
-        } else if (value instanceof RealParameter) {
+        } else {
+            // Single parameter (RealParameter, SimplexParam, etc.) — already handled as one object
             String idStr = value.getID() != null ? value.getID() : generator.getName();
             BEASTObject beastDummyObj = new BEASTObject() {
                 @Override
                 public void initAndValidate() {setID(idStr); }
             };
             return beastDummyObj;
-        } else {
-            throw new IllegalArgumentException("Expecting BEASTVector value from VectorizedDistribution");
         }
 
         List<DeterministicFunction> functionList = generator.getComponentFunctions();

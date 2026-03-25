@@ -18,6 +18,7 @@ import beast.base.inference.operator.kernel.BactrianUpDownOperator;
 import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.inference.parameter.BoolVectorParam;
 import beast.base.spec.inference.parameter.IntSimplexParam;
 import beast.base.spec.inference.parameter.RealScalarParam;
 import beast.base.spec.inference.parameter.RealVectorParam;
@@ -99,6 +100,8 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                     operators.add(createRealVectorOperator(realVector));
                 } else if (stateNode instanceof RealScalarParam<?> realScalar) {
                     operators.add(createRealScalarOperator(realScalar));
+                } else if (stateNode instanceof BoolVectorParam boolVector) {
+                    operators.add(createBoolVectorOperator(boolVector));
                 // legacy beast2 types
                 } else if (stateNode instanceof RealParameter realParameter) {
                     Operator operator = createBEASTOperator(realParameter);
@@ -335,6 +338,17 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         operator.setInputValue("scaleFactor", 0.75);
         operator.initAndValidate();
         operator.setID(realScalar.getID() + ".scale");
+        Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
+        elements.put(operator, null);
+        return operator;
+    }
+
+    private Operator createBoolVectorOperator(BoolVectorParam boolVector) {
+        var operator = new beast.base.spec.inference.operator.BitFlipOperator();
+        operator.setInputValue("parameter", boolVector);
+        operator.setInputValue("weight", getOperatorWeight(boolVector.size()));
+        operator.initAndValidate();
+        operator.setID(boolVector.getID() + ".bitFlip");
         Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
         elements.put(operator, null);
         return operator;

@@ -1,7 +1,7 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.inference.parameter.BooleanParameter;
+import beast.base.spec.inference.parameter.BoolVectorParam;
 import beast.base.spec.evolution.substitutionmodel.Frequencies;
 import beast.base.spec.type.Simplex;
 import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModel;
@@ -13,7 +13,6 @@ import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
-import java.util.Arrays;
 import java.util.Map;
 
 public class GTRToDiscretePhylogeo implements
@@ -37,7 +36,7 @@ public class GTRToDiscretePhylogeo implements
         svs.setInputValue("rates", context.getBEASTObject(rateNode));
 
         GraphicalModelNode<?> indicatorNode = (GraphicalModelNode<?>) selectFunParams.get(Select.indicatorParamName);
-        BooleanParameter rateIndicators = (BooleanParameter) context.getBEASTObject(indicatorNode);
+        BoolVectorParam rateIndicators = (BoolVectorParam) context.getBEASTObject(indicatorNode);
 
         Simplex freqSimplex = (Simplex) context.getBEASTObject(gtr.getFreq());
         Frequencies traitfreqs = new Frequencies(freqSimplex);
@@ -52,13 +51,14 @@ public class GTRToDiscretePhylogeo implements
         return svs;
     }
 
-    private void validateIndicators(BooleanParameter rateIndicators, int stateCount) {
-        if (rateIndicators.getDimension() != stateCount * (stateCount - 1) / 2)
+    private void validateIndicators(BoolVectorParam rateIndicators, int stateCount) {
+        if (rateIndicators.size() != stateCount * (stateCount - 1) / 2)
             throw new IllegalStateException("In symmetric rates model, the rate indicators should have the dimension of " +
                     "stateCount * (stateCount - 1) / 2 !\nBut stateCount = " + stateCount +
-                    ", indicators dimension = " + rateIndicators.getDimension());
+                    ", indicators dimension = " + rateIndicators.size());
 
-        long numOfTrue = Arrays.stream(rateIndicators.getValues()).filter(indicator -> indicator).count();
+        long numOfTrue = 0;
+        for (boolean b : rateIndicators.getValues()) if (b) numOfTrue++;
 
         if (numOfTrue < stateCount)
             throw new IllegalArgumentException("Invalid init value of the trait rate indicators, where " +
