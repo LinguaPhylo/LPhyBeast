@@ -36,11 +36,15 @@ Plan file: `~/.claude/plans/breezy-scribbling-sutherland.md`
 ### Operators
 - `DefaultOperatorStrategy` dispatches `SimplexParam`, `IntSimplexParam`,
   `RealVectorParam`, `RealScalarParam` → spec `ScaleOperator`, `DeltaExchangeOperator`
+- `DefaultOperatorStrategy` dispatches `BoolVectorParam` → spec `BitFlipOperator`
 
 ### Infrastructure (beast3 repo)
 - `BEASTClassLoader.initServicesFromClassLoaderResources()` — finds version.xml in JARs
 - beast-base embeds version.xml in published JAR
 - beast-classic `SVSGeneralSubstitutionModel` extends spec `ComplexSubstitutionModel`
+- beast-classic `AncestralStateTreeLikelihood` extends spec `TreeLikelihood`
+- beast-classic `GTRToDiscretePhylogeo` uses `BoolVectorParam`
+- BEASTLabs `WeightedDirichlet` migrated to spec `TensorDistribution`
 
 ### Tests passing
 - `SkylinePlotsTutorialTest`
@@ -66,8 +70,10 @@ Generic fallback updates (25 Mar):
 - ✅ `IntegerValueToBEAST` → `IntScalarParam` (with domain inference from bounds)
 - ✅ `BooleanValueToBEAST` → `BoolScalarParam`
 - ✅ `BooleanArrayValueToBEAST` → `BoolVectorParam`
-- TODO `DoubleArrayValueToBEAST` → `RealVectorParam<Real>` (needs `createParameterWithBound` refactor)
-- TODO `IntegerArrayValueToBEAST` → `IntVectorParam<Int>` (needs `createParameterWithBound` refactor)
+- ✅ `NumberArrayValueToBEAST` → `RealVectorParam` (with domain inference)
+- ✅ `DoubleArray2DValueToBEAST` → `RealVectorParam<Real>`
+- ✅ `DoubleArray3DValueToBEAST` → `RealVectorParam<Real>`
+- ✅ `IntegerArrayValueToBEAST` → `IntVectorParam` (with domain-aware typing)
 
 ## DONE: Distribution mappings (25 Mar)
 
@@ -81,9 +87,10 @@ Each returns the spec distribution directly (pattern: `DirichletToBEAST`).
 | `ExpToBEAST` | ✅ | `spec.distribution.Exponential` |
 | `UniformToBEAST` | ✅ | `spec.distribution.Uniform` |
 | `InverseGammaToBEAST` | ✅ | `spec.distribution.InverseGamma` |
-| `PoissonToBEAST` | TODO | Needs offset handling (spec Poisson has no offset) |
+| `PoissonToBEAST` | ✅ | `spec.distribution.Poisson` + `OffsetInt` |
+| `ExpMultiToBEAST` | ✅ | `spec.distribution.Exponential` + `IID` |
 
-Then remove `BEASTContext.createPrior()` (after Poisson done).
+`BEASTContext.createPrior()` and `getPrior()` removed — no callers remain.
 
 ## DONE: Substitution models (25 Mar)
 
@@ -110,10 +117,15 @@ Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated)
 - ✅ `PopFuncCoalescentToBEAST` — passes through `context.getBEASTObject()`
 - ✅ `BernoulliMultiToBEAST` — passes through `context.getBEASTObject()`
 
-**Blocked by Prior/Function infrastructure:**
-- TODO `WeightedDirichletToBEAST` — needs `createPrior` (WeightedDirichlet is ParametricDistribution, not Distribution). Fixed weights to use `getAsRealParameter`.
-- TODO `RandomBooleanArrayToBEAST` — complex Poisson→Sum→Prior chain
-- TODO `IIDToBEAST` — expects `Prior` from sub-generators, uses `Parameter.getDimension()`
+**Migrated (Prior removed):**
+- ✅ `WeightedDirichletToBEAST` — uses spec `WeightedDirichlet` (BEASTLabs)
+- ✅ `RandomBooleanArrayToBEAST` — uses spec `IntSum` + `OffsetInt(Poisson)`, no old Prior
+- ✅ `CalibratedYuleToBeast` — gets spec distribution directly, uses spec `CalibrationPoint`
+- ✅ `BirthDeathSampleTreeDTToBEAST` — removed old Prior fallback
+- ✅ `PhyloCTMCToBEAST` — removed old Prior fallback for IID(LogNormal)
+
+**Still needs work:**
+- TODO `IIDToBEAST` — uses `Parameter.getDimension()`
 
 ## TODO: Infrastructure
 
@@ -121,6 +133,10 @@ Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated)
   (currently bridged in `PhyloCTMCToBEAST.getClockRateParam`)
 - Remove `BEASTContext.getAsRealParameter()` once all callers migrated
 - Remove `BEASTContext.createRealParameter()` factory methods
+- Remove `BEASTContext.createParameterWithBound()` — no callers remain
+- Remaining old-type files: BEASTContext, DefaultOperatorStrategy, PhyloCTMCToBEAST,
+  LeafCalibrationsToBEAST, MapValueToBEAST, MapStringDoubleArrayValueToBEAST,
+  ContinuousCharacterDataToBEAST, LogisticToBEAST, ValueHandler
 
 ## TODO: Extension modules
 
