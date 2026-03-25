@@ -1,14 +1,20 @@
 package lphybeast.tobeast.values;
 
-import beast.base.core.BEASTInterface;
-import beast.base.inference.parameter.Parameter;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.NonNegativeReal;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.domain.Real;
+import beast.base.spec.domain.UnitInterval;
+import beast.base.spec.inference.parameter.RealVectorParam;
 import lphy.base.distribution.WeightedDirichlet;
+import lphy.core.model.GenerativeDistribution;
+import lphy.core.model.GenerativeDistribution1D;
+import lphy.core.model.RandomVariable;
 import lphy.core.model.Value;
+import lphy.core.vectorization.IID;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
-public class DoubleArrayValueToBEAST implements ValueToBEAST<Double[], BEASTInterface> {
+public class DoubleArrayValueToBEAST implements ValueToBEAST<Double[], RealVectorParam> {
 
     @Override
     public boolean match(Value value) {
@@ -18,13 +24,44 @@ public class DoubleArrayValueToBEAST implements ValueToBEAST<Double[], BEASTInte
     }
 
     @Override
-    public BEASTInterface valueToBEAST(Value<Double[]> value, BEASTContext context) {
+    public RealVectorParam valueToBEAST(Value<Double[]> value, BEASTContext context) {
 
-        Parameter parameter = BEASTContext.createParameterWithBound(value, null, null, false);
-        if (!(parameter instanceof RealParameter))
-            throw new IllegalStateException("Expecting to create KeyRealParameter from " + value.getCanonicalId());
+        Double[] vals = value.value();
+        double[] primitives = new double[vals.length];
+        for (int i = 0; i < vals.length; i++) primitives[i] = vals[i];
 
-        return (RealParameter) parameter;
+        Real domain = inferDomain(value);
+
+        RealVectorParam param = new RealVectorParam<>(primitives, domain);
+
+        if (!(value instanceof RandomVariable))
+            param.setInputValue("estimate", false);
+
+        param.setID(value.getCanonicalId());
+        return param;
+    }
+
+    private Real inferDomain(Value<Double[]> value) {
+        GenerativeDistribution1D<Double> gd1d = null;
+
+        if (value.getGenerator() instanceof GenerativeDistribution1D<?> gd) {
+            gd1d = (GenerativeDistribution1D<Double>) gd;
+        } else if (value.getGenerator() instanceof IID<?> iid
+                && iid.getBaseDistribution() instanceof GenerativeDistribution1D<?>) {
+            gd1d = (GenerativeDistribution1D<Double>) iid.getBaseDistribution();
+        }
+
+        if (gd1d != null) {
+            Double[] bounds = gd1d.getDomainBounds();
+            double lower = bounds[0];
+            double upper = bounds[1];
+
+            if (lower == 0.0 && upper == 1.0) return UnitInterval.INSTANCE;
+            if (lower == 0.0) return NonNegativeReal.INSTANCE;
+            if (lower > 0.0) return PositiveReal.INSTANCE;
+        }
+
+        return Real.INSTANCE;
     }
 
     @Override
@@ -33,7 +70,7 @@ public class DoubleArrayValueToBEAST implements ValueToBEAST<Double[], BEASTInte
     }
 
     @Override
-    public Class<BEASTInterface> getBEASTClass() {
-        return BEASTInterface.class;
+    public Class<RealVectorParam> getBEASTClass() {
+        return RealVectorParam.class;
     }
 }
