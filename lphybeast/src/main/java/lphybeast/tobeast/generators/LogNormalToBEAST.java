@@ -19,10 +19,15 @@ public class LogNormalToBEAST implements GeneratorToBEAST<LogNormal, Distributio
                 (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getSDLog());
 
         beast.base.spec.inference.distribution.LogNormal dist =
-                new beast.base.spec.inference.distribution.LogNormal(
-                        (RealScalar<PositiveReal>) value, M, S);
+                new beast.base.spec.inference.distribution.LogNormal();
+        dist.setInputValue("M", M);
+        dist.setInputValue("S", S);
+        if (value != null) {
+            dist.setInputValue("param", value);
+            dist.setID(((BEASTInterface) value).getID() + ".prior");
+        }
+        dist.initAndValidate();
 
-        dist.setID(((BEASTInterface) value).getID() + ".prior");
         return dist;
     }
 
