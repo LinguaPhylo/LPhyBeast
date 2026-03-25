@@ -3,6 +3,7 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.inference.Distribution;
 import beast.base.inference.StateNode;
+import beast.base.spec.evolution.IntSum;
 import beast.base.spec.inference.distribution.OffsetInt;
 import lphy.base.distribution.RandomBooleanArray;
 import lphy.core.model.Generator;
@@ -28,22 +29,23 @@ public class RandomBooleanArrayToBEAST implements GeneratorToBEAST<RandomBoolean
         Distribution poissonDist = (Distribution) context.getBEASTObject(poissonGenerator);
         context.removeBEASTObject(poissonDist);
 
-        // Re-target the distribution to Sum(I) instead of S
-        beast.base.evolution.Sum x = new beast.base.evolution.Sum();
+        // Re-target the distribution to IntSum(I) instead of S
+        IntSum x = new IntSum();
         x.setInputValue("arg", value);
+        x.initAndValidate();
 
-        // The spec OffsetInt/Poisson has param input — replace it with Sum(I)
-        // Since Sum implements Function (not a spec type), use the old Prior as bridge
-        beast.base.inference.distribution.Prior prior = new beast.base.inference.distribution.Prior();
+        // Replace param on the spec distribution with IntSum(I)
         if (poissonDist instanceof OffsetInt offsetInt) {
-            prior.setInputValue("distr", offsetInt);
+            offsetInt.setInputValue("param", x);
+            offsetInt.setID(value.getID() + ".prior");
+            offsetInt.initAndValidate();
+            return offsetInt;
         } else {
-            prior.setInputValue("distr", poissonDist);
+            poissonDist.setInputValue("param", x);
+            poissonDist.setID(value.getID() + ".prior");
+            poissonDist.initAndValidate();
+            return poissonDist;
         }
-        prior.setInputValue("x", x);
-        prior.setID(value.getID() + ".prior");
-        prior.initAndValidate();
-        return prior;
     }
 
     @Override
