@@ -11,8 +11,6 @@ import beast.base.evolution.substitutionmodel.Frequencies;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeInterface;
 import beast.base.inference.*;
-import beast.base.inference.distribution.ParametricDistribution;
-import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.Parameter;
 import beast.base.inference.parameter.RealParameter;
@@ -1092,15 +1090,6 @@ public class BEASTContext {
         return scalar;
     }
 
-    public static Prior createPrior(ParametricDistribution distr, Function function) {
-        Prior prior = new Prior();
-        prior.setInputValue("distr", distr);
-        prior.setInputValue("x", function);
-        prior.initAndValidate();
-        if (function instanceof BEASTInterface) prior.setID(((BEASTInterface) function).getID() + ".prior");
-        return prior;
-    }
-
     public static double getOperatorWeight(int size, double pow) {
         return Math.pow(size, pow);
     }
@@ -1214,15 +1203,6 @@ public class BEASTContext {
         elements.put(posterior, null);
 
         return posterior;
-    }
-
-    public Prior getPrior(Function param) {
-        for (BEASTInterface beastInterface : elements.keySet()) {
-            if (beastInterface instanceof Prior prior && prior.m_x.get().equals(param) ) {
-                return prior;
-            }
-        }
-        return null;
     }
 
     private void logOrignalAlignment(GenericTreeLikelihood treeLikelihood) {
