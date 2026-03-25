@@ -17,7 +17,7 @@ public class UniformToBEAST implements GeneratorToBEAST<Uniform, Distribution> {
 
         beast.base.spec.inference.distribution.Uniform dist =
                 new beast.base.spec.inference.distribution.Uniform(
-                        (RealScalar<Real>) value, lower, upper);
+                        (RealScalar<Real>) BEASTContext.ensureRealScalar(value), lower, upper);
 
         dist.setID(((BEASTInterface) value).getID() + ".prior");
         return dist;

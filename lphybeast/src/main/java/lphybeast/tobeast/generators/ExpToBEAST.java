@@ -18,7 +18,7 @@ public class ExpToBEAST implements GeneratorToBEAST<Exp, Distribution> {
 
         beast.base.spec.inference.distribution.Exponential dist =
                 new beast.base.spec.inference.distribution.Exponential(
-                        (RealScalar<NonNegativeReal>) value, mean);
+                        (RealScalar<NonNegativeReal>) BEASTContext.ensureRealScalar(value), mean);
 
         dist.setID(((BEASTInterface) value).getID() + ".prior");
         return dist;

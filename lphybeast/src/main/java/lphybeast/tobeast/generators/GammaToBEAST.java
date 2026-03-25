@@ -19,7 +19,7 @@ public class GammaToBEAST implements GeneratorToBEAST<Gamma, Distribution> {
 
         beast.base.spec.inference.distribution.Gamma dist =
                 new beast.base.spec.inference.distribution.Gamma(
-                        (RealScalar<PositiveReal>) value, alpha, theta);
+                        (RealScalar<PositiveReal>) BEASTContext.ensureRealScalar(value), alpha, theta);
 
         dist.setID(((BEASTInterface) value).getID() + ".prior");
         return dist;

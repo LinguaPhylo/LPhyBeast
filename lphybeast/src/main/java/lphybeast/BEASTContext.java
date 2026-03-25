@@ -1095,6 +1095,17 @@ public class BEASTContext {
         return scalar;
     }
 
+    /**
+     * Ensure a BEASTInterface is a RealScalar, coercing from RealParameter if needed.
+     * Used by distribution generators that receive 'value' which may be either type during migration.
+     */
+    public static beast.base.spec.type.RealScalar<?> ensureRealScalar(BEASTInterface value) {
+        if (value instanceof beast.base.spec.type.RealScalar<?> rs) return rs;
+        if (value instanceof RealParameter rp)
+            return toRealScalar(rp, beast.base.spec.domain.Real.INSTANCE);
+        throw new RuntimeException("Cannot coerce " + value.getClass().getSimpleName() + " to RealScalar");
+    }
+
     public static Prior createPrior(ParametricDistribution distr, Function function) {
         Prior prior = new Prior();
         prior.setInputValue("distr", distr);
