@@ -13,7 +13,7 @@ public class YuleToBEAST implements GeneratorToBEAST<Yule, YuleModel> {
         YuleModel yuleModel = new YuleModel();
 
         yuleModel.setInputValue("tree", value);
-        yuleModel.setInputValue("birthDiffRate", context.getBEASTObject(generator.getBirthRate()));
+        yuleModel.setInputValue("birthDiffRate", context.getAsRealScalar(generator.getBirthRate()));
         yuleModel.initAndValidate();
 
         return yuleModel;

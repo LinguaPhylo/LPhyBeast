@@ -397,8 +397,23 @@ public class BEASTContext {
      * @return the RealParameter associated with this value if it exists, or can be coerced. Has a side-effect if coercion occurs.
      */
     public RealParameter getAsRealParameter(Value value) {
-        Parameter param = (Parameter) beastObjects.get(value);
+        Object obj = beastObjects.get(value);
 
+        // Handle spec types: coerce to deprecated RealParameter for callers not yet migrated
+        if (obj instanceof beast.base.spec.inference.parameter.RealScalarParam<?> rsp) {
+            RealParameter rp = createRealParameter(rsp.getID(), rsp.get());
+            removeBEASTObject((BEASTInterface) rsp);
+            addToContext(value, rp);
+            return rp;
+        }
+        if (obj instanceof beast.base.spec.inference.parameter.IntScalarParam<?> isp) {
+            RealParameter rp = createRealParameter(isp.getID(), (double) isp.get());
+            removeBEASTObject((BEASTInterface) isp);
+            addToContext(value, rp);
+            return rp;
+        }
+
+        Parameter param = (Parameter) obj;
         if (param instanceof RealParameter) return (RealParameter) param;
         if (param instanceof IntegerParameter) {
             if (param.getDimension() == 1) {

@@ -18,9 +18,9 @@ public class BirthDeathSampleTreeDTToBEAST implements
     public BirthDeathGernhard08Model generatorToBEAST(BirthDeathSamplingTreeDT generator, BEASTInterface tree, BEASTContext context) {
 
         BirthDeathGernhard08Model beastBirthDeath = new BirthDeathGernhard08Model();
-        beastBirthDeath.setInputValue("birthDiffRate", context.getBEASTObject(generator.getDiversificationRate()));
-        beastBirthDeath.setInputValue("relativeDeathRate", context.getBEASTObject(generator.getTurnover()));
-        beastBirthDeath.setInputValue("sampleProbability", context.getBEASTObject(generator.getRho()));
+        beastBirthDeath.setInputValue("birthDiffRate", context.getAsRealScalar(generator.getDiversificationRate()));
+        beastBirthDeath.setInputValue("relativeDeathRate", context.getAsRealScalar(generator.getTurnover()));
+        beastBirthDeath.setInputValue("sampleProbability", context.getAsRealScalar(generator.getRho()));
         beastBirthDeath.setInputValue("type", "labeled");
         beastBirthDeath.setInputValue("conditionalOnRoot", true);
         beastBirthDeath.setInputValue("tree", tree);

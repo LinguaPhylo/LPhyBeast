@@ -34,7 +34,7 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
         CalibratedYuleModel calibratedYuleModel = new CalibratedYuleModel();
 
         calibratedYuleModel.setInputValue("tree", value);
-        calibratedYuleModel.setInputValue("birthRate", context.getBEASTObject(generator.getBirthRate()));
+        calibratedYuleModel.setInputValue("birthRate", context.getAsRealScalar(generator.getBirthRate()));
 
 
         Value<Number[]> cladeMRCAAge = generator.getCladeMRCAAge();
