@@ -399,12 +399,9 @@ public class BEASTContext {
     public RealParameter getAsRealParameter(Value value) {
         Object obj = beastObjects.get(value);
 
-        // Handle spec types: coerce to deprecated RealParameter for callers not yet migrated
-        if (obj instanceof beast.base.spec.inference.parameter.RealScalarParam<?> rsp) {
-            RealParameter rp = createRealParameter(rsp.getID(), rsp.get());
-            removeBEASTObject((BEASTInterface) rsp);
-            addToContext(value, rp);
-            return rp;
+        if (obj instanceof beast.base.spec.type.RealScalar<?>) {
+            throw new RuntimeException("Value '" + value + "' is a " + obj.getClass().getSimpleName() +
+                    " (spec type). Use getAsRealScalar() instead of getAsRealParameter().");
         }
         if (obj instanceof beast.base.spec.inference.parameter.IntScalarParam<?> isp) {
             RealParameter rp = createRealParameter(isp.getID(), (double) isp.get());
@@ -1093,17 +1090,6 @@ public class BEASTContext {
         var scalar = new beast.base.spec.inference.parameter.RealScalarParam<>(param.getValue(), domain);
         scalar.setID(param.getID());
         return scalar;
-    }
-
-    /**
-     * Ensure a BEASTInterface is a RealScalar, coercing from RealParameter if needed.
-     * Used by distribution generators that receive 'value' which may be either type during migration.
-     */
-    public static beast.base.spec.type.RealScalar<?> ensureRealScalar(BEASTInterface value) {
-        if (value instanceof beast.base.spec.type.RealScalar<?> rs) return rs;
-        if (value instanceof RealParameter rp)
-            return toRealScalar(rp, beast.base.spec.domain.Real.INSTANCE);
-        throw new RuntimeException("Cannot coerce " + value.getClass().getSimpleName() + " to RealScalar");
     }
 
     public static Prior createPrior(ParametricDistribution distr, Function function) {

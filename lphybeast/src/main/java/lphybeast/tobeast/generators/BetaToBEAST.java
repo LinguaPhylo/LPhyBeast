@@ -20,7 +20,7 @@ public class BetaToBEAST implements GeneratorToBEAST<Beta, Distribution> {
 
         beast.base.spec.inference.distribution.Beta dist =
                 new beast.base.spec.inference.distribution.Beta(
-                        (RealScalar<UnitInterval>) BEASTContext.ensureRealScalar(value), alpha, beta);
+                        (RealScalar<UnitInterval>) value, alpha, beta);
 
         dist.setID(((BEASTInterface) value).getID() + ".prior");
         return dist;
