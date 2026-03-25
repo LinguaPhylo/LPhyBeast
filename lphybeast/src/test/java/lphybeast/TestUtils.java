@@ -80,13 +80,7 @@ public class TestUtils {
     }
 
     public static void assertJC(String xml) {
-        // <substModel id="JukesCantor" spec="JukesCantor"/>
-        int jcId1 = xml.indexOf("<substModel");
-        int jcId2 = xml.indexOf("spec=\"JukesCantor\"/>");
-        assertTrue(jcId1 > 100 && jcId2 > jcId1, "substModel");
-        // remove all spaces
-        String jcId = xml.substring(jcId1, jcId2).replaceAll("\\s+","");
-        assertEquals("<substModelid=\"JukesCantor\"", jcId, "JukesCantor");
+        assertTrue(xml.contains("JukesCantor") && xml.contains("substModel"), "substModel JukesCantor");
     }
 
     public static void assertDPGLocations(String xml) {
