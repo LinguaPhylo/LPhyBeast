@@ -13,8 +13,8 @@ public class ExpToBEAST implements GeneratorToBEAST<Exp, Distribution> {
     @Override
     public Distribution generatorToBEAST(Exp generator, BEASTInterface value, BEASTContext context) {
 
-        RealScalar<PositiveReal> mean = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getParams().get("mean")), PositiveReal.INSTANCE);
+        RealScalar<PositiveReal> mean =
+                (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getParams().get("mean"));
 
         beast.base.spec.inference.distribution.Exponential dist =
                 new beast.base.spec.inference.distribution.Exponential(

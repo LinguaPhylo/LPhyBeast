@@ -13,10 +13,10 @@ public class InverseGammaToBEAST implements GeneratorToBEAST<InverseGamma, Distr
     @Override
     public Distribution generatorToBEAST(InverseGamma generator, BEASTInterface value, BEASTContext context) {
 
-        RealScalar<PositiveReal> alpha = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getAlpha()), PositiveReal.INSTANCE);
-        RealScalar<PositiveReal> beta = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getBeta()), PositiveReal.INSTANCE);
+        RealScalar<PositiveReal> alpha =
+                (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getAlpha());
+        RealScalar<PositiveReal> beta =
+                (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getBeta());
 
         beast.base.spec.inference.distribution.InverseGamma dist =
                 new beast.base.spec.inference.distribution.InverseGamma(

@@ -13,10 +13,10 @@ public class NormalToBEAST implements GeneratorToBEAST<Normal, Distribution> {
     @Override
     public Distribution generatorToBEAST(Normal generator, BEASTInterface value, BEASTContext context) {
 
-        RealScalar<Real> mean = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getMean()), Real.INSTANCE);
-        RealScalar<PositiveReal> sigma = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getSd()), PositiveReal.INSTANCE);
+        RealScalar<Real> mean =
+                (RealScalar<Real>) context.getAsRealScalar(generator.getMean());
+        RealScalar<PositiveReal> sigma =
+                (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getSd());
 
         beast.base.spec.inference.distribution.Normal dist =
                 new beast.base.spec.inference.distribution.Normal(

@@ -2,7 +2,6 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.inference.Distribution;
-import beast.base.inference.parameter.RealParameter;
 import beast.base.spec.domain.PositiveReal;
 import beast.base.spec.domain.Real;
 import beast.base.spec.type.RealScalar;
@@ -14,10 +13,10 @@ public class LogNormalToBEAST implements GeneratorToBEAST<LogNormal, Distributio
     @Override
     public Distribution generatorToBEAST(LogNormal generator, BEASTInterface value, BEASTContext context) {
 
-        RealScalar<Real> M = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getMeanLog()), Real.INSTANCE);
-        RealScalar<PositiveReal> S = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getSDLog()), PositiveReal.INSTANCE);
+        RealScalar<Real> M =
+                (RealScalar<Real>) context.getAsRealScalar(generator.getMeanLog());
+        RealScalar<PositiveReal> S =
+                (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getSDLog());
 
         beast.base.spec.inference.distribution.LogNormal dist =
                 new beast.base.spec.inference.distribution.LogNormal(

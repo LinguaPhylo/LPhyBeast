@@ -13,10 +13,10 @@ public class BetaToBEAST implements GeneratorToBEAST<Beta, Distribution> {
     @Override
     public Distribution generatorToBEAST(Beta generator, BEASTInterface value, BEASTContext context) {
 
-        RealScalar<PositiveReal> alpha = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getParams().get("alpha")), PositiveReal.INSTANCE);
-        RealScalar<PositiveReal> beta = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getParams().get("beta")), PositiveReal.INSTANCE);
+        RealScalar<PositiveReal> alpha =
+                (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getParams().get("alpha"));
+        RealScalar<PositiveReal> beta =
+                (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getParams().get("beta"));
 
         beast.base.spec.inference.distribution.Beta dist =
                 new beast.base.spec.inference.distribution.Beta(

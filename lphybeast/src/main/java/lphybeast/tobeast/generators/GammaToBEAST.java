@@ -12,10 +12,10 @@ public class GammaToBEAST implements GeneratorToBEAST<Gamma, Distribution> {
     @Override
     public Distribution generatorToBEAST(Gamma generator, BEASTInterface value, BEASTContext context) {
 
-        RealScalar<PositiveReal> alpha = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getShape()), PositiveReal.INSTANCE);
-        RealScalar<PositiveReal> theta = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getScale()), PositiveReal.INSTANCE);
+        RealScalar<PositiveReal> alpha =
+                (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getShape());
+        RealScalar<PositiveReal> theta =
+                (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getScale());
 
         beast.base.spec.inference.distribution.Gamma dist =
                 new beast.base.spec.inference.distribution.Gamma(
