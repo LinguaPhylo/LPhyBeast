@@ -4,12 +4,13 @@ import beast.base.core.BEASTInterface;
 import beast.base.core.Function;
 import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.branchratemodel.BranchRateModel;
-import beast.base.evolution.branchratemodel.StrictClockModel;
-import beast.base.evolution.branchratemodel.UCRelaxedClockModel;
+import beast.base.spec.evolution.branchratemodel.StrictClockModel;
+import beast.base.spec.evolution.branchratemodel.UCRelaxedClockModel;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.UserDataType;
 import beast.base.evolution.likelihood.GenericTreeLikelihood;
-import beast.base.evolution.likelihood.ThreadedTreeLikelihood;
+import beast.base.inference.Distribution;
+import beast.base.spec.evolution.likelihood.ThreadedTreeLikelihood;
 import beast.base.evolution.operator.AdaptableOperatorSampler;
 import beast.base.evolution.operator.Exchange;
 import beast.base.evolution.operator.kernel.BactrianScaleOperator;
@@ -52,11 +53,11 @@ import lphybeast.tobeast.operators.DefaultOperatorStrategy;
 
 import java.util.Map;
 
-public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTreeLikelihood> {
+public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, BEASTInterface> {
 
     private static final String LOCATION = "location";
 
-    public GenericTreeLikelihood generatorToBEAST(PhyloCTMC phyloCTMC, BEASTInterface value, BEASTContext context) {
+    public BEASTInterface generatorToBEAST(PhyloCTMC phyloCTMC, BEASTInterface value, BEASTContext context) {
 
         if (value instanceof AlignmentFromTrait traitAlignment) {
             // for discrete phylogeography
@@ -86,7 +87,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         treeLikelihood.setID(traitAlignment.getID() + ".treeLikelihood");
 
         // <log idref="D_trait.treeLikelihood"/> in parameters
-        context.addExtraLoggable(treeLikelihood);
+        context.addExtraLoggable((beast.base.core.Loggable) treeLikelihood);
 
         // Extra Logger <logger id="TreeWithTraitLogger" fileName="h5n1_with_trait.trees"
         TraitTreeLogger traitTreeLogger = new TraitTreeLogger(treeLikelihood, context);
@@ -138,8 +139,8 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
     }
 
 
-    private GenericTreeLikelihood createGenericTreeLikelihood(PhyloCTMC phyloCTMC, BEASTInterface value, BEASTContext context) {
-        GenericTreeLikelihood treeLikelihood = null;
+    private BEASTInterface createGenericTreeLikelihood(PhyloCTMC phyloCTMC, BEASTInterface value, BEASTContext context) {
+        BEASTInterface treeLikelihood = null;
 
         assert value instanceof beast.base.evolution.alignment.Alignment;
         beast.base.evolution.alignment.Alignment alignment = (beast.base.evolution.alignment.Alignment)value;
@@ -172,7 +173,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
         treeLikelihood.initAndValidate();
         treeLikelihood.setID(alignment.getID() + ".treeLikelihood");
         // logging
-        context.addExtraLoggable(treeLikelihood);
+        context.addExtraLoggable((beast.base.core.Loggable) treeLikelihood);
 
         return treeLikelihood;
     }
@@ -184,7 +185,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
      * @param treeLikelihood
      * @param context
      */
-    public static void constructTreeAndBranchRate(PhyloCTMC phyloCTMC, GenericTreeLikelihood treeLikelihood, BEASTContext context) {
+    public static void constructTreeAndBranchRate(PhyloCTMC phyloCTMC, BEASTInterface treeLikelihood, BEASTContext context) {
         constructTreeAndBranchRate(phyloCTMC, treeLikelihood, context, false);
     }
 
@@ -195,7 +196,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
      * @param context
      * @param skipBranchOperators skip constructing branch rates
      */
-    public static void constructTreeAndBranchRate(PhyloLikelihood phyloCTMC, GenericTreeLikelihood treeLikelihood, BEASTContext context, boolean skipBranchOperators) {
+    public static void constructTreeAndBranchRate(PhyloLikelihood phyloCTMC, BEASTInterface treeLikelihood, BEASTContext context, boolean skipBranchOperators) {
         Value<TimeTree> timeTreeValue = phyloCTMC.getTree();
         Tree tree = (Tree) context.getBEASTObject(timeTreeValue);
         //tree.setInputValue("taxa", value);
@@ -205,7 +206,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
         Value<Number> clockRateValue = phyloCTMC.getClockRate();
         // clock.rate
-        Function clockRateParam = getClockRateParam(clockRateValue, context);
+        BEASTInterface clockRateParam = getClockRateParam(clockRateValue, context);
         // add updown op when estimating clock.rate
         if (timeTreeValue instanceof RandomVariable && skipBranchOperators == false) {
             if (clockRateValue instanceof RandomVariable && clockRateParam instanceof StateNode clockRate) {
@@ -289,26 +290,13 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
 
     }
 
-    public static Function getClockRateParam(Value<Number> clockRateValue, BEASTContext context) {
-        Function clockRateParam;
+    public static BEASTInterface getClockRateParam(Value<Number> clockRateValue, BEASTContext context) {
         if (clockRateValue != null) {
-            BEASTInterface beastObj = context.getBEASTObject(clockRateValue);
-            if (beastObj instanceof Function f) {
-                clockRateParam = f;
-            } else if (beastObj instanceof beast.base.spec.inference.parameter.RealScalarParam<?> scalar) {
-                // Bridge: StrictClockModel expects Function, spec types don't implement it.
-                // Replace context object so state and operators stay consistent.
-                RealParameter rp = BEASTContext.createRealParameter(scalar.get());
-                rp.setID(scalar.getID());
-                context.putBEASTObject(clockRateValue, rp);
-                clockRateParam = rp;
-            } else {
-                clockRateParam = context.getAsFunctionOrRealParameter(clockRateValue);
-            }
+            return context.getBEASTObject(clockRateValue);
         } else {
-            clockRateParam = BEASTContext.createRealParameter(1.0);
+            return new beast.base.spec.inference.parameter.RealScalarParam<>(1.0,
+                    beast.base.spec.domain.PositiveReal.INSTANCE);
         }
-        return clockRateParam;
     }
 
     /**
@@ -433,7 +421,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
     }
 
     @Override
-    public Class<GenericTreeLikelihood> getBEASTClass() {
-        return GenericTreeLikelihood.class;
+    public Class<BEASTInterface> getBEASTClass() {
+        return BEASTInterface.class;
     }
 }
