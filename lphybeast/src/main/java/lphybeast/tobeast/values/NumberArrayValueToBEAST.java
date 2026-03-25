@@ -23,7 +23,8 @@ public class NumberArrayValueToBEAST implements ValueToBEAST<Number[], RealVecto
         double[] dvals = new double[vals.length];
         for (int i = 0; i < vals.length; i++)
             dvals[i] = vals[i].doubleValue();
-        RealVectorParam<Real> param = new RealVectorParam<>(dvals, Real.INSTANCE);
+        Real domain = DoubleValueToBEAST.inferDomain(value);
+        RealVectorParam<?> param = new RealVectorParam<>(dvals, domain);
         if (!(value instanceof RandomVariable))
             param.setInputValue("estimate", false);
         param.setID(value.getCanonicalId());
