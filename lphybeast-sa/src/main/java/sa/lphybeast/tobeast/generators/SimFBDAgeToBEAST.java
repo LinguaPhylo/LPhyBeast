@@ -2,7 +2,9 @@ package sa.lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.tree.Tree;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.PositiveReal;
+import beast.base.spec.domain.UnitInterval;
+import beast.base.spec.inference.parameter.RealScalarParam;
 import lphy.base.evolution.birthdeath.SimFBDAge;
 import lphy.base.evolution.tree.TimeTree;
 import lphy.core.model.Value;
@@ -28,18 +30,18 @@ public class SimFBDAgeToBEAST implements GeneratorToBEAST<SimFBDAge, SABirthDeat
             throw new IllegalArgumentException("Expecting a lphy.evolution.tree.TimeTree with an origin node!");
         }
 
-        RealParameter originParameter = (RealParameter) context.getBEASTObject(tree.getID() + suffix);
-        if (originParameter.getValue() < beastTree.getRoot().getHeight()) {
-            originParameter.setValue(beastTree.getRoot().getHeight() + 1.0);
+        RealScalarParam<PositiveReal> originParameter = (RealScalarParam<PositiveReal>) context.getBEASTObject(tree.getID() + suffix);
+        if (originParameter.get() < beastTree.getRoot().getHeight()) {
+            originParameter.set(beastTree.getRoot().getHeight() + 1.0);
         }
         context.addStateNode(originParameter, timeTree, true);
 
         SABirthDeathModel saBirthDeathModel = new SABirthDeathModel();
-        saBirthDeathModel.setInputValue("birthRate", context.getAsRealParameter(generator.getBirthRate()));
-        saBirthDeathModel.setInputValue("deathRate", context.getAsRealParameter(generator.getDeathRate()));
-        saBirthDeathModel.setInputValue("rho", context.getAsRealParameter(generator.getRho()));
-        saBirthDeathModel.setInputValue("samplingRate", context.getAsRealParameter(generator.getPsi()));
-        saBirthDeathModel.setInputValue("removalProbability", BEASTContext.createRealParameter(0.0));
+        saBirthDeathModel.setInputValue("birthRate", context.getAsRealScalar(generator.getBirthRate()));
+        saBirthDeathModel.setInputValue("deathRate", context.getAsRealScalar(generator.getDeathRate()));
+        saBirthDeathModel.setInputValue("rho", context.getAsRealScalar(generator.getRho()));
+        saBirthDeathModel.setInputValue("samplingRate", context.getAsRealScalar(generator.getPsi()));
+        saBirthDeathModel.setInputValue("removalProbability", new RealScalarParam<>(0.0, UnitInterval.INSTANCE));
         saBirthDeathModel.setInputValue("origin", originParameter);
         saBirthDeathModel.setInputValue("tree", tree);
         saBirthDeathModel.setInputValue("conditionOnSampling", true);
@@ -65,7 +67,8 @@ public class SimFBDAgeToBEAST implements GeneratorToBEAST<SimFBDAge, SABirthDeat
         // TODO remove this when sampled-ancestors have been fixed.
         origin += timeTree.value().getTaxa().ntaxa();
 
-        RealParameter originParameter = BEASTContext.createRealParameter(originID, origin);
+        RealScalarParam<PositiveReal> originParameter = new RealScalarParam<>(origin, PositiveReal.INSTANCE);
+        originParameter.setID(originID);
         context.addStateNode(originParameter, timeTree, true);
     }
 

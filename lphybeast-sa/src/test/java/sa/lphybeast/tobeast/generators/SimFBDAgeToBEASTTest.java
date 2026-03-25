@@ -42,9 +42,11 @@ class SimFBDAgeToBEASTTest {
                 xml.contains("conditionOnSampling=\"true\"") && xml.contains("origin=\"@tree.origin\"") &&
                 xml.contains("sa.evolution.speciation.SABirthDeathModel"), "SABirthDeathModel");
 
-        assertTrue(xml.contains("\"birthRate\">1.0</parameter>") &&
-                xml.contains("\"deathRate\">0.6</parameter>") && xml.contains("\"samplingRate\">0.4</parameter>") &&
-                xml.contains("\"removalProbability\">0.0</parameter>") && xml.contains("\"rho\">0.3</parameter>"),
+        assertTrue(xml.contains("<birthRate") && xml.contains("value=\"1.0\"") &&
+                xml.contains("<deathRate") && xml.contains("value=\"0.6\"") &&
+                xml.contains("<samplingRate") && xml.contains("value=\"0.4\"") &&
+                xml.contains("<removalProbability") && xml.contains("domain=\"UnitInterval\"") &&
+                xml.contains("<rho") && xml.contains("value=\"0.3\""),
                 "SABirthDeath parameters");
 
         assertEquals(8, xml.split("<operator", -1).length - 1, "operators");

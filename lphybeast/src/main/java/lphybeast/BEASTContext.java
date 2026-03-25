@@ -423,6 +423,23 @@ public class BEASTContext {
         throw new RuntimeException("No coercible parameter found for " + value);
     }
 
+    /**
+     * Returns the spec RealScalar for this value, coercing from IntScalarParam if needed.
+     */
+    public beast.base.spec.type.RealScalar<?> getAsRealScalar(Value value) {
+        Object obj = beastObjects.get(value);
+        if (obj instanceof beast.base.spec.type.RealScalar<?> rs) return rs;
+        if (obj instanceof beast.base.spec.inference.parameter.IntScalarParam<?> isp) {
+            var scalar = new beast.base.spec.inference.parameter.RealScalarParam<>(
+                    (double) isp.get(), beast.base.spec.domain.Real.INSTANCE);
+            scalar.setID(isp.getID());
+            removeBEASTObject((BEASTInterface) isp);
+            addToContext(value, scalar);
+            return scalar;
+        }
+        throw new RuntimeException("No coercible RealScalar found for " + value + " (got " + obj.getClass().getSimpleName() + ")");
+    }
+
     public IntegerParameter getAsIntegerParameter(Value value) {
         Parameter param = (Parameter) beastObjects.get(value);
         if (param instanceof IntegerParameter) return (IntegerParameter) param;

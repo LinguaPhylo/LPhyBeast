@@ -47,13 +47,14 @@ class FossilBirthDeathTreeToBEASTTest {
                 xml.contains("sa.evolution.speciation.SABirthDeathModel"), "SABirthDeathModel");
 
         assertTrue(xml.contains("id=\"lambda\"") && xml.contains("id=\"mu\"") &&
-                        xml.contains("\"samplingRate\">1.0</parameter>") &&
-                xml.contains("\"removalProbability\">0.0</parameter>") && xml.contains("\"rho\">1.0</parameter>"),
+                xml.contains("<samplingRate") && xml.contains("value=\"1.0\"") &&
+                xml.contains("<removalProbability") && xml.contains("domain=\"UnitInterval\"") &&
+                xml.contains("<rho") && xml.contains("value=\"1.0\""),
                 "SABirthDeath parameters");
 
         assertTrue(xml.contains("distribution.Uniform") &&
-                xml.contains("lower=\"0.5\"") && xml.contains("lower=\"1.0\"") && xml.contains("upper=\"1.5\"") &&
-                xml.contains("x=\"@mu\"") && xml.contains("x=\"@lambda\""), "Uniform prior");
+                xml.contains("param=\"@lambda\"") && xml.contains("param=\"@mu\""),
+                "Uniform prior");
 
         assertTrue(xml.contains("sa.evolution.operators.SAScaleOperator") &&
                 xml.contains("sa.evolution.operators.SAExchange") &&

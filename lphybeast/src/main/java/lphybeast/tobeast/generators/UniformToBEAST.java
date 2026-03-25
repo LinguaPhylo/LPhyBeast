@@ -12,10 +12,8 @@ public class UniformToBEAST implements GeneratorToBEAST<Uniform, Distribution> {
     @Override
     public Distribution generatorToBEAST(Uniform generator, BEASTInterface value, BEASTContext context) {
 
-        RealScalar<Real> lower = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getLower()), Real.INSTANCE);
-        RealScalar<Real> upper = BEASTContext.toRealScalar(
-                context.getAsRealParameter(generator.getUpper()), Real.INSTANCE);
+        RealScalar<Real> lower = (RealScalar<Real>) context.getAsRealScalar(generator.getLower());
+        RealScalar<Real> upper = (RealScalar<Real>) context.getAsRealScalar(generator.getUpper());
 
         beast.base.spec.inference.distribution.Uniform dist =
                 new beast.base.spec.inference.distribution.Uniform(
