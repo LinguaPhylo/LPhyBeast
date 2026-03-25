@@ -1,26 +1,29 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.core.Function;
-import beast.base.inference.distribution.Prior;
+import beast.base.inference.Distribution;
+import beast.base.spec.type.RealVector;
+import beast.base.spec.type.Simplex;
 import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 
-public class WeightedDirichletToBEAST implements GeneratorToBEAST<WeightedDirichlet, Prior> {
+public class WeightedDirichletToBEAST implements GeneratorToBEAST<WeightedDirichlet, Distribution> {
     @Override
-    public Prior generatorToBEAST(WeightedDirichlet generator, BEASTInterface value, BEASTContext context) {
+    public Distribution generatorToBEAST(WeightedDirichlet generator, BEASTInterface value, BEASTContext context) {
 
         Value<Number[]> concentration = generator.getConcentration();
 
-        beastlabs.math.distributions.WeightedDirichlet beastDirichlet =
-                new beastlabs.math.distributions.WeightedDirichlet();
-        beastDirichlet.setInputValue("alpha", context.getAsRealVector(concentration));
-        beastDirichlet.setInputValue("weights", context.getAsRealVector(generator.getWeights()));
-        beastDirichlet.initAndValidate();
+        RealVector<?> alpha = context.getAsRealVector(concentration);
+        RealVector<?> weights = context.getAsRealVector(generator.getWeights());
 
-        return BEASTContext.createPrior(beastDirichlet, (Function) value);
+        beastlabs.math.distributions.WeightedDirichlet beastDirichlet =
+                new beastlabs.math.distributions.WeightedDirichlet(
+                        (Simplex) value, alpha, weights);
+
+        beastDirichlet.setID(((BEASTInterface) value).getID() + ".prior");
+        return beastDirichlet;
     }
 
     @Override
@@ -29,7 +32,7 @@ public class WeightedDirichletToBEAST implements GeneratorToBEAST<WeightedDirich
     }
 
     @Override
-    public Class<Prior> getBEASTClass() {
-        return Prior.class;
+    public Class<Distribution> getBEASTClass() {
+        return Distribution.class;
     }
 }
