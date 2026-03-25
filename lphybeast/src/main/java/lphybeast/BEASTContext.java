@@ -455,6 +455,30 @@ public class BEASTContext {
         throw new RuntimeException("No coercible RealScalar found for " + value + " (got " + obj.getClass().getSimpleName() + ")");
     }
 
+    /**
+     * Returns a spec RealVector for this value, coercing from RealParameter or IntegerParameter if needed.
+     */
+    public beast.base.spec.type.RealVector<?> getAsRealVector(Value value) {
+        Object obj = beastObjects.get(value);
+        if (obj instanceof beast.base.spec.type.RealVector<?> rv) return rv;
+        if (obj instanceof RealParameter rp) {
+            var vec = toRealVector(rp, beast.base.spec.domain.Real.INSTANCE);
+            removeBEASTObject(rp);
+            addToContext(value, vec);
+            return vec;
+        }
+        if (obj instanceof IntegerParameter ip) {
+            double[] values = new double[ip.getDimension()];
+            for (int i = 0; i < values.length; i++) values[i] = ip.getValue(i).doubleValue();
+            var vec = new beast.base.spec.inference.parameter.RealVectorParam<>(values, beast.base.spec.domain.Real.INSTANCE);
+            vec.setID(ip.getID());
+            removeBEASTObject(ip);
+            addToContext(value, vec);
+            return vec;
+        }
+        throw new RuntimeException("No coercible RealVector found for " + value + " (got " + obj.getClass().getSimpleName() + ")");
+    }
+
     public IntegerParameter getAsIntegerParameter(Value value) {
         Parameter param = (Parameter) beastObjects.get(value);
         if (param instanceof IntegerParameter) return (IntegerParameter) param;

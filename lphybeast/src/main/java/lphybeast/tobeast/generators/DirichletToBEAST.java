@@ -2,9 +2,8 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.inference.Distribution;
-import beast.base.inference.parameter.RealParameter;
 import beast.base.spec.domain.PositiveReal;
-import beast.base.spec.inference.parameter.RealVectorParam;
+import beast.base.spec.type.RealVector;
 import beast.base.spec.type.Simplex;
 import lphy.base.distribution.Dirichlet;
 import lphybeast.BEASTContext;
@@ -14,8 +13,7 @@ public class DirichletToBEAST implements GeneratorToBEAST<Dirichlet, Distributio
     @Override
     public Distribution generatorToBEAST(Dirichlet generator, BEASTInterface value, BEASTContext context) {
 
-        RealParameter alphaParam = context.getAsRealParameter(generator.getConcentration());
-        RealVectorParam<PositiveReal> alpha = BEASTContext.toRealVector(alphaParam, PositiveReal.INSTANCE);
+        RealVector<PositiveReal> alpha = (RealVector<PositiveReal>) context.getAsRealVector(generator.getConcentration());
 
         beast.base.spec.inference.distribution.Dirichlet dirichlet =
                 new beast.base.spec.inference.distribution.Dirichlet((Simplex) value, alpha);
