@@ -249,14 +249,22 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, GenericTree
                 // simpleRelaxedClock.lphy
                 UCRelaxedClockModel relaxedClockModel = new UCRelaxedClockModel();
 
-//                Prior logNormalPrior = (Prior) context.getBEASTObject(generator);
-                Prior logNormalPrior = (Prior) beastBranchModel;
+                // Extract the base ScalarDistribution from the spec IID or old Prior
+                Object baseDist;
+                if (beastBranchModel instanceof beast.base.spec.inference.distribution.IID<?,?,?> iid) {
+                    baseDist = iid.distInput.get();
+                } else if (beastBranchModel instanceof Prior prior) {
+                    baseDist = prior.distInput.get();
+                } else {
+                    throw new RuntimeException("Expected IID or Prior for IID(LogNormal) branch rates, got " +
+                            beastBranchModel.getClass().getSimpleName());
+                }
 
-                RealParameter beastBranchRates = context.getAsRealParameter(branchRates);
+                BEASTInterface beastBranchRates = context.getBEASTObject(branchRates);
 
                 relaxedClockModel.setInputValue("rates", beastBranchRates);
                 relaxedClockModel.setInputValue("tree", tree);
-                relaxedClockModel.setInputValue("distr", logNormalPrior.distInput.get());
+                relaxedClockModel.setInputValue("distr", baseDist);
                 relaxedClockModel.setID(branchRates.getCanonicalId() + ".model");
                 relaxedClockModel.initAndValidate();
                 treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
