@@ -18,9 +18,6 @@ import beast.base.spec.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.StateNode;
-import beast.base.inference.distribution.LogNormalDistributionModel;
-import beast.base.inference.distribution.ParametricDistribution;
-import beast.base.inference.distribution.Prior;
 import beast.base.inference.operator.kernel.BactrianRandomWalkOperator;
 import beast.base.inference.parameter.RealParameter;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
@@ -250,14 +247,12 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, BEASTInterf
                 // simpleRelaxedClock.lphy
                 UCRelaxedClockModel relaxedClockModel = new UCRelaxedClockModel();
 
-                // Extract the base ScalarDistribution from the spec IID or old Prior
+                // Extract the base ScalarDistribution from the spec IID
                 Object baseDist;
                 if (beastBranchModel instanceof beast.base.spec.inference.distribution.IID<?,?,?> iid) {
                     baseDist = iid.distInput.get();
-                } else if (beastBranchModel instanceof Prior prior) {
-                    baseDist = prior.distInput.get();
                 } else {
-                    throw new RuntimeException("Expected IID or Prior for IID(LogNormal) branch rates, got " +
+                    throw new RuntimeException("Expected spec IID for IID(LogNormal) branch rates, got " +
                             beastBranchModel.getClass().getSimpleName());
                 }
 

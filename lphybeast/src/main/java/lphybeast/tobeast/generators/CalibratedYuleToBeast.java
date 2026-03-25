@@ -1,25 +1,17 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.evolution.alignment.Taxon;
 import beast.base.evolution.alignment.TaxonSet;
 import beast.base.spec.evolution.speciation.CalibratedYuleModel;
-import beast.base.evolution.speciation.CalibrationPoint;
-import beast.base.evolution.tree.MRCAPrior;
+import beast.base.spec.evolution.speciation.CalibrationPoint;
 import beast.base.evolution.tree.TreeInterface;
 import beast.base.inference.Distribution;
-import beast.base.inference.distribution.ParametricDistribution;
-import beast.base.inference.distribution.Prior;
+import beast.base.spec.inference.distribution.ScalarDistribution;
 import lphy.base.evolution.Taxa;
 import lphy.base.evolution.birthdeath.CalibratedYule;
-import lphy.base.evolution.tree.TimeTreeNode;
 import lphy.core.model.*;
-import lphy.core.parser.graphicalmodel.GraphicalModel;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static lphybeast.tobeast.TaxaUtils.getTaxonSet;
 
@@ -56,14 +48,11 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
         context.removeBEASTObject(beastCladeAgeValue);
 
         if (cladePriorGenerator instanceof GenerativeDistribution<?>) {
-            // get the distribution for calibration
-            Prior cladeCalibrationPrior = (Prior) context.getBEASTObject(cladePriorGenerator);
-            ParametricDistribution calibrationDistribution = cladeCalibrationPrior.distInput.get();
-            // remove the clade mrca age in the prior section
-            context.removeBEASTObject(cladeCalibrationPrior);
+            // get the spec distribution directly (e.g. LogNormal, Normal)
+            Distribution cladeDist = (Distribution) context.getBEASTObject(cladePriorGenerator);
+            context.removeBEASTObject(cladeDist);
 
             // get TaxonSet for calibrations
-            // get taxa names
             String[] cladeNames = new String[((Taxa) cladeTaxa.value()).length()];
             int index = 0;
             for (String name : ((Taxa) cladeTaxa.value()).getTaxaNames()) {
@@ -74,7 +63,7 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
 
             CalibrationPoint calibrationPoint = new CalibrationPoint();
             calibrationPoint.setInputValue("taxonset", cladeTaxonSet);
-            calibrationPoint.setInputValue("distr", calibrationDistribution);
+            calibrationPoint.setInputValue("distr", cladeDist);
             calibrationPoint.initAndValidate();
 
             calibratedYuleModel.setInputValue("calibrations", calibrationPoint);
@@ -91,16 +80,14 @@ public class CalibratedYuleToBeast implements GeneratorToBEAST<CalibratedYule, C
             TaxonSet allTaxa = ((TreeInterface)value).getTaxonset();
 
             if (rootAge.getGenerator() instanceof GenerativeDistribution<?>) {
-                // get the distribution for calibration
-                Prior rootAgeCalibrationPrior = (Prior) context.getBEASTObject(rootAge.getGenerator());
-                ParametricDistribution rootCalibrationDistribution = rootAgeCalibrationPrior.distInput.get();
-                // remove the clade mrca age in the prior section
-                context.removeBEASTObject(rootAgeCalibrationPrior);
+                // get the spec distribution directly
+                Distribution rootDist = (Distribution) context.getBEASTObject(rootAge.getGenerator());
+                context.removeBEASTObject(rootDist);
 
                 // create calibration point for the root
                 CalibrationPoint calibrationRoot = new CalibrationPoint();
                 calibrationRoot.setInputValue("taxonset", allTaxa);
-                calibrationRoot.setInputValue("distr", rootCalibrationDistribution);
+                calibrationRoot.setInputValue("distr", rootDist);
                 calibrationRoot.initAndValidate();
                 calibratedYuleModel.setInputValue("calibrations", calibrationRoot);
             }
