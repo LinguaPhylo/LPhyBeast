@@ -26,12 +26,6 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.github.compevol</groupId>
-            <artifactId>beagle</artifactId>
-            <version>1.0</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
