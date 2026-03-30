@@ -4,10 +4,8 @@ import bdtree.likelihood.BirthDeathSequentialSampling;
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.tree.MRCAPrior;
 import beast.base.evolution.tree.Tree;
-import beast.base.inference.distribution.ParametricDistribution;
-import beast.base.inference.distribution.Prior;
-import beast.base.inference.distribution.Uniform;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.Distribution;
+import beast.base.spec.type.RealScalar;
 import lphy.base.evolution.birthdeath.BirthDeathSerialSamplingTree;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.GenerativeDistribution1D;
@@ -24,18 +22,19 @@ public class BirthDeathSerialSamplingToBEAST implements
     public BirthDeathSequentialSampling generatorToBEAST(BirthDeathSerialSamplingTree generator, BEASTInterface tree, BEASTContext context) {
 
         BirthDeathSequentialSampling beastBDSS = new BirthDeathSequentialSampling();
-        beastBDSS.setInputValue("birthRate", context.getAsRealParameter(generator.getBirthRate()));
-        beastBDSS.setInputValue("deathRate", context.getAsRealParameter(generator.getDeathRate()));
-        beastBDSS.setInputValue("rho", context.getAsRealParameter(generator.getRho()));
-        beastBDSS.setInputValue("psi", context.getAsRealParameter(generator.getPsi()));
+        beastBDSS.setInputValue("birthRate", context.getAsRealScalar(generator.getBirthRate()));
+        beastBDSS.setInputValue("deathRate", context.getAsRealScalar(generator.getDeathRate()));
+        beastBDSS.setInputValue("rho", context.getAsRealScalar(generator.getRho()));
+        beastBDSS.setInputValue("psi", context.getAsRealScalar(generator.getPsi()));
         beastBDSS.setInputValue("tree", tree);
 
         Value<Number> rootAgeVal = generator.getRootAge();
         if (rootAgeVal.getGenerator() != null) {
+            BEASTInterface beastRootAge = context.getBEASTObject(rootAgeVal);
             BEASTInterface beastRootAgeGenerator = context.getBEASTObject(rootAgeVal.getGenerator());
-            if (beastRootAgeGenerator instanceof Prior) {
-                Prior rootAgePrior = (Prior) beastRootAgeGenerator;
-                ParametricDistribution dist = rootAgePrior.distInput.get();
+
+            if (beastRootAge instanceof RealScalar && beastRootAgeGenerator instanceof Distribution) {
+                Distribution rootAgeDist = (Distribution) beastRootAgeGenerator;
 
                 Double lower = Double.NEGATIVE_INFINITY;
                 Double upper = Double.POSITIVE_INFINITY;
@@ -48,9 +47,9 @@ public class BirthDeathSerialSamplingToBEAST implements
                         if (number.doubleValue() < upper)
                             upper = number.doubleValue();
                 }
-                if (dist instanceof Uniform uniform) {
-                    lower = uniform.lowerInput.get();
-                    upper = uniform.upperInput.get();
+                if (rootAgeDist instanceof beast.base.spec.inference.distribution.Uniform uniform) {
+                    lower = uniform.lowerInput.get().get();
+                    upper = uniform.upperInput.get().get();
                 } else
                     LoggerUtils.log.warning("Cannot detect lower and upper for the root age of BDSS, " +
                             "set to its distribution domain bounds [" + lower + ", " + upper + "].");
@@ -58,13 +57,11 @@ public class BirthDeathSerialSamplingToBEAST implements
                 beastBDSS.setInputValue("upper", upper);
 
                 MRCAPrior prior = new MRCAPrior();
-                prior.setInputValue("distr", dist);
+                prior.setInputValue("distr", rootAgeDist);
                 prior.setInputValue("tree", tree);
                 prior.setInputValue("taxonset", ((Tree) tree).getTaxonset());
                 prior.initAndValidate();
-                context.addBEASTObject(prior, generator.getRootAge().getGenerator());
-
-                RealParameter beastRootAge = context.getAsRealParameter(generator.getRootAge());
+                context.addBEASTObject(prior, rootAgeVal.getGenerator());
                 context.removeBEASTObject(beastRootAge);
                 context.removeBEASTObject(beastRootAgeGenerator);
             } else {

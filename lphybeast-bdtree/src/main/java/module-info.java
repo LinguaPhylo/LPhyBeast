@@ -1,7 +1,7 @@
 open module lphy.beast.bdtree {
     requires lphy.beast;
     requires beast.base;
-    requires beast.bdtree;
+    requires bdtree;
     requires lphy.base;
 
     exports bdtree.lphybeast.spi;

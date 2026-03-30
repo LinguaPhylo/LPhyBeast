@@ -16,7 +16,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.compevol</groupId>
-            <artifactId>beast-bdtree</artifactId>
+            <artifactId>bdtree</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
