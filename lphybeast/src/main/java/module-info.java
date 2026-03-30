@@ -23,6 +23,7 @@ open module lphy.beast {
     uses lphybeast.spi.ValueHandler;
     uses lphybeast.spi.TreeLikelihoodStrategy;
     uses lphybeast.spi.OperatorContributor;
+    uses lphybeast.spi.ClockOperatorContributor;
     uses lphybeast.spi.AlignmentHandler;
 
     provides lphybeast.spi.LPhyBEASTMapping with lphybeast.spi.LPhyBEASTMappingImpl;

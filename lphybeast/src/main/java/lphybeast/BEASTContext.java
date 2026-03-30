@@ -157,6 +157,10 @@ public class BEASTContext {
         return loader.operatorContributors;
     }
 
+    public List<ClockOperatorContributor> getClockOperatorContributors() {
+        return loader.clockOperatorContributors;
+    }
+
     public List<AlignmentHandler> getAlignmentHandlers() {
         return loader.alignmentHandlers;
     }

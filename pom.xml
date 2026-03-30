@@ -27,6 +27,7 @@
         <module>lphybeast-ma</module>
         <module>lphybeast-sa</module>
         <module>lphybeast-mm</module>
+        <module>lphybeast-orc</module>
         <!-- <module>lphybeast-mascot</module> -->
         <!-- <module>lphybeast-flc</module> -->
         <!-- <module>lphybeast-ext-dist</module> -->

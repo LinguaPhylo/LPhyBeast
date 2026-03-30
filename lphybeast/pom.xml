@@ -62,9 +62,9 @@
 
         <!-- BEAGLE (optional in beast-base, needed at runtime for TreeLikelihood) -->
         <dependency>
-            <groupId>io.github.compevol</groupId>
+            <groupId>io.github.beagle-dev</groupId>
             <artifactId>beagle</artifactId>
-            <version>1.0</version>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- SubstModels (GTR and other nucleotide substitution models) -->

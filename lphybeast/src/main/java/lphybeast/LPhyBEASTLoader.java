@@ -76,6 +76,7 @@ public class LPhyBEASTLoader {
     public List<ValueHandler> valueHandlers;
     public List<TreeLikelihoodStrategy> treeLikelihoodStrategies;
     public List<OperatorContributor> operatorContributors;
+    public List<ClockOperatorContributor> clockOperatorContributors;
     public List<AlignmentHandler> alignmentHandlers;
 
     /**
@@ -186,6 +187,7 @@ public class LPhyBEASTLoader {
         valueHandlers = new ArrayList<>();
         treeLikelihoodStrategies = new ArrayList<>();
         operatorContributors = new ArrayList<>();
+        clockOperatorContributors = new ArrayList<>();
         alignmentHandlers = new ArrayList<>();
 
         generatorSources = new LinkedHashMap<>();
@@ -237,6 +239,7 @@ public class LPhyBEASTLoader {
             discoverServices(ValueHandler.class, valueHandlers);
             discoverServices(TreeLikelihoodStrategy.class, treeLikelihoodStrategies);
             discoverServices(OperatorContributor.class, operatorContributors);
+            discoverServices(ClockOperatorContributor.class, clockOperatorContributors);
             discoverServices(AlignmentHandler.class, alignmentHandlers);
 
             System.out.println("Load " + valueToBEASTList.size() + " ValuesToBEAST = " + valueToBEASTList);
@@ -249,6 +252,7 @@ public class LPhyBEASTLoader {
                     valueHandlers.size() + " ValueHandler(s), " +
                     treeLikelihoodStrategies.size() + " TreeLikelihoodStrategy(s), " +
                     operatorContributors.size() + " OperatorContributor(s), " +
+                    clockOperatorContributors.size() + " ClockOperatorContributor(s), " +
                     alignmentHandlers.size() + " AlignmentHandler(s)");
 
         } catch (ServiceConfigurationError serviceError) {

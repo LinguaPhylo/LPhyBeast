@@ -10,8 +10,6 @@ import beast.base.evolution.datatype.UserDataType;
 import beast.base.evolution.likelihood.GenericTreeLikelihood;
 import beast.base.inference.Distribution;
 import beast.base.spec.evolution.likelihood.ThreadedTreeLikelihood;
-import beast.base.evolution.operator.AdaptableOperatorSampler;
-import beast.base.evolution.operator.Exchange;
 import beast.base.evolution.operator.kernel.BactrianScaleOperator;
 import beast.base.spec.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
@@ -39,13 +37,6 @@ import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.loggers.TraitTreeLogger;
 import lphybeast.tobeast.operators.DefaultOperatorStrategy;
-// TODO: move to lphybeast-orc extension module
-//import orc.consoperators.InConstantDistanceOperator;
-//import orc.consoperators.SimpleDistance;
-//import orc.consoperators.SmallPulley;
-//import orc.consoperators.UcldScalerOperator;
-//import orc.ner.NEROperator_dAE_dBE_dCE;
-//import orc.operators.SampleFromPriorOperator;
 
 import java.util.Map;
 
@@ -235,8 +226,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, BEASTInterf
                 treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
 
                 if (skipBranchOperators == false) {
-                    // TODO: move to lphybeast-orc extension module
-                    //addORCOperators(tree, relaxedClockModel, context);
+                    addClockOperators(tree, relaxedClockModel, context);
                 }
 
             } else if (generator instanceof IID &&
@@ -265,8 +255,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, BEASTInterf
                 treeLikelihood.setInputValue("branchRateModel", relaxedClockModel);
 
                 if (skipBranchOperators == false) {
-                    // TODO: move to lphybeast-orc extension module
-                    //addORCOperators(tree, relaxedClockModel, context);
+                    addClockOperators(tree, relaxedClockModel, context);
                 }
 
             } else if (beastBranchModel instanceof beast.base.spec.evolution.branchratemodel.Base specBranchRateModel) {
@@ -355,59 +344,17 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, BEASTInterf
         return siteModel;
     }
 
-    // TODO: ORC operator methods removed. Move to lphybeast-orc extension module.
-
-
     /**
-     * @deprecated this will be replaced by ORC soon
+     * Delegate to ClockOperatorContributor SPI implementations (e.g., ORC extension).
+     * If no contributors are registered, no extra clock operators are added.
      */
-    @Deprecated
-    //    private static void addRelaxedClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, BEASTContext context) {
-    //
-    //        RealParameter rates = relaxedClockModel.rateInput.get();
-    //
-    //        double tWindowSize = tree.getRoot().getHeight() / 10.0;
-    //
-    //        InConstantDistanceOperator inConstantDistanceOperator = new InConstantDistanceOperator();
-    //        inConstantDistanceOperator.setInputValue("clockModel", relaxedClockModel);
-    //        inConstantDistanceOperator.setInputValue("tree", tree);
-    //        inConstantDistanceOperator.setInputValue("rates", rates);
-    //        inConstantDistanceOperator.setInputValue("twindowSize", tWindowSize);
-    //        inConstantDistanceOperator.setInputValue("weight", BEASTContext.getOperatorWeight(tree.getNodeCount()));
-    //        inConstantDistanceOperator.setID(relaxedClockModel.getID() + ".inConstantDistanceOperator");
-    //        inConstantDistanceOperator.initAndValidate();
-    //        context.addExtraOperator(inConstantDistanceOperator);
-    //
-    //        SimpleDistance simpleDistance = new SimpleDistance();
-    //        simpleDistance.setInputValue("clockModel", relaxedClockModel);
-    //        simpleDistance.setInputValue("tree", tree);
-    //        simpleDistance.setInputValue("rates", rates);
-    //        simpleDistance.setInputValue("twindowSize", tWindowSize);
-    //        simpleDistance.setInputValue("weight", BEASTContext.getOperatorWeight(2));
-    //        simpleDistance.setID(relaxedClockModel.getID() + ".simpleDistance");
-    //        simpleDistance.initAndValidate();
-    //        context.addExtraOperator(simpleDistance);
-    //
-    //        BigPulley bigPulley = new BigPulley();
-    //        bigPulley.setInputValue("tree", tree);
-    //        bigPulley.setInputValue("rates", rates);
-    //        bigPulley.setInputValue("twindowSize", tWindowSize);
-    //        bigPulley.setInputValue("dwindowSize", 0.1);
-    //        bigPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
-    //        bigPulley.setID(relaxedClockModel.getID() + ".bigPulley");
-    //        bigPulley.initAndValidate();
-    //        context.addExtraOperator(bigPulley);
-    //
-    //        SmallPulley smallPulley = new SmallPulley();
-    //        smallPulley.setInputValue("clockModel", relaxedClockModel);
-    //        smallPulley.setInputValue("tree", tree);
-    //        smallPulley.setInputValue("rates", rates);
-    //        smallPulley.setInputValue("dwindowSize", 0.1);
-    //        smallPulley.setInputValue("weight", BEASTContext.getOperatorWeight(2));
-    //        smallPulley.setID(relaxedClockModel.getID() + ".smallPulley");
-    //        smallPulley.initAndValidate();
-    //        context.addExtraOperator(smallPulley);
-    //    }
+    private static void addClockOperators(Tree tree, UCRelaxedClockModel relaxedClockModel, BEASTContext context) {
+        for (var contributor : context.getClockOperatorContributors()) {
+            for (var operator : contributor.createOperators(tree, relaxedClockModel, context)) {
+                context.addExtraOperator(operator);
+            }
+        }
+    }
 
     @Override
     public Class<PhyloCTMC> getGeneratorClass() {
