@@ -16,7 +16,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.compevol</groupId>
-            <artifactId>beast-mutable-alignment</artifactId>
+            <artifactId>mutable-alignment</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

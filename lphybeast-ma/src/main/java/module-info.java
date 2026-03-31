@@ -1,7 +1,7 @@
 open module lphy.beast.ma {
     requires lphy.beast;
     requires beast.base;
-    requires beast.mutable.alignment;
+    requires mutable.alignment;
     requires lphy.base;
 
     exports ma.lphybeast;
