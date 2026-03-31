@@ -146,12 +146,12 @@ Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated)
 
 - ✅ `lphybeast-sa` — all 4 generators use spec types (`RealScalarParam<PositiveReal>`, `RealScalarParam<UnitInterval>`)
 - ✅ `lphybeast-bdtree` — spec types complete (31 Mar). `getAsRealScalar`, `RealScalar`, spec `Uniform`, spec `MRCAPrior`.
+- ✅ `lphybeast-mm` — already clean (31 Mar). No deprecated types used.
+- ✅ `lphybeast-mc3` — already clean (31 Mar). No deprecated types used.
+- ✅ `lphybeast-ma` — clean (31 Mar). `GenericTreeLikelihood` return type narrowed to `BEASTInterface`.
 
 ## TODO: Extension modules
 
 | Module | Scope |
 |--------|-------|
 | `lphybeast-feast` | 3 generators, `Function` dependency |
-| `lphybeast-mm` | 1 generator (LewisMK) |
-| `lphybeast-mc3` | MCMC strategy only |
-| `lphybeast-ma` | 3 handlers |
