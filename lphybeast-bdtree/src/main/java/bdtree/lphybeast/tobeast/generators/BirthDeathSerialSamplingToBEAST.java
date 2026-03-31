@@ -2,9 +2,9 @@ package bdtree.lphybeast.tobeast.generators;
 
 import bdtree.likelihood.BirthDeathSequentialSampling;
 import beast.base.core.BEASTInterface;
-import beast.base.evolution.tree.MRCAPrior;
 import beast.base.evolution.tree.Tree;
-import beast.base.inference.Distribution;
+import beast.base.spec.evolution.tree.MRCAPrior;
+import beast.base.spec.inference.distribution.ScalarDistribution;
 import beast.base.spec.type.RealScalar;
 import lphy.base.evolution.birthdeath.BirthDeathSerialSamplingTree;
 import lphy.core.logger.LoggerUtils;
@@ -33,8 +33,8 @@ public class BirthDeathSerialSamplingToBEAST implements
             BEASTInterface beastRootAge = context.getBEASTObject(rootAgeVal);
             BEASTInterface beastRootAgeGenerator = context.getBEASTObject(rootAgeVal.getGenerator());
 
-            if (beastRootAge instanceof RealScalar && beastRootAgeGenerator instanceof Distribution) {
-                Distribution rootAgeDist = (Distribution) beastRootAgeGenerator;
+            if (beastRootAge instanceof RealScalar && beastRootAgeGenerator instanceof ScalarDistribution) {
+                ScalarDistribution rootAgeDist = (ScalarDistribution) beastRootAgeGenerator;
 
                 Double lower = Double.NEGATIVE_INFINITY;
                 Double upper = Double.POSITIVE_INFINITY;

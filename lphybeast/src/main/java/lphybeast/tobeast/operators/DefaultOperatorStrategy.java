@@ -3,33 +3,25 @@ package lphybeast.tobeast.operators;
 import beast.base.core.BEASTInterface;
 import beast.base.core.BEASTObject;
 import beast.base.core.Function;
-import beast.base.evolution.operator.AdaptableOperatorSampler;
 import beast.base.evolution.operator.Exchange;
 import beast.base.evolution.operator.TreeOperator;
-import beast.base.evolution.operator.kernel.BactrianScaleOperator;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.Operator;
+import beast.base.inference.Scalable;
 import beast.base.inference.StateNode;
-import beast.base.inference.operator.BitFlipOperator;
-import beast.base.inference.operator.IntRandomWalkOperator;
-import beast.base.inference.operator.kernel.BactrianDeltaExchangeOperator;
-import beast.base.inference.operator.kernel.BactrianRandomWalkOperator;
-import beast.base.inference.operator.kernel.BactrianUpDownOperator;
-import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.IntegerParameter;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.evolution.operator.AdaptableOperatorSampler;
+import beast.base.spec.evolution.operator.UpDownOperator;
+import beast.base.spec.inference.operator.DeltaExchangeOperator;
 import beast.base.spec.inference.parameter.BoolVectorParam;
 import beast.base.spec.inference.parameter.IntSimplexParam;
 import beast.base.spec.inference.parameter.RealScalarParam;
 import beast.base.spec.inference.parameter.RealVectorParam;
 import beast.base.spec.inference.parameter.SimplexParam;
 import com.google.common.collect.Multimap;
-import lphy.base.distribution.Dirichlet;
-import lphy.base.distribution.RandomComposition;
 import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.*;
-import lphy.core.vectorization.IID;
 import lphybeast.BEASTContext;
 import lphybeast.spi.OperatorContributor;
 
@@ -54,31 +46,6 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
     }
 
 
-    @Override
-    public Operator getScaleOperator() {
-        return new BactrianScaleOperator();
-    }
-
-    @Override
-    public Operator getDeltaExchangeOperator() {
-        return new BactrianDeltaExchangeOperator();
-    }
-
-    @Override
-    public Operator getRandomWalkOperator() {
-        return new BactrianRandomWalkOperator();
-    }
-
-    @Override
-    public Operator getIntRandomWalkOperator() {
-        return new IntRandomWalkOperator();
-    }
-
-    @Override
-    public Operator getBitFlipOperator() {
-        return new BitFlipOperator();
-    }
-
     /**
      * @return  a list of {@link Operator}.
      */
@@ -90,8 +57,7 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         Set<StateNode> skipOperators = context.getSkipOperators();
         for (StateNode stateNode : context.getState()) {
             if (!skipOperators.contains(stateNode)) {
-                // The default template to create operators
-                // beast3 spec types first
+                // beast3 spec types
                 if (stateNode instanceof SimplexParam simplex) {
                     operators.add(createSimplexOperator(simplex));
                 } else if (stateNode instanceof IntSimplexParam<?> intSimplex) {
@@ -102,14 +68,6 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                     operators.add(createRealScalarOperator(realScalar));
                 } else if (stateNode instanceof BoolVectorParam boolVector) {
                     operators.add(createBoolVectorOperator(boolVector));
-                // legacy beast2 types
-                } else if (stateNode instanceof RealParameter realParameter) {
-                    Operator operator = createBEASTOperator(realParameter);
-                    if (operator != null) operators.add(operator);
-                } else if (stateNode instanceof IntegerParameter integerParameter) {
-                    operators.add(createBEASTOperator(integerParameter));
-                } else if (stateNode instanceof BooleanParameter booleanParameter) {
-                    operators.add(createBitFlipOperator(booleanParameter));
                 } else if (stateNode instanceof Tree tree) {
                     TreeOperatorStrategy treeOperatorStrategy = context.resolveTreeOperatorStrategy(tree);
                     // create operators
@@ -188,110 +146,6 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
     }
 
 
-    //*** parameter operators ***//
-
-    public Operator createBEASTOperator(RealParameter parameter) {
-        Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
-        Collection<GraphicalModelNode<?>> nodes = elements.get(parameter);
-
-        if (nodes.stream().anyMatch(node -> node instanceof RandomVariable)) {
-
-            GraphicalModelNode graphicalModelNode = (GraphicalModelNode)nodes.stream().filter(node -> node instanceof RandomVariable).toArray()[0];
-
-            RandomVariable<?> variable = (RandomVariable<?>) graphicalModelNode;
-
-            Operator operator;
-            GenerativeDistribution generativeDistribution = variable.getGenerativeDistribution();
-
-            if (generativeDistribution instanceof Dirichlet ||
-                    (generativeDistribution instanceof IID &&
-                            ((IID<?>) generativeDistribution).getBaseDistribution() instanceof Dirichlet) ) {
-                Double[] value = (Double[]) variable.value();
-                operator = getDeltaExchangeOperator();
-                operator.setInputValue("parameter", parameter);
-                operator.setInputValue("weight", getOperatorWeight(parameter.getDimension() - 1));
-                operator.setInputValue("delta", 1.0 / value.length);
-                operator.initAndValidate();
-                operator.setID(parameter.getID() + ".deltaExchange");
-
-            } else if (supportNegativeValues(generativeDistribution)) {
-                // any distribution with support in negative values, e.g. Normal, Laplace.
-                operator = getRandomWalkOperator();
-                operator.setInputValue("parameter", parameter);
-                operator.setInputValue("weight", getOperatorWeight(parameter.getDimension()));
-                operator.setInputValue("scaleFactor", 0.75);
-                operator.initAndValidate();
-                operator.setID(parameter.getID() + ".randomWalk");
-
-            } else {
-                operator = getScaleOperator();
-                operator.setInputValue("parameter", parameter);
-                operator.setInputValue("weight", getOperatorWeight(parameter.getDimension()));
-                operator.setInputValue("scaleFactor", 0.75);
-                operator.initAndValidate();
-                operator.setID(parameter.getID() + ".scale");
-            }
-            elements.put(operator, null);
-            return operator;
-        } else {
-            LoggerUtils.log.severe("No LPhy random variable associated with beast state node " + parameter.getID());
-            return null;
-        }
-    }
-
-    // for RandomWalkOperator
-    public static boolean supportNegativeValues(GenerativeDistribution generativeDistribution) {
-        if ( generativeDistribution instanceof GenerativeDistribution1D<?> oneD) {
-            Object[] bounds = oneD.getDomainBounds();
-            if ( bounds[0] instanceof Number lower && bounds[1] instanceof Number upper ) {
-                return lower.doubleValue() < 0 && upper.doubleValue() > 0;
-            }
-            return false;
-        }
-        return false;
-    }
-
-    public Operator createBEASTOperator(IntegerParameter parameter) {
-        Map<BEASTInterface, GraphicalModelNode<?>> BEASTToLPHYMap = context.getBEASTToLPHYMap();
-        // TODO safe cast?
-        RandomVariable<?> variable = (RandomVariable<?>) BEASTToLPHYMap.get(parameter);
-
-        Operator operator;
-        if (variable.getGenerativeDistribution() instanceof RandomComposition) {
-            System.out.println("Constructing operator for randomComposition");
-
-            operator = getDeltaExchangeOperator();
-            operator.setInputValue("intparameter", parameter);
-            operator.setInputValue("weight", getOperatorWeight(parameter.getDimension() - 1));
-            operator.setInputValue("delta", 2.0);
-            operator.setInputValue("integer", true);
-            operator.initAndValidate();
-            operator.setID(parameter.getID() + ".deltaExchange");
-        } else {
-            operator = getIntRandomWalkOperator();
-            operator.setInputValue("parameter", parameter);
-            operator.setInputValue("weight", getOperatorWeight(parameter.getDimension()));
-
-            // TODO implement an optimizable int random walk that uses a reflected Poisson distribution for the jump size with the mean of the Poisson being the optimizable parameter
-            operator.setInputValue("windowSize", 1);
-            operator.initAndValidate();
-            operator.setID(parameter.getID() + ".randomWalk");
-        }
-        Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
-        elements.put(operator, null);
-        return operator;
-    }
-
-    private Operator createBitFlipOperator(BooleanParameter parameter) {
-        Operator operator = getBitFlipOperator();
-        operator.setInputValue("parameter", parameter);
-        operator.setInputValue("weight", getOperatorWeight(parameter.getDimension()));
-        operator.initAndValidate();
-        operator.setID(parameter.getID() + ".bitFlip");
-
-        return operator;
-    }
-
     //*** beast3 spec parameter operators ***//
 
     private Operator createSimplexOperator(SimplexParam simplex) {
@@ -356,12 +210,24 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
 
     //*** static methods ***//
 
+    // for RandomWalkOperator
+    public static boolean supportNegativeValues(GenerativeDistribution generativeDistribution) {
+        if ( generativeDistribution instanceof GenerativeDistribution1D<?> oneD) {
+            Object[] bounds = oneD.getDomainBounds();
+            if ( bounds[0] instanceof Number lower && bounds[1] instanceof Number upper ) {
+                return lower.doubleValue() < 0 && upper.doubleValue() > 0;
+            }
+            return false;
+        }
+        return false;
+    }
+
     // when both mu and tree are random var
     public static void addUpDownOperator(Tree tree, StateNode clockRate, BEASTContext context) {
         String idStr = clockRate.getID() + "Up" + tree.getID() + "DownOperator";
         // avoid to duplicate updown ops from the same pair of rate and tree
         if (!context.hasExtraOperator(idStr)) {
-            Operator upDownOperator = new BactrianUpDownOperator();
+            Operator upDownOperator = new UpDownOperator();
             upDownOperator.setID(idStr);
             upDownOperator.setInputValue("up", clockRate);
             upDownOperator.setInputValue("down", tree);
@@ -385,11 +251,15 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         String idStr = expression.getID() + "Up" + tree.getID() + "DownOperator";
         // avoid to duplicate updown ops from the same pair of rate and tree
         if (!context.hasExtraOperator(idStr)) {
-            Operator upDownOperator = new BactrianUpDownOperator();
+            Operator upDownOperator = new UpDownOperator();
             upDownOperator.setID(idStr);
 
             for (Function function : upArgs) {
-                upDownOperator.setInputValue("up", function);
+                if (function instanceof Scalable) {
+                    upDownOperator.setInputValue("up", function);
+                } else {
+                    LoggerUtils.log.warning("Cannot add " + function + " to up-down operator: not Scalable");
+                }
             }
             LoggerUtils.log.warning("The clock rate is computed by expression " +
                     expression.getID() +
@@ -401,11 +271,12 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         }
     }
 
+    // TODO: migrate to spec DeltaExchangeOperator once BEASTContext.getAsIntVector() exists
     public static void addDeltaExchangeOperator(Value<Double[]> value, List<Function> args, BEASTContext context) {
         WeightedDirichlet weightedDirichlet = (WeightedDirichlet) value.getGenerator();
         IntegerParameter weightIntParam = context.getAsIntegerParameter(weightedDirichlet.getWeights());
 
-        Operator operator = new BactrianDeltaExchangeOperator();
+        Operator operator = new beast.base.inference.operator.kernel.BactrianDeltaExchangeOperator();
         operator.setInputValue("parameter", args);
         operator.setInputValue("weight", BEASTContext.getOperatorWeight(args.size() - 1));
         operator.setInputValue("weightvector", weightIntParam);

@@ -1,14 +1,12 @@
 package lphybeast.tobeast.operators;
 
-import beast.base.evolution.operator.EpochFlexOperator;
 import beast.base.evolution.operator.Exchange;
-import beast.base.evolution.operator.TreeStretchOperator;
 import beast.base.evolution.operator.WilsonBalding;
 import beast.base.evolution.operator.kernel.BactrianNodeOperator;
-import beast.base.evolution.operator.kernel.BactrianScaleOperator;
 import beast.base.evolution.operator.kernel.BactrianSubtreeSlide;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.Operator;
+import beast.base.spec.evolution.operator.ScaleTreeOperator;
 import lphybeast.BEASTContext;
 
 /**
@@ -27,17 +25,7 @@ public class DefaultTreeOperatorStrategy implements TreeOperatorStrategy {
 
     @Override
     public Operator getScaleOperator() {
-        return new BactrianScaleOperator(); // still used by TreeRootScaler
-    }
-
-    @Override
-    public Operator getBICEPSEpochTopOrAll() {
-        return new EpochFlexOperator();
-    }
-
-    @Override
-    public Operator getBICEPSTreeFlex() {
-        return new TreeStretchOperator();
+        return new ScaleTreeOperator();
     }
 
     @Override

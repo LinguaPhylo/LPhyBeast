@@ -17,16 +17,4 @@ public interface OperatorStrategy {
      */
     List<Operator> createOperators();
 
-    // get the instance, assign the inputs later
-
-    Operator getScaleOperator();
-
-    Operator getDeltaExchangeOperator();
-
-    Operator getRandomWalkOperator();
-
-    Operator getIntRandomWalkOperator();
-
-    Operator getBitFlipOperator();
-
 }

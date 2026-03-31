@@ -36,7 +36,6 @@ public interface TreeOperatorStrategy extends BICESPSTreeOperatorStractegy {
 
     // static creator, so could use context.addSkipOperator((Tree) tree)
     // combining with context.addExtraOperator(
-    @Deprecated
     static Operator createTreeScaleOperator(Tree tree, BEASTContext context) {
         TreeOperatorStrategy treeOperatorStrategy = context.resolveTreeOperatorStrategy(tree);
         Operator operator = treeOperatorStrategy.getScaleOperator();
@@ -119,14 +118,7 @@ public interface TreeOperatorStrategy extends BICESPSTreeOperatorStractegy {
     default List<Operator> createTreeOperators(Tree tree, BEASTContext context) {
         List<Operator> operators = new ArrayList<>();
 
-        // replace tree scale operator with more efficient BICESPS operators
-        if (context.resolveTreeOperatorStrategy(tree) instanceof StandardTreeOperatorStrategy)
-            operators.add(createTreeScaleOperator(tree, context));
-        else { // default
-            operators.add(BICESPSTreeOperatorStractegy.createBICEPSEpochTop(tree, context));
-            operators.add(BICESPSTreeOperatorStractegy.createBICEPSEpochAll(tree, context));
-            operators.add(BICESPSTreeOperatorStractegy.createBICEPSTreeFlex(tree, context));
-        }
+        operators.add(BICESPSTreeOperatorStractegy.createIntervalScaleOperator(tree, context));
         operators.add(createRootHeightOperator(tree, context));
         operators.add(createExchangeOperator(tree, context, true));
         operators.add(createExchangeOperator(tree, context, false));
