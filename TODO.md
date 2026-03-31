@@ -148,7 +148,7 @@ Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated)
 - ✅ `lphybeast-bdtree` — spec types complete (31 Mar). `getAsRealScalar`, `RealScalar`, spec `Uniform`, spec `MRCAPrior`.
 - ✅ `lphybeast-mm` — already clean (31 Mar). No deprecated types used.
 - ✅ `lphybeast-mc3` — already clean (31 Mar). No deprecated types used.
-- ✅ `lphybeast-ma` — clean (31 Mar). `GenericTreeLikelihood` return type narrowed to `BEASTInterface`.
+- ✅ `lphybeast-ma` — clean (31 Mar). Dependency updated (31 Mar): `mutable-alignment` artifact, `mutable.alignment` JPMS module.
 
 ## TODO: Extension modules
 
