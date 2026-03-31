@@ -137,17 +137,20 @@ Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated)
 - ✅ `ValueHandler` — no old types (uses core `Function`/`StateNode` interfaces)
 - `MapStringDoubleArrayValueToBEAST`, `ContinuousCharacterDataToBEAST` — blocked: uses `RealParameter.minordimension` (no spec equivalent)
 - ✅ `MapValueToBEAST` migrated to `RealVectorParam<Real>` with keys
-- Remaining old-type files: BEASTContext, DefaultOperatorStrategy, PhyloCTMCToBEAST
+- Remaining old-type files: BEASTContext, PhyloCTMCToBEAST
+- ✅ `DefaultOperatorStrategy` migrated (31 Mar): removed legacy `RealParameter`/`IntegerParameter`/`BooleanParameter` fallback branches and deprecated factory methods. `addUpDownOperator` → spec `UpDownOperator`. `AdaptableOperatorSampler` → spec. `addDeltaExchangeOperator` still blocked on `BEASTContext.getAsIntVector()` and `Function` → `Tensor`.
+- ✅ Tree operator strategies migrated (31 Mar): `ScaleTreeOperator` replaces `BactrianScaleOperator` and old `ScaleOperator`. `IntervalScaleOperator` replaces `EpochFlexOperator` + `TreeStretchOperator` combo. `BICESPSTreeOperatorStractegy` simplified.
+- ✅ `BirthDeathSampleTreeDTToBEAST` and bdtree `BirthDeathSerialSamplingToBEAST` migrated to spec `MRCAPrior` + `ScalarDistribution`
 
 ## DONE: Extension modules
 
 - ✅ `lphybeast-sa` — all 4 generators use spec types (`RealScalarParam<PositiveReal>`, `RealScalarParam<UnitInterval>`)
+- ✅ `lphybeast-bdtree` — spec types complete (31 Mar). `getAsRealScalar`, `RealScalar`, spec `Uniform`, spec `MRCAPrior`.
 
 ## TODO: Extension modules
 
 | Module | Scope |
 |--------|-------|
-| `lphybeast-bdtree` | 1 generator, complex prior handling |
 | `lphybeast-feast` | 3 generators, `Function` dependency |
 | `lphybeast-mm` | 1 generator (LewisMK) |
 | `lphybeast-mc3` | MCMC strategy only |
