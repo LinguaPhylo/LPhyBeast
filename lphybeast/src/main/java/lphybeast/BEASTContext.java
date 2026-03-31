@@ -6,7 +6,7 @@ import beast.base.core.Loggable;
 import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.alignment.Taxon;
 import beast.base.evolution.datatype.DataType;
-import beast.base.evolution.likelihood.GenericTreeLikelihood;
+import beast.base.spec.evolution.likelihood.GenericTreeLikelihood;
 import beast.base.evolution.substitutionmodel.Frequencies;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeInterface;

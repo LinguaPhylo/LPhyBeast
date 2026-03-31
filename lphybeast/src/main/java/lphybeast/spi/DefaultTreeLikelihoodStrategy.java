@@ -1,7 +1,7 @@
 package lphybeast.spi;
 
-import beast.base.core.BEASTInterface;
 import beast.base.evolution.alignment.Alignment;
+import beast.base.spec.evolution.likelihood.GenericTreeLikelihood;
 import beast.base.spec.evolution.likelihood.ThreadedTreeLikelihood;
 
 /**
@@ -15,7 +15,7 @@ public class DefaultTreeLikelihoodStrategy implements TreeLikelihoodStrategy {
     }
 
     @Override
-    public BEASTInterface createTreeLikelihood(Alignment alignment, boolean isObserved) {
+    public GenericTreeLikelihood createTreeLikelihood(Alignment alignment, boolean isObserved) {
         ThreadedTreeLikelihood treeLikelihood = new ThreadedTreeLikelihood();
         treeLikelihood.setInputValue("useAmbiguities", true);
         return treeLikelihood;
