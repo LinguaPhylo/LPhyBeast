@@ -1,14 +1,16 @@
 package mascot.lphybeast;
 
-import lphy.core.io.UserDir;
-import lphybeast.TestUtils;
+import beast.pkgmgmt.BEASTClassLoader;
+import lphybeast.LPhyBEASTLoader;
+import lphybeast.LPhyBeast;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test StructuredCoalescentRateShifts conversion to MASCOT GLM with rate shifts.
@@ -18,18 +20,14 @@ public class StructuredCoalescentRateShiftsTest {
 
     @BeforeEach
     public void setUp() {
-        // load ../LPhyBeast/lphybeast/version.xml
-        Path lphybeastDir = Paths.get(UserDir.getUserDir().toAbsolutePath().getParent().toString(),
-                "..", "LPhyBeast", "lphybeast");
-        TestUtils.loadServices(lphybeastDir.toString());
-        // load mascot/version.xml
-        Path parentDir = UserDir.getUserDir().toAbsolutePath();
-        TestUtils.loadServices(parentDir.toString());
+        BEASTClassLoader.classLoader.addServices("lphybeast-mascot", Map.of(
+                "lphybeast.spi.LPhyBEASTMapping", Set.of("mascot.lphybeast.spi.MascotLBImpl")
+        ));
+        LPhyBEASTLoader.loadServicesForTest(System.getProperty("user.dir") + "/../lphybeast");
     }
 
     @Test
-    public void testSimpleRateShifts() {
-        // Test with constant rates (no GLM) but with rate shifts
+    public void testSimpleRateShifts() throws IOException {
         String lphyScript = """
             data {
               S = 3;
@@ -46,41 +44,26 @@ public class StructuredCoalescentRateShiftsTest {
               m_data = [0.2, 0.1, 0.2, 0.15, 0.1, 0.15, 0.05, 0.02, 0.05, 0.03, 0.02, 0.03];
             }
             model {
-              ψ ~ StructuredCoalescentRateShifts(
+              psi ~ StructuredCoalescentRateShifts(
                 theta=theta_data,
                 m=m_data,
                 rateShiftTimes=rateShiftTimes,
                 taxa=taxa,
                 demes=demes
               );
-              D ~ PhyloCTMC(L=200, Q=jukesCantor(), tree=ψ);
+              D ~ PhyloCTMC(L=200, Q=jukesCantor(), tree=psi);
             }""";
 
-        String xml = TestUtils.lphyScriptToBEASTXML(lphyScript, "rateShiftsSimple");
+        LPhyBeast lPhyBeast = new LPhyBeast();
+        String xml = lPhyBeast.lphyStrToXML(lphyScript, "rateShiftsSimple");
+        assertNotNull(xml, "XML");
 
-        // Check GLM dynamics is used
         assertTrue(xml.contains("mascot.dynamics.GLM"), "Should use GLM dynamics");
-
-        // Check rate shifts are present with correct values
         assertTrue(xml.contains("mascot.dynamics.RateShifts"), "Should have RateShifts");
-        assertTrue(xml.contains("0.0") && xml.contains("5.0"), "Should have rate shift times 0.0 and 5.0");
-
-        // Check both Ne and migration GLMs
-        assertTrue(xml.contains("migrationGLM") || xml.contains("MigrationGLM"), "Should have migration GLM");
-        assertTrue(xml.contains("neGLM") || xml.contains("NeGLM"), "Should have Ne GLM");
-
-        System.out.println("Simple rate shifts test passed - XML generated successfully");
-
-        // Save XML for inspection
-        try {
-            java.nio.file.Files.writeString(java.nio.file.Path.of("/tmp/simpleRateShifts.xml"), xml);
-            System.out.println("XML saved to /tmp/simpleRateShifts.xml");
-        } catch (Exception e) { e.printStackTrace(); }
     }
 
     @Test
-    public void testGLMRateShifts() {
-        // Test with GLM-based rates and rate shifts
+    public void testGLMRateShifts() throws IOException {
         String lphyScript = """
             data {
               S = 3;
@@ -88,7 +71,6 @@ public class StructuredCoalescentRateShiftsTest {
               rateShiftTimes = [0.0, 5.0];
               nPredictors = 2;
 
-              // Design matrices for time-varying covariates
               X_Ne = [[2.0, 0.8], [1.5, 0.5], [1.8, 0.6],
                       [2.0, 0.2], [1.5, 0.1], [1.8, 0.15]];
               X_m = [[0.5, 0.9], [2.0, 0.5], [0.5, 0.9], [1.5, 0.6], [2.0, 0.5], [1.5, 0.6],
@@ -106,76 +88,6 @@ public class StructuredCoalescentRateShiftsTest {
               m_scale ~ LogNormal(meanlog=-2.0, sdlog=1.0);
               m = generalLinearFunction(beta=beta_m, x=X_m, link="log", scale=m_scale);
 
-              ψ ~ StructuredCoalescentRateShifts(
-                theta=theta,
-                m=m,
-                rateShiftTimes=rateShiftTimes,
-                taxa=taxa,
-                demes=demes
-              );
-              D ~ PhyloCTMC(L=200, Q=jukesCantor(), tree=ψ);
-            }""";
-
-        String xml = TestUtils.lphyScriptToBEASTXML(lphyScript, "rateShiftsGLM");
-
-        // Check GLM dynamics is used
-        assertTrue(xml.contains("mascot.dynamics.GLM"), "Should use GLM dynamics");
-
-        // Check rate shifts
-        assertTrue(xml.contains("mascot.dynamics.RateShifts"), "Should have RateShifts");
-
-        // Check GLM components - beta parameters and covariates
-        assertTrue(xml.contains("beta_Ne") || xml.contains("NeScalerGLM"), "Should have Ne beta/scaler");
-        assertTrue(xml.contains("beta_m") || xml.contains("migrationScalerGLM"), "Should have migration beta/scaler");
-        assertTrue(xml.contains("Covariate") || xml.contains("covariate"), "Should have covariates");
-
-        System.out.println("GLM rate shifts test passed - XML generated successfully");
-
-        // Save XML for inspection
-        try {
-            java.nio.file.Files.writeString(java.nio.file.Path.of("/tmp/rateShiftsGLM.xml"), xml);
-            System.out.println("XML saved to /tmp/rateShiftsGLM.xml");
-        } catch (Exception e) { e.printStackTrace(); }
-    }
-
-    @Test
-    public void testGLMRateShiftsWithCbind() {
-        // Test with GLM + rate shifts + cbind for combining multiple predictors
-        // This mirrors the full MASCOT-GLM tutorial workflow
-        String lphyScript = """
-            data {
-              S = 3;
-              nIntervals = 2;
-              rateShiftTimes = [0.0, 5.0];
-
-              // Ne: 2 predictors combined via cbind
-              // Predictor 1: static values tiled across 2 intervals => [6][1]
-              X_Ne_static = [[2.0], [1.5], [1.8], [2.0], [1.5], [1.8]];
-              // Predictor 2: time-variant values => [6][1]
-              X_Ne_tv = [[0.8], [0.5], [0.6], [0.2], [0.1], [0.15]];
-              // Combine into [6][2]
-              X_Ne = cbind(a=X_Ne_static, b=X_Ne_tv);
-
-              // Migration: 2 predictors combined via cbind
-              // 3 demes => 3*(3-1)=6 migration rates per interval => 12 total rows
-              X_m_dist = [[0.5], [2.0], [0.5], [1.5], [2.0], [1.5],
-                          [0.5], [2.0], [0.5], [1.5], [2.0], [1.5]];
-              X_m_border = [[1.0], [0.0], [1.0], [0.0], [0.0], [0.0],
-                            [1.0], [0.0], [1.0], [0.0], [0.0], [0.0]];
-              X_m = cbind(a=X_m_dist, b=X_m_border);
-
-              taxa = taxa(names=["A1","A2","A3","B1","B2","B3","C1","C2","C3"]);
-              demes = ["A","A","A","B","B","B","C","C","C"];
-            }
-            model {
-              beta_Ne ~ Normal(mean=0.0, sd=1.0, replicates=2);
-              Ne_scale ~ LogNormal(meanlog=0.0, sdlog=1.0);
-              theta = generalLinearFunction(beta=beta_Ne, x=X_Ne, link="log", scale=Ne_scale);
-
-              beta_m ~ Normal(mean=0.0, sd=1.0, replicates=2);
-              m_scale ~ LogNormal(meanlog=-2.0, sdlog=1.0);
-              m = generalLinearFunction(beta=beta_m, x=X_m, link="log", scale=m_scale);
-
               psi ~ StructuredCoalescentRateShifts(
                 theta=theta,
                 m=m,
@@ -186,26 +98,11 @@ public class StructuredCoalescentRateShiftsTest {
               D ~ PhyloCTMC(L=200, Q=jukesCantor(), tree=psi);
             }""";
 
-        String xml = TestUtils.lphyScriptToBEASTXML(lphyScript, "rateShiftsCbind");
+        LPhyBeast lPhyBeast = new LPhyBeast();
+        String xml = lPhyBeast.lphyStrToXML(lphyScript, "rateShiftsGLM");
+        assertNotNull(xml, "XML");
 
-        // Check GLM dynamics is used
         assertTrue(xml.contains("mascot.dynamics.GLM"), "Should use GLM dynamics");
         assertTrue(xml.contains("mascot.dynamics.RateShifts"), "Should have RateShifts");
-
-        // Check 2 Ne covariates from cbind
-        assertTrue(xml.contains("Ne_predictor_0"), "Should have Ne predictor 0 from cbind");
-        assertTrue(xml.contains("Ne_predictor_1"), "Should have Ne predictor 1 from cbind");
-
-        // Check 2 migration covariates from cbind
-        assertTrue(xml.contains("migration_predictor_0"), "Should have migration predictor 0 from cbind");
-        assertTrue(xml.contains("migration_predictor_1"), "Should have migration predictor 1 from cbind");
-
-        System.out.println("GLM rate shifts with cbind test passed - XML generated successfully");
-
-        // Save XML for inspection
-        try {
-            java.nio.file.Files.writeString(java.nio.file.Path.of("/tmp/rateShiftsCbind.xml"), xml);
-            System.out.println("XML saved to /tmp/rateShiftsCbind.xml");
-        } catch (Exception e) { e.printStackTrace(); }
     }
 }

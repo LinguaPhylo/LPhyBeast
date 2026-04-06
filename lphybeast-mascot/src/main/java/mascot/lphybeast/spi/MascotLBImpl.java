@@ -5,10 +5,8 @@ import jebl.evolution.sequences.SequenceType;
 import lphy.core.model.Generator;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
-import lphybeast.spi.LPhyBEASTExt;
-import mascot.lphybeast.tobeast.generators.PoissonIndicatorsToBEAST;
+import lphybeast.spi.LPhyBEASTMapping;
 import mascot.lphybeast.tobeast.generators.StructuredCoalescentToMascot;
-import mascot.lphybeast.tobeast.generators.StructuredCoalescentToGLM;
 import mascot.lphybeast.tobeast.generators.StructuredCoalescentRateShiftsToGLM;
 
 import java.util.ArrayList;
@@ -24,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * to extend.
  * @author Walter Xie
  */
-public class MascotLBImpl implements LPhyBEASTExt {
+public class MascotLBImpl implements LPhyBEASTMapping {
 
     @Override
     public List<Class<? extends ValueToBEAST>> getValuesToBEASTs() {
@@ -35,8 +33,7 @@ public class MascotLBImpl implements LPhyBEASTExt {
     public List<Class<? extends GeneratorToBEAST>> getGeneratorToBEASTs() {
         return Arrays.asList(
                 StructuredCoalescentToMascot.class,
-                StructuredCoalescentRateShiftsToGLM.class,
-                PoissonIndicatorsToBEAST.class
+                StructuredCoalescentRateShiftsToGLM.class
         );
     }
 
@@ -52,7 +49,6 @@ public class MascotLBImpl implements LPhyBEASTExt {
 
     @Override
     public List<Class> getExcludedValueType() {
-        // For a complex logic, or arrays, use isExcludedValue
         return new ArrayList<>();
     }
 

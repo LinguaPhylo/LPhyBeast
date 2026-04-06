@@ -4,8 +4,10 @@ import beast.base.core.BEASTInterface;
 import beast.base.evolution.alignment.Taxon;
 import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.tree.TraitSet;
-import beast.base.inference.parameter.BooleanParameter;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.Real;
+import beast.base.spec.inference.parameter.BoolVectorParam;
+import beast.base.spec.inference.parameter.RealScalarParam;
+import beast.base.spec.inference.parameter.RealVectorParam;
 import lphy.base.evolution.coalescent.StructuredCoalescentRateShifts;
 import lphy.base.evolution.tree.TimeTree;
 import lphy.base.evolution.tree.TimeTreeNode;
@@ -29,54 +31,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Converts LPhy {@link StructuredCoalescentRateShifts} to BEAST2 MASCOT GLM.
- * <p>
- * This converter handles the structured coalescent with time-varying (piecewise constant)
- * migration rates and effective population sizes. Rate shifts occur at fixed times
- * specified by the user.
- * </p>
- *
- * <h2>Deme Ordering Contract</h2>
- * <p>
- * Demes are <b>always sorted alphabetically</b> in both LPhy and MASCOT.
- * The theta and m arrays must be provided in the correct flattened order:
- * </p>
- * <ul>
- *   <li>theta: [interval0_deme0, interval0_deme1, ..., interval1_deme0, ...]</li>
- *   <li>m: [interval0_0→1, interval0_0→2, ..., interval1_0→1, ...]</li>
- * </ul>
- *
- * <h2>LPhy Usage</h2>
- * <pre>
- * // Direct rate specification:
- * ψ ~ StructuredCoalescentRateShifts(
- *     theta=theta_data,
- *     m=m_data,
- *     rateShiftTimes=rateShiftTimes,
- *     taxa=taxa,
- *     demes=demes
- * );
- *
- * // GLM-based rates:
- * theta = generalLinearFunction(beta=beta_Ne, x=X_Ne, link="log", scale=Ne_scale);
- * m = generalLinearFunction(beta=beta_m, x=X_m, link="log", scale=m_scale);
- * ψ ~ StructuredCoalescentRateShifts(
- *     theta=theta,
- *     m=m,
- *     rateShiftTimes=rateShiftTimes,
- *     taxa=taxa,
- *     demes=demes
- * );
- * </pre>
+ * Converts LPhy {@link StructuredCoalescentRateShifts} to BEAST3 MASCOT GLM.
  *
  * @author Alexei Drummond
  */
 public class StructuredCoalescentRateShiftsToGLM implements
         GeneratorToBEAST<StructuredCoalescentRateShifts, mascot.distribution.Mascot> {
 
-    /**
-     * GLM parameters extracted from GeneralLinearFunction.
-     */
     private static record GLMParams(
             Value<Double[]> beta,
             Value<?> x,
@@ -103,7 +64,6 @@ public class StructuredCoalescentRateShiftsToGLM implements
 
         Double[] rateShiftTimes = rateShiftTimesValue.value();
 
-        // Create MASCOT components
         mascot.distribution.Mascot mascot = new mascot.distribution.Mascot();
 
         // === Migration GLM ===
@@ -165,111 +125,83 @@ public class StructuredCoalescentRateShiftsToGLM implements
         return mascot;
     }
 
-    /**
-     * Create the migration GLM model.
-     * If m comes from GeneralLinearFunction, use the GLM parameters.
-     * Otherwise, treat the m values as intercept covariates.
-     */
     private LogLinear createMigrationGLM(Value<Double[]> mValue, int nDemes, int nIntervals, BEASTContext context) {
 
         int nMigRates = nDemes * (nDemes - 1);
-        int totalMigRates = nIntervals * nMigRates;
 
         GLMParams params = extractGLMParams(mValue.getGenerator());
 
         if (params != null) {
-            // m comes from GeneralLinearFunction - use full GLM
             String link = (params.link() != null) ? params.link().value() : "identity";
             if (!"log".equalsIgnoreCase(link)) {
                 throw new IllegalArgumentException("MASCOT GLM requires log link function for migration, got: " + link);
             }
             return createGLMFromParams(params, nMigRates, nIntervals, "migration", context);
         } else {
-            // m is constant data - create intercept-only GLM
             return createInterceptGLM(mValue.value(), nMigRates, nIntervals, "migration");
         }
     }
 
-    /**
-     * Create the Ne GLM model.
-     * If theta comes from GeneralLinearFunction, use the GLM parameters.
-     * Otherwise, treat the theta values as intercept covariates.
-     */
     private LogLinear createNeGLM(Value<Double[]> thetaValue, int nDemes, int nIntervals, BEASTContext context) {
-
-        int totalNe = nIntervals * nDemes;
 
         GLMParams params = extractGLMParams(thetaValue.getGenerator());
 
         if (params != null) {
-            // theta comes from GeneralLinearFunction - use full GLM
             String link = (params.link() != null) ? params.link().value() : "identity";
             if (!"log".equalsIgnoreCase(link)) {
                 throw new IllegalArgumentException("MASCOT GLM requires log link function for Ne, got: " + link);
             }
             return createGLMFromParams(params, nDemes, nIntervals, "Ne", context);
         } else {
-            // theta is constant data - create intercept-only GLM
             return createInterceptGLM(thetaValue.value(), nDemes, nIntervals, "Ne");
         }
     }
 
-    /**
-     * Create a LogLinear GLM from GeneralLinearFunction parameters.
-     */
     private LogLinear createGLMFromParams(GLMParams params, int verticalEntries, int nIntervals,
                                            String namePrefix, BEASTContext context) {
 
         Double[] beta = params.beta().value();
         int nPredictors = beta.length;
 
-        // Extract covariates from design matrix
         List<Covariate> covariates = extractCovariates(params.x(), nPredictors, verticalEntries, nIntervals, namePrefix);
 
         CovariateList covariateList = new CovariateList();
         covariateList.setInputValue("covariates", covariates);
         covariateList.initAndValidate();
 
-        // Get or create scaler parameter (beta coefficients)
-        RealParameter scalerParam = (RealParameter) context.getBEASTObject(params.beta());
+        RealVectorParam<?> scalerParam = (RealVectorParam<?>) context.getBEASTObject(params.beta());
         scalerParam.setID(namePrefix + "ScalerGLM");
 
-        // Create indicator parameter - use LPhy indicators if provided, otherwise all true
-        BooleanParameter indicatorParam;
+        BoolVectorParam indicatorParam;
         if (params.indicator() != null) {
-            indicatorParam = (BooleanParameter) context.getBEASTObject(params.indicator());
+            indicatorParam = (BoolVectorParam) context.getBEASTObject(params.indicator());
             indicatorParam.setID(namePrefix + "IndicatorGLM");
         } else {
-            Boolean[] indicators = new Boolean[nPredictors];
+            boolean[] indicators = new boolean[nPredictors];
             Arrays.fill(indicators, true);
-            indicatorParam = new BooleanParameter();
-            indicatorParam.setInputValue("value", Arrays.asList(indicators));
+            indicatorParam = new BoolVectorParam(indicators);
             indicatorParam.setID(namePrefix + "IndicatorGLM");
             indicatorParam.initAndValidate();
         }
 
-        // Create clock parameter from scale value, or default 1.0
-        RealParameter clockParam;
+        RealScalarParam<Real> clockParam;
         if (params.scale() != null) {
-            clockParam = (RealParameter) context.getBEASTObject(params.scale());
+            clockParam = (RealScalarParam<Real>) context.getBEASTObject(params.scale());
             clockParam.setID(namePrefix + "ClockGLM");
         } else {
-            clockParam = new RealParameter();
-            clockParam.setInputValue("value", "1.0");
+            clockParam = new RealScalarParam<>(1.0, Real.INSTANCE);
             clockParam.setID(namePrefix + "ClockGLM");
             clockParam.initAndValidate();
         }
 
-        // Create LogLinear GLM model
         LogLinear glm = new LogLinear();
         glm.setInputValue("covariateList", covariateList);
         glm.setInputValue("scaler", scalerParam);
         glm.setInputValue("indicator", indicatorParam);
         glm.setInputValue("clock", clockParam);
 
-        // Wire error term if provided
         if (params.error() != null) {
-            RealParameter errorParam = (RealParameter) context.getBEASTObject(params.error());
+            RealVectorParam<?> errorParam = (RealVectorParam<?>) context.getBEASTObject(params.error());
             errorParam.setID(namePrefix + "ErrorGLM");
             glm.setInputValue("error", errorParam);
         }
@@ -283,10 +215,6 @@ public class StructuredCoalescentRateShiftsToGLM implements
         return glm;
     }
 
-    /**
-     * Create an intercept-only GLM for constant rate values.
-     * The rate values become the covariate, with scaler=1.0.
-     */
     private LogLinear createInterceptGLM(Double[] values, int verticalEntries, int nIntervals, String namePrefix) {
 
         int expectedLength = nIntervals * verticalEntries;
@@ -296,8 +224,6 @@ public class StructuredCoalescentRateShiftsToGLM implements
                 " (nIntervals=" + nIntervals + " * verticalEntries=" + verticalEntries + ")");
         }
 
-        // Create a single "intercept" covariate with the log of the rate values
-        // (since MASCOT uses log-linear, we need exp(log(value)) = value)
         Double[] logValues = new Double[values.length];
         for (int i = 0; i < values.length; i++) {
             logValues[i] = Math.log(values[i]);
@@ -311,21 +237,15 @@ public class StructuredCoalescentRateShiftsToGLM implements
         covariateList.setInputValue("covariates", covariates);
         covariateList.initAndValidate();
 
-        // Scaler = 1.0 (coefficient for the intercept)
-        RealParameter scalerParam = new RealParameter();
-        scalerParam.setInputValue("value", "1.0");
+        RealVectorParam<Real> scalerParam = new RealVectorParam<>(new double[]{1.0}, Real.INSTANCE);
         scalerParam.setID(namePrefix + "ScalerGLM");
         scalerParam.initAndValidate();
 
-        // Indicator = true
-        BooleanParameter indicatorParam = new BooleanParameter();
-        indicatorParam.setInputValue("value", "true");
+        BoolVectorParam indicatorParam = new BoolVectorParam(new boolean[]{true});
         indicatorParam.setID(namePrefix + "IndicatorGLM");
         indicatorParam.initAndValidate();
 
-        // Clock = 1.0
-        RealParameter clockParam = new RealParameter();
-        clockParam.setInputValue("value", "1.0");
+        RealScalarParam<Real> clockParam = new RealScalarParam<>(1.0, Real.INSTANCE);
         clockParam.setID(namePrefix + "ClockGLM");
         clockParam.initAndValidate();
 
@@ -343,10 +263,6 @@ public class StructuredCoalescentRateShiftsToGLM implements
         return glm;
     }
 
-    /**
-     * Extract covariates from the design matrix.
-     * Each column of the design matrix becomes one Covariate.
-     */
     private List<Covariate> extractCovariates(Value<?> xValue, int nPredictors, int verticalEntries,
                                                int nIntervals, String namePrefix) {
         List<Covariate> covariates = new ArrayList<>();
@@ -363,7 +279,6 @@ public class StructuredCoalescentRateShiftsToGLM implements
                     "Design matrix has " + matrix[0].length + " columns, expected " + nPredictors);
             }
 
-            // Create one covariate per predictor (column)
             for (int p = 0; p < nPredictors; p++) {
                 Double[] covValues = new Double[expectedRows];
                 for (int i = 0; i < expectedRows; i++) {
@@ -373,7 +288,6 @@ public class StructuredCoalescentRateShiftsToGLM implements
                 covariates.add(cov);
             }
         } else if (x instanceof Double[] array) {
-            // Flattened design matrix: values are row-major [row0_col0, row0_col1, ..., row1_col0, ...]
             if (array.length != expectedRows * nPredictors) {
                 throw new IllegalArgumentException(
                     "Flattened design matrix has " + array.length + " values, expected " +
@@ -395,9 +309,6 @@ public class StructuredCoalescentRateShiftsToGLM implements
         return covariates;
     }
 
-    /**
-     * Extract GLM parameters from either a GeneralLinearFunction or VectorizedFunction.
-     */
     private GLMParams extractGLMParams(Generator<?> generator) {
         if (generator instanceof GeneralLinearFunction glm) {
             return new GLMParams(
