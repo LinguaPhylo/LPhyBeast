@@ -16,9 +16,13 @@ public class DirichletToBEAST implements GeneratorToBEAST<Dirichlet, Distributio
         RealVector<PositiveReal> alpha = (RealVector<PositiveReal>) context.getAsRealVector(generator.getConcentration());
 
         beast.base.spec.inference.distribution.Dirichlet dirichlet =
-                new beast.base.spec.inference.distribution.Dirichlet((Simplex) value, alpha);
-
-        dirichlet.setID(((BEASTInterface) value).getID() + ".prior");
+                new beast.base.spec.inference.distribution.Dirichlet();
+        dirichlet.setInputValue("alpha", alpha);
+        if (value != null) {
+            dirichlet.setInputValue("param", value);
+            dirichlet.setID(((BEASTInterface) value).getID() + ".prior");
+        }
+        dirichlet.initAndValidate();
         return dirichlet;
     }
 

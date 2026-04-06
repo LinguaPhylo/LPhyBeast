@@ -114,8 +114,8 @@ public class H5N1TutorialTest {
         assertTrue(xml.contains("Exchange") && xml.contains("BactrianSubtreeSlide") &&
                 xml.contains("BactrianNodeOperator") && xml.contains("WilsonBalding"), "Tree Operator" );
 
-        assertTrue(xml.contains("BactrianUpDownOperator") &&
-                xml.contains("<up") && xml.contains("<down"), "BactrianUpDownOperator" );
+        assertTrue(xml.contains("UpDownOperator") &&
+                xml.contains("<up") && xml.contains("<down"), "UpDownOperator" );
 
         assertTrue(xml.contains("chainLength=\"1000000\"") && xml.contains("logEvery=\"500\"") &&
                 xml.contains("fileName=\"" + fileStem + ".log\""), //&& xml.contains("fileName=\"" + fileStem + ".trees\""),

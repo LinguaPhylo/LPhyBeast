@@ -16,10 +16,14 @@ public class UniformToBEAST implements GeneratorToBEAST<Uniform, Distribution> {
         RealScalar<Real> upper = (RealScalar<Real>) context.getAsRealScalar(generator.getUpper());
 
         beast.base.spec.inference.distribution.Uniform dist =
-                new beast.base.spec.inference.distribution.Uniform(
-                        (RealScalar<Real>) value, lower, upper);
-
-        dist.setID(((BEASTInterface) value).getID() + ".prior");
+                new beast.base.spec.inference.distribution.Uniform();
+        dist.setInputValue("lower", lower);
+        dist.setInputValue("upper", upper);
+        if (value != null) {
+            dist.setInputValue("param", value);
+            dist.setID(((BEASTInterface) value).getID() + ".prior");
+        }
+        dist.initAndValidate();
         return dist;
     }
 

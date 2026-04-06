@@ -146,8 +146,9 @@ public class LPhyBEASTLoader {
     public List<LPhyBEASTMapping> getExtClasses() throws IOException, ClassNotFoundException,
             InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
-        Map<String, Set<String>> providers = BEASTClassLoader.getServices();
-        Set<String> extStr = providers.get(LPHY_BEAST_EXT);
+        // Use loadService() to trigger JPMS module descriptor scanning
+        // (getServices() returns the raw map without discovery)
+        Set<String> extStr = BEASTClassLoader.loadService(LPhyBEASTMapping.class);
 
         if (extStr==null || extStr.isEmpty())
             throw new IllegalArgumentException("Cannot find the BEAST2 service implementing " + LPHY_BEAST_EXT + " !");

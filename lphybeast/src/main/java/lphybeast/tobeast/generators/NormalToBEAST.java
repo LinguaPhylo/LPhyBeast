@@ -19,10 +19,14 @@ public class NormalToBEAST implements GeneratorToBEAST<Normal, Distribution> {
                 (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getSd());
 
         beast.base.spec.inference.distribution.Normal dist =
-                new beast.base.spec.inference.distribution.Normal(
-                        (RealScalar<Real>) value, mean, sigma);
-
-        dist.setID(((BEASTInterface) value).getID() + ".prior");
+                new beast.base.spec.inference.distribution.Normal();
+        dist.setInputValue("mean", mean);
+        dist.setInputValue("sigma", sigma);
+        if (value != null) {
+            dist.setInputValue("param", value);
+            dist.setID(((BEASTInterface) value).getID() + ".prior");
+        }
+        dist.initAndValidate();
         return dist;
     }
 

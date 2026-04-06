@@ -18,10 +18,14 @@ public class GammaToBEAST implements GeneratorToBEAST<Gamma, Distribution> {
                 (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getScale());
 
         beast.base.spec.inference.distribution.Gamma dist =
-                new beast.base.spec.inference.distribution.Gamma(
-                        (RealScalar<PositiveReal>) value, alpha, theta);
-
-        dist.setID(((BEASTInterface) value).getID() + ".prior");
+                new beast.base.spec.inference.distribution.Gamma();
+        dist.setInputValue("alpha", alpha);
+        dist.setInputValue("theta", theta);
+        if (value != null) {
+            dist.setInputValue("param", value);
+            dist.setID(((BEASTInterface) value).getID() + ".prior");
+        }
+        dist.initAndValidate();
         return dist;
     }
 

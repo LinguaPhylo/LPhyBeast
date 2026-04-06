@@ -19,10 +19,14 @@ public class InverseGammaToBEAST implements GeneratorToBEAST<InverseGamma, Distr
                 (RealScalar<PositiveReal>) context.getAsRealScalar(generator.getBeta());
 
         beast.base.spec.inference.distribution.InverseGamma dist =
-                new beast.base.spec.inference.distribution.InverseGamma(
-                        (RealScalar<UnitInterval>) value, alpha, beta);
-
-        dist.setID(((BEASTInterface) value).getID() + ".prior");
+                new beast.base.spec.inference.distribution.InverseGamma();
+        dist.setInputValue("alpha", alpha);
+        dist.setInputValue("beta", beta);
+        if (value != null) {
+            dist.setInputValue("param", value);
+            dist.setID(((BEASTInterface) value).getID() + ".prior");
+        }
+        dist.initAndValidate();
         return dist;
     }
 
