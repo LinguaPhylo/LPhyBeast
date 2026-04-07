@@ -3,10 +3,12 @@ package flc.lphybeast.spi;
 import beast.base.evolution.datatype.DataType;
 import flc.lphybeast.tobeast.generators.LocalClockToBeast;
 import jebl.evolution.sequences.SequenceType;
+import lphy.base.evolution.tree.MRCA;
+import lphy.base.evolution.tree.TimeTreeNode;
 import lphy.core.model.Generator;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
-import lphybeast.spi.LPhyBEASTExt;
+import lphybeast.spi.LPhyBEASTMapping;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * to extend.
  * @author Walter Xie
  */
-public class FLCLBImpl implements LPhyBEASTExt {
+public class FLCLBImpl implements LPhyBEASTMapping {
 
     @Override
     public List<Class<? extends ValueToBEAST>> getValuesToBEASTs() {
@@ -40,13 +42,12 @@ public class FLCLBImpl implements LPhyBEASTExt {
 
     @Override
     public List<Class<? extends Generator>> getExcludedGenerator() {
-        return new ArrayList<>();
+        return List.of(MRCA.class);
     }
 
     @Override
     public List<Class> getExcludedValueType() {
-        // For a complex logic, or arrays, use isExcludedValue
-        return new ArrayList<>();
+        return List.of(TimeTreeNode.class);
     }
 
 }

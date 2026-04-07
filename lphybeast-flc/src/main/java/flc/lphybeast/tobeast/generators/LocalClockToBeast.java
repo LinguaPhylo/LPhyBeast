@@ -3,7 +3,7 @@ package flc.lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.tree.TreeInterface;
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.type.RealScalar;
 import lphy.base.evolution.branchrate.LocalClock;
 import lphy.base.evolution.tree.TimeTree;
 import lphy.base.evolution.tree.TimeTreeNode;
@@ -25,12 +25,9 @@ public class LocalClockToBeast implements GeneratorToBEAST<LocalClock, FlexibleL
         Value<Double> rootRate = localClock.getRootRate();
         StrictLineageClockModel rootCladeModel = new StrictLineageClockModel();
 
-        // 1 dimension
-        RealParameter rootRateParameter = context.getAsRealParameter(rootRate);
-        // specify the parameter has the upper bound at 1.0
-        //rootRateParameter.setInputValue("upper", 1.0);
+        RealScalar<?> rootRateScalar = context.getAsRealScalar(rootRate);
 
-        rootCladeModel.initByName("clock.rate", rootRateParameter);
+        rootCladeModel.initByName("clock.rate", rootRateScalar);
 
         Value<Object[]> clades = localClock.getClades();
         Value<Double[]> cladeRates = localClock.getCladeRates();
@@ -82,4 +79,3 @@ public class LocalClockToBeast implements GeneratorToBEAST<LocalClock, FlexibleL
         return FlexibleLocalClockModel.class;
     }
 }
-
