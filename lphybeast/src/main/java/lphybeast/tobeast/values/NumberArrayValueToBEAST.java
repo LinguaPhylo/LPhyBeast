@@ -2,7 +2,6 @@ package lphybeast.tobeast.values;
 
 import beast.base.spec.domain.Real;
 import beast.base.spec.inference.parameter.RealVectorParam;
-import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.model.RandomVariable;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
@@ -12,8 +11,6 @@ public class NumberArrayValueToBEAST implements ValueToBEAST<Number[], RealVecto
 
     @Override
     public boolean match(Value value) {
-        // WeightedDirichlet requires Concatenate (feast extension)
-        if (value.getGenerator() instanceof WeightedDirichlet) return false;
         return Number[].class.isAssignableFrom(value.value().getClass());
     }
 

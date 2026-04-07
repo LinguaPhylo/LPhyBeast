@@ -10,7 +10,7 @@ import lphy.core.model.Generator;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
-import lphybeast.tobeast.ScalarSlice;
+import beast.base.spec.inference.parameter.VectorElement;
 
 import static lphy.base.distribution.ExpMarkovChain.firstValueParamName;
 import static lphy.base.distribution.ExpMarkovChain.initialMeanParamName;
@@ -30,14 +30,14 @@ public class ExpMarkovChainToBEAST implements GeneratorToBEAST<ExpMarkovChain, D
             context.removeBEASTObject(firstV);
 
             // create scalar view of element 0
-            ScalarSlice scalarSlice = new ScalarSlice(
+            VectorElement<PositiveReal> element = new VectorElement<>(
                     (RealVector<PositiveReal>) value, 0);
-            scalarSlice.setID(firstValue.getCanonicalId());
+            element.setID(firstValue.getCanonicalId());
 
             // replace prior's param with scalar view of chain[0]
             Generator dist = firstValue.getGenerator();
             BEASTInterface prior = context.getBEASTObject(dist);
-            prior.setInputValue("param", scalarSlice);
+            prior.setInputValue("param", element);
             context.putBEASTObject(dist, prior);
 
         } else {

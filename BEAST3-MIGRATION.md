@@ -163,7 +163,8 @@ without waiting for the full BEASTLabs migration.
 | Class | Used in | Resolution |
 |-------|---------|------------|
 | `BernoulliDistribution` | `BernoulliMultiToBEAST` | Replace with beast3's `Bernoulli` |
-| `Slice` | `SliceFactory`, 3 generators | Use feast's `Slice` (feast targets beast3). Vendor temporarily if feast not yet released. |
+| `WeightedDirichlet` | `WeightedDirichletToBEAST` | Runtime dep from BEASTLabs (spec-migrated source at `~/Git/BEASTLabs`) |
+| `Slice` | `SliceFactory`, 3 generators | ✅ Done (7 Apr). Replaced by `VectorElement` (beast3 #61) and `VectorSlice` (local). `SliceFactory` deleted. |
 | `BEASTVector` | `BEASTContext`, 5 generators | Vendor (~40 lines, no external deps) |
 | `RNNIMetric` | `BEASTContext` | Vendor (~150 lines, implements beast3's `TreeMetric`) |
 
@@ -174,14 +175,11 @@ BEASTLabs is migrated or classes are absorbed into beast-base.
 
 | Class | Used in | Resolution |
 |-------|---------|------------|
-| `ExpCalculator` | `ExpressionNodeWrapperToFEAST` | Runtime dep via package manager |
-| `Concatenate` | Core | Runtime dep via package manager |
+| `ExpCalculator` | `ExpressionNodeWrapperToFEAST`, `FeastValueHandler` | Runtime dep via package manager. Still needed for LPhy expression handling. |
+| `Concatenate` | ~~Core~~ | ✅ Done (7 Apr). Eliminated entirely. Single `RealVectorParam` + `VectorElement` replaces the Concatenate pattern. `SliceDoubleArrayToBEAST` moved to core. |
 
-Tim has feast migration underway. These are runtime dependencies: feast
-must be installed as a beast3 package. The generator mappers that use feast
-classes are only activated when feast is available (SPI discovery).
-
-If feast is delayed, vendor the two classes temporarily.
+Feast dependency reduced to **expression handling only** (`ExpCalculator`).
+`Concatenate` and `Slice` are no longer used anywhere in LPhyBeast.
 
 ### Phase 4: Resolve ORC dependencies (6 classes)
 

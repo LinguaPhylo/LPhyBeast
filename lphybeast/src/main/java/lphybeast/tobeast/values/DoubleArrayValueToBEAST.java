@@ -6,7 +6,6 @@ import beast.base.spec.domain.Real;
 import beast.base.spec.domain.UnitInterval;
 import beast.base.spec.inference.parameter.RealVectorParam;
 import lphy.base.distribution.WeightedDirichlet;
-import lphy.core.model.GenerativeDistribution;
 import lphy.core.model.GenerativeDistribution1D;
 import lphy.core.model.RandomVariable;
 import lphy.core.model.Value;
@@ -18,7 +17,7 @@ public class DoubleArrayValueToBEAST implements ValueToBEAST<Double[], RealVecto
 
     @Override
     public boolean match(Value value) {
-        // WeightedDirichlet requires Concatenate (feast extension)
+        // WeightedDirichlet handled by WeightedDirichletValueToBEAST (SimplexParam)
         if (value.getGenerator() instanceof WeightedDirichlet) return false;
         return value.value() instanceof Double[];
     }
@@ -38,6 +37,7 @@ public class DoubleArrayValueToBEAST implements ValueToBEAST<Double[], RealVecto
             param.setInputValue("estimate", false);
 
         param.setID(value.getCanonicalId());
+
         return param;
     }
 

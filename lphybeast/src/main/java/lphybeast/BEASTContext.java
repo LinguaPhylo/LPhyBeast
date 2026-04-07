@@ -15,8 +15,10 @@ import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.Parameter;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.parser.XMLProducer;
-import beastlabs.core.util.Slice;
+import beast.base.spec.inference.parameter.VectorElement;
+import beast.base.spec.type.RealVector;
 import beastlabs.util.BEASTVector;
+import lphybeast.tobeast.VectorSlice;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import jebl.evolution.sequences.SequenceType;
@@ -427,12 +429,21 @@ public class BEASTContext {
             addToContext(value, vec);
             return vec;
         }
+        if (obj instanceof beast.base.spec.inference.parameter.IntVectorParam ivp) {
+            double[] values = new double[ivp.size()];
+            for (int i = 0; i < values.length; i++) values[i] = ivp.get(i);
+            var vec = new beast.base.spec.inference.parameter.RealVectorParam<>(values, beast.base.spec.domain.Real.INSTANCE);
+            vec.setID(ivp.getID());
+            vec.setInputValue("estimate", false);
+            removeBEASTObject(ivp);
+            addToContext(value, vec);
+            return vec;
+        }
         throw new RuntimeException("No coercible RealVector found for " + value + " (got " + obj.getClass().getSimpleName() + ")");
     }
 
     public IntegerParameter getAsIntegerParameter(Value value) {
         Parameter param = (Parameter) beastObjects.get(value);
-        if (param instanceof IntegerParameter) return (IntegerParameter) param;
         if (param instanceof RealParameter) {
             if (param.getDimension() == 1) {
 
@@ -498,18 +509,9 @@ public class BEASTContext {
             String[] parts = id.split(VectorUtils.INDEX_SEPARATOR);
             if (parts.length == 2) {
                 int index = Integer.parseInt(parts[1]);
-                // If parent is a compound value (e.g., Concatenate), extract the element directly
-                // instead of wrapping in Slice — beast3 strong typing requires RealParameter, not Slice
-                BEASTInterface parentNode = getBEASTObject(Symbols.getCanonical(parts[0]));
-                List<Function> compoundParts = valueHandlerExtractParts(parentNode);
-                if (compoundParts != null && index < compoundParts.size()) {
-                    BEASTInterface element = (BEASTInterface) compoundParts.get(index);
-                    addToContext(node, element);
-                    return element;
-                }
-                Slice slice = createSliceFromVector(node, parts[0], index);
-                beastObjects.put(node, slice);
-                return slice;
+                VectorElement<?> element = createVectorElementFromVector(node, parts[0], index);
+                beastObjects.put(node, element);
+                return element;
             }
         }
 
@@ -531,14 +533,14 @@ public class BEASTContext {
         return null;
     }
 
-    public Slice createSliceFromVector(GraphicalModelNode node, String id, int index) {
+    public VectorElement<?> createVectorElementFromVector(GraphicalModelNode node, String id, int index) {
 
         BEASTInterface parentNode = getBEASTObject(Symbols.getCanonical(id));
 
-        Slice slice = SliceFactory.createSlice(parentNode, index,
-                Symbols.getCanonical(id) + VectorUtils.INDEX_SEPARATOR + index);
-        addToContext(node, slice);
-        return slice;
+        VectorElement<?> element = new VectorElement<>((RealVector) parentNode, index);
+        element.setID(Symbols.getCanonical(id) + VectorUtils.INDEX_SEPARATOR + index);
+        addToContext(node, element);
+        return element;
 
     }
 
@@ -554,21 +556,12 @@ public class BEASTContext {
 
         BEASTInterface slicedBEASTValue = beastObjects.get(sliceValue.getSlicedValue());
 
-
         if (slicedBEASTValue != null) {
-            // Check if a ValueHandler can extract parts (e.g., Concatenate from feast)
-            List<Function> parts = valueHandlerExtractParts(slicedBEASTValue);
-            if (parts != null) {
-                // handle compound value by extracting the part at the slice index
-                Function slice = parts.get(sliceValue.getIndex());
-                addToContext(sliceValue, (BEASTInterface) slice);
-                return (BEASTInterface) slice;
-            } else {
-                String id = lPhyBeastConfig.isLogUnicode() ? sliceValue.getId() : sliceValue.getCanonicalId();
-                Slice slice = SliceFactory.createSlice(slicedBEASTValue, sliceValue.getIndex(), id);
-                addToContext(sliceValue, slice);
-                return slice;
-            }
+            String id = lPhyBeastConfig.isLogUnicode() ? sliceValue.getId() : sliceValue.getCanonicalId();
+            VectorElement<?> element = new VectorElement<>((RealVector) slicedBEASTValue, sliceValue.getIndex());
+            element.setID(id);
+            addToContext(sliceValue, element);
+            return element;
         } else return null;
     }
 
@@ -956,12 +949,6 @@ public class BEASTContext {
                 if (beastInterface instanceof StateNode) {
                     // include MutableAlignment
                     state.add((StateNode) beastInterface);
-                } else if (valueHandlerExtractStateNodes(beastInterface) != null) {
-                    // Compound value (e.g., Concatenate from feast): add its state node parts
-                    List<StateNode> nodes = valueHandlerExtractStateNodes(beastInterface);
-                    for (StateNode sn : nodes) {
-                        if (!state.contains(sn)) state.add(sn);
-                    }
                 } else if (beastInterface instanceof BEASTVector) {
                     for (BEASTInterface beastElement : ((BEASTVector) beastInterface).getObjectList()) {
                         // BI obj is wrapped inside BEASTVector, so check existence again
@@ -969,16 +956,19 @@ public class BEASTContext {
                             state.add((StateNode) beastElement);
                         }
                     }
-                } else if (beastInterface instanceof Slice) {
-                    BEASTInterface parent = (BEASTInterface)((Slice)beastInterface).functionInput.get();
-                    if (parent instanceof StateNode) {
-                        if (!state.contains(parent)) {
-                            state.add((StateNode) parent);
-                        } else {
-                            // parent already in state
-                        }
+                } else if (beastInterface instanceof VectorElement<?> ve) {
+                    BEASTInterface parent = (BEASTInterface) ve.vectorInput.get();
+                    if (parent instanceof StateNode sn) {
+                        if (!state.contains(sn)) state.add(sn);
                     } else {
-                        throw new RuntimeException("Slice representing random value, but the sliced beast interface is not a state node!");
+                        throw new RuntimeException("VectorElement representing random value, but the vector is not a state node!");
+                    }
+                } else if (beastInterface instanceof VectorSlice<?> vs) {
+                    BEASTInterface parent = (BEASTInterface) vs.vectorInput.get();
+                    if (parent instanceof StateNode sn) {
+                        if (!state.contains(sn)) state.add(sn);
+                    } else {
+                        throw new RuntimeException("VectorSlice representing random value, but the vector is not a state node!");
                     }
                 } else if (beastInterface instanceof Alignment) {
                     // Do nothing here

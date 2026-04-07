@@ -69,6 +69,7 @@ public class LPhyBEASTMappingImpl implements LPhyBEASTMapping {
                 NormalValueToBEAST.class,        // RealScalarParam<Real>
                 UniformValueToBEAST.class,       // RealScalarParam<Real>
                 PoissonValueToBEAST.class,       // IntScalarParam<NonNegativeInt>
+                WeightedDirichletValueToBEAST.class, // SimplexParam (must precede generic Double[])
                 DoubleArrayValueToBEAST.class,  // KeyRealParameter
                 IntegerArrayValueToBEAST.class, // KeyIntegerParameter
                 NumberArrayValueToBEAST.class,
@@ -127,7 +128,8 @@ public class LPhyBEASTMappingImpl implements LPhyBEASTMapping {
                 WeightedDirichletToBEAST.class,
                 YuleToBEAST.class, CalibratedYuleToBeast.class, LeafCalibrationsToBEAST.class,
 //                AutoCorrelatedClockToBEAST.class, AutoCorrelatedLogRatesToBEAST.class,CategoricalToBEAST.class,MixturePhyloCTMCToBEAST.class,
-                ExpMarkovChainToBEAST.class );
+                ExpMarkovChainToBEAST.class,
+                SliceDoubleArrayToBEAST.class );
     }
 
     // LPhy SequenceType => BEAST DataType

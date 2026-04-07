@@ -3,7 +3,6 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.inference.Distribution;
 import beast.base.spec.type.RealVector;
-import beast.base.spec.type.Simplex;
 import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
@@ -19,8 +18,11 @@ public class WeightedDirichletToBEAST implements GeneratorToBEAST<WeightedDirich
         RealVector<?> weights = context.getAsRealVector(generator.getWeights());
 
         beastlabs.math.distributions.WeightedDirichlet beastDirichlet =
-                new beastlabs.math.distributions.WeightedDirichlet(
-                        (Simplex) value, alpha, weights);
+                new beastlabs.math.distributions.WeightedDirichlet();
+        beastDirichlet.setInputValue("param", value);
+        beastDirichlet.setInputValue("alpha", alpha);
+        beastDirichlet.setInputValue("weights", weights);
+        beastDirichlet.initAndValidate();
 
         beastDirichlet.setID(((BEASTInterface) value).getID() + ".prior");
         return beastDirichlet;

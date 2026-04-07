@@ -9,7 +9,7 @@ import beast.base.evolution.tree.Tree;
 import beast.base.inference.Operator;
 import beast.base.inference.Scalable;
 import beast.base.inference.StateNode;
-import beast.base.inference.parameter.IntegerParameter;
+
 import beast.base.spec.evolution.operator.AdaptableOperatorSampler;
 import beast.base.spec.evolution.operator.UpDownOperator;
 import beast.base.spec.inference.operator.DeltaExchangeOperator;
@@ -271,15 +271,14 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         }
     }
 
-    // TODO: migrate to spec DeltaExchangeOperator once BEASTContext.getAsIntVector() exists
-    public static void addDeltaExchangeOperator(Value<Double[]> value, List<Function> args, BEASTContext context) {
+    public static void addDeltaExchangeOperator(Value<Double[]> value, RealVectorParam<?> param, BEASTContext context) {
         WeightedDirichlet weightedDirichlet = (WeightedDirichlet) value.getGenerator();
-        IntegerParameter weightIntParam = context.getAsIntegerParameter(weightedDirichlet.getWeights());
+        BEASTInterface weightsObj = context.getBEASTObject(weightedDirichlet.getWeights());
 
-        Operator operator = new beast.base.inference.operator.kernel.BactrianDeltaExchangeOperator();
-        operator.setInputValue("parameter", args);
-        operator.setInputValue("weight", BEASTContext.getOperatorWeight(args.size() - 1));
-        operator.setInputValue("weightvector", weightIntParam);
+        DeltaExchangeOperator operator = new DeltaExchangeOperator();
+        operator.setInputValue("rvparameter", param);
+        operator.setInputValue("weight", BEASTContext.getOperatorWeight(param.size() - 1));
+        operator.setInputValue("weightvector", weightsObj);
         operator.setInputValue("delta", 1.0 / value.value().length);
         operator.initAndValidate();
         operator.setID(value.getCanonicalId() + ".deltaExchange");
