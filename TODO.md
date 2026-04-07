@@ -135,7 +135,7 @@ Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated)
 - ✅ Removed `BEASTContext.createParameterWithBound()`
 - ✅ `LeafCalibrationsToBEAST` migrated to spec `MRCAPrior` + spec distributions + `OffsetReal`
 - ✅ `ValueHandler` — no old types (uses core `Function`/`StateNode` interfaces)
-- `MapStringDoubleArrayValueToBEAST`, `ContinuousCharacterDataToBEAST` — blocked: uses `RealParameter.minordimension` (no spec equivalent)
+- ✅ `MapStringDoubleArrayValueToBEAST`, `ContinuousCharacterDataToBEAST` — migrated to `RealVectorParam<Real>` with shape (6 Apr). Unblocked by beast3 vector-shape (CompEvol/beast3#58).
 - ✅ `MapValueToBEAST` migrated to `RealVectorParam<Real>` with keys
 - Remaining old-type files: BEASTContext, PhyloCTMCToBEAST
 - ✅ `DefaultOperatorStrategy` migrated (31 Mar): removed legacy `RealParameter`/`IntegerParameter`/`BooleanParameter` fallback branches and deprecated factory methods. `addUpDownOperator` → spec `UpDownOperator`. `AdaptableOperatorSampler` → spec. `addDeltaExchangeOperator` still blocked on `BEASTContext.getAsIntVector()` and `Function` → `Tensor`.
