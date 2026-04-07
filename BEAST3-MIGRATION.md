@@ -186,17 +186,9 @@ remain in core `lphybeast/`.
 
 ### Phase 5: Package manager integration
 
-Integrate beast3's `PackageManager` and `MavenPackageResolver` into
-LPhyBeast's CLI.
-
-- Add `--pkg-list`, `--pkg-install`, `--pkg-remove` subcommands
-- Configure package storage (shared `~/.beast/2.8/` or own directory)
-- Wire up module layer creation at startup
-- Test: install SA from CBAN, verify `SALBImpl` is discovered
-
-**Open question**: Should LPhyBeast share beast3's package directory
-(`~/.beast/2.8/`) or have its own? Sharing means packages installed via
-beast3 are automatically available to LPhyBeast.
+✅ Done. `LPhyBeastMain` provides subcommands: `convert`, `run`, `install`,
+`list`, `remove`. Uses beast3's `PackageManager` with its own package
+directory (`Utils6.getPackageUserDir("LPhyBEAST")`).
 
 ### Phase 6: Audit remaining BEAST package dependencies
 
