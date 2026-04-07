@@ -180,17 +180,9 @@ Feast dependency reduced to **expression handling only** (`ExpCalculator`).
 
 ### Phase 4: Resolve ORC dependencies (6 classes)
 
-All ORC classes are operators used in `DefaultOperatorStrategy` and
-`DefaultTreeOperatorStrategy`:
-
-- `InConstantDistanceOperator`, `SimpleDistance`, `SmallPulley`
-- `UcldScalerOperator`, `NEROperator_dAE_dBE_dCE`
-- `SampleFromPriorOperator`
-
-**Resolution**: Make ORC optional. Guard ORC operator usage behind runtime
-availability checks. Fall back to beast-base operators when ORC is not
-installed. ORC operators are MCMC performance optimisations, not functional
-requirements.
+✅ Done. ORC operators moved to `lphybeast-orc` extension module with
+`io.github.jordandouglas:beast-orc` as a Maven dependency. No ORC imports
+remain in core `lphybeast/`.
 
 ### Phase 5: Package manager integration
 
@@ -208,19 +200,19 @@ beast3 are automatically available to LPhyBeast.
 
 ### Phase 6: Audit remaining BEAST package dependencies
 
-| Package | Used by | Action needed |
-|---------|---------|---------------|
-| BEAST_CLASSIC | core | Audit imports, determine if essential |
-| SSM | core subst models | Check if absorbed into beast-base |
-| CoupledMCMC | core | Audit: likely optional (parallel tempering) |
-| bdtree | core | Audit: `BirthDeathSequentialSampling` |
-| MutableAlignment | core | Audit: `MATreeLikelihood` etc. |
-| BICEPS | core operators | Remco migrating; make optional |
-| Mascot | lphybeast-mascot | Nicola migrating; extension only |
-| flc | lphybeast-flc | ✅ Done (6 Apr). `io.github.compevol:flc:1.3.0-SNAPSHOT`, full spec types, test passing. |
-
-For each: determine number of classes imported, whether usage can be made
-optional, and whether the owning developer is migrating it.
+| Package | Used by | Status |
+|---------|---------|--------|
+| BEAST_CLASSIC | core (discrete phylogeography) | ✅ Maven dep (`io.github.compevol:beast-classic`), already spec-migrated |
+| BEASTLabs | core (BernoulliDistribution, WeightedDirichlet) | ✅ Maven dep, already spec-migrated. PR: BEAST2-Dev/BEASTLabs#27 |
+| feast | lphybeast-feast (ExpCalculator only) | ✅ Maven dep, expression handling |
+| ORC | lphybeast-orc | ✅ Separate extension module |
+| Mascot | lphybeast-mascot | ✅ Separate extension module |
+| flc | lphybeast-flc | ✅ Done (6 Apr). `io.github.compevol:flc:1.3.0-SNAPSHOT` |
+| SSM | core subst models | No direct imports in core — check if still needed |
+| CoupledMCMC | core | No direct imports — referenced in comments only (MCMCStrategy SPI) |
+| bdtree | lphybeast-bdtree | Separate extension module, dependency resolution issue |
+| MutableAlignment | lphybeast-ma | Separate extension module |
+| BICEPS | core operators | Commented out (BICEPSToBEAST in excluded-generators) |
 
 ### Phase 7: Update generator mappers and value converters
 

@@ -81,13 +81,6 @@
              beast-mutable-alignment -> lphybeast-ma
         -->
 
-        <!-- TODO: These BEAST2 package deps will be resolved at runtime
-             via beast3 package manager, or made optional.
-
-             ORC (6 operator classes)
-             BICEPS
-        -->
-
         <!-- Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
