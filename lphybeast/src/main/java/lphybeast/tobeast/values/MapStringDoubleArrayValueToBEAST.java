@@ -1,48 +1,52 @@
 package lphybeast.tobeast.values;
 
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.Real;
+import beast.base.spec.inference.parameter.RealVectorParam;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
 import lphybeast.ValueToBEAST;
 
 import java.util.*;
 
-public class MapStringDoubleArrayValueToBEAST implements ValueToBEAST<Map<String, Double[]>, RealParameter> {
+public class MapStringDoubleArrayValueToBEAST implements ValueToBEAST<Map<String, Double[]>, RealVectorParam> {
 
     @Override
-    public RealParameter valueToBEAST(Value<Map<String, Double[]>> value, BEASTContext context) {
+    public RealVectorParam valueToBEAST(Value<Map<String, Double[]>> value, BEASTContext context) {
 
         Map<String, Double[]> map = value.value();
 
-        RealParameter parameter = new RealParameter();
-
         SortedMap<String, Double[]> sortedMap = null;
         if (map instanceof SortedMap) {
-            sortedMap = (SortedMap<String, Double[]>)map;
+            sortedMap = (SortedMap<String, Double[]>) map;
         } else {
             sortedMap = new TreeMap<>();
             sortedMap.putAll(map);
         }
 
-        int minordimension = 0;
+        int ncols = 0;
         String[] keys = new String[sortedMap.size()];
         List<Double> values = new ArrayList<>();
+        int keyIndex = 0;
         for (Map.Entry<String, Double[]> entry : sortedMap.entrySet()) {
-            keys[values.size()] = entry.getKey();
-            minordimension = entry.getValue().length;
+            keys[keyIndex++] = entry.getKey();
+            ncols = entry.getValue().length;
             values.addAll(Arrays.asList(entry.getValue()));
         }
 
-        StringBuilder builder = new StringBuilder();
-        builder.append(keys[0]);
+        StringBuilder keysBuilder = new StringBuilder();
+        keysBuilder.append(keys[0]);
         for (int i = 1; i < keys.length; i++) {
-            builder.append(" ");
-            builder.append(keys[i]);
+            keysBuilder.append(" ");
+            keysBuilder.append(keys[i]);
         }
 
+        int nrows = sortedMap.size();
+
+        RealVectorParam<Real> parameter = new RealVectorParam<>();
         parameter.setInputValue("value", values);
-        parameter.setInputValue("keys", builder.toString());
-        parameter.setInputValue("minordimension", minordimension);
+        parameter.setInputValue("keys", keysBuilder.toString());
+        parameter.setInputValue("shape", nrows + " " + ncols);
+        parameter.setInputValue("domain", Real.INSTANCE);
         parameter.initAndValidate();
         if (!value.isAnonymous()) parameter.setID(value.getCanonicalId());
 
@@ -55,8 +59,8 @@ public class MapStringDoubleArrayValueToBEAST implements ValueToBEAST<Map<String
     }
 
     @Override
-    public Class<RealParameter> getBEASTClass() {
-        return RealParameter.class;
+    public Class<RealVectorParam> getBEASTClass() {
+        return RealVectorParam.class;
     }
 
 }

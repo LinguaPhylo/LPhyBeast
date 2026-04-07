@@ -1,6 +1,7 @@
 package lphybeast.tobeast.values;
 
-import beast.base.inference.parameter.RealParameter;
+import beast.base.spec.domain.Real;
+import beast.base.spec.inference.parameter.RealVectorParam;
 import lphy.base.evolution.alignment.ContinuousCharacterData;
 import lphy.core.model.Value;
 import lphybeast.BEASTContext;
@@ -10,19 +11,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ContinuousCharacterDataToBEAST implements ValueToBEAST<ContinuousCharacterData, RealParameter> {
+public class ContinuousCharacterDataToBEAST implements ValueToBEAST<ContinuousCharacterData, RealVectorParam> {
 
     @Override
-    public RealParameter valueToBEAST(Value<ContinuousCharacterData> continuousCharacterDataValue, BEASTContext context) {
+    public RealVectorParam valueToBEAST(Value<ContinuousCharacterData> continuousCharacterDataValue, BEASTContext context) {
 
         ContinuousCharacterData continuousCharacterData = continuousCharacterDataValue.value();
         String[] taxaNames = continuousCharacterData.getTaxa().getTaxaNames();
 
-        StringBuilder builder = new StringBuilder();
-        builder.append(taxaNames[0]);
+        StringBuilder keysBuilder = new StringBuilder();
+        keysBuilder.append(taxaNames[0]);
         for (int i = 1; i < taxaNames.length; i++) {
-            builder.append(" ");
-            builder.append(taxaNames[i]);
+            keysBuilder.append(" ");
+            keysBuilder.append(taxaNames[i]);
         }
 
         List<Double> allDataRowByRow = new ArrayList<>();
@@ -30,13 +31,16 @@ public class ContinuousCharacterDataToBEAST implements ValueToBEAST<ContinuousCh
             allDataRowByRow.addAll(Arrays.asList(continuousCharacterData.getCharacterSequence(taxaNames[i])));
         }
 
-        RealParameter beastParameter = new RealParameter();
-        beastParameter.setInputValue("keys", builder.toString());
-        beastParameter.setInputValue("values", allDataRowByRow);
-        beastParameter.setInputValue("minordimension", continuousCharacterData.nchar());
+        int nTaxa = taxaNames.length;
+        int nTraits = continuousCharacterData.nchar();
+
+        RealVectorParam<Real> beastParameter = new RealVectorParam<>();
+        beastParameter.setInputValue("value", allDataRowByRow);
+        beastParameter.setInputValue("keys", keysBuilder.toString());
+        beastParameter.setInputValue("shape", nTaxa + " " + nTraits);
+        beastParameter.setInputValue("domain", Real.INSTANCE);
         beastParameter.initAndValidate();
 
-        // using LPhy var as ID allows multiple alignments
         if (!continuousCharacterDataValue.isAnonymous()) beastParameter.setID(continuousCharacterDataValue.getCanonicalId());
         return beastParameter;
     }
@@ -47,7 +51,7 @@ public class ContinuousCharacterDataToBEAST implements ValueToBEAST<ContinuousCh
     }
 
     @Override
-    public Class<RealParameter> getBEASTClass() {
-        return RealParameter.class;
+    public Class<RealVectorParam> getBEASTClass() {
+        return RealVectorParam.class;
     }
 }
