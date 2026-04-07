@@ -222,7 +222,7 @@ beast3 are automatically available to LPhyBeast.
 | MutableAlignment | core | Audit: `MATreeLikelihood` etc. |
 | BICEPS | core operators | Remco migrating; make optional |
 | Mascot | lphybeast-mascot | Nicola migrating; extension only |
-| flc | lphybeast-flc | Check status |
+| flc | lphybeast-flc | ✅ Done (6 Apr). `io.github.compevol:flc:1.3.0-SNAPSHOT`, full spec types, test passing. |
 
 For each: determine number of classes imported, whether usage can be made
 optional, and whether the owning developer is migrating it.

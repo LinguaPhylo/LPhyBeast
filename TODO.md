@@ -150,6 +150,18 @@ Then remove `BEASTContext.createBEASTFrequencies()` (after all callers migrated)
 - ✅ `lphybeast-mc3` — already clean (31 Mar). No deprecated types used.
 - ✅ `lphybeast-ma` — clean (31 Mar). Dependency updated (31 Mar): `mutable-alignment` artifact, `mutable.alignment` JPMS module.
 
+## DONE: lphybeast-flc (6 Apr)
+
+- ✅ pom.xml: Maven dependency on `io.github.compevol:flc:1.3.0-SNAPSHOT` (replaces system-scoped JAR)
+- ✅ module-info.java: `open module lphy.beast.flc`
+- ✅ `FLCLBImpl`: `LPhyBEASTExt` → `LPhyBEASTMapping`; excludes `MRCA` generator and `TimeTreeNode` value type
+- ✅ `LocalClockToBeast`: `getAsRealParameter()` → `getAsRealScalar()`, `RealParameter` → `RealScalar<?>`
+- ✅ version.xml: service type `lphybeast.spi.LPhyBEASTMapping`, version 2.0.0
+- ✅ `LocalClockTest`: end-to-end LPhy-to-XML test with `localClock()` + `mrca()`
+- ✅ BEAST exec verified: 10k steps, all operators functional
+- ✅ Module uncommented in root pom.xml
+- ✅ Removed old `lib/` JAR and `src/assembly/` descriptor
+
 ## TODO: Extension modules
 
 | Module | Scope |
