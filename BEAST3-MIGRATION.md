@@ -155,21 +155,18 @@ Extension modules require `lphy.beast` plus their beast3 package module.
 
 **Verify**: `mvn compile` succeeds with module declarations.
 
-### Phase 2: Resolve BEASTLabs dependencies (4 classes)
+### Phase 2: Resolve BEASTLabs dependencies
 
-LPhyBeast imports exactly 4 classes from BEASTLabs. Each can be resolved
-without waiting for the full BEASTLabs migration.
-
-| Class | Used in | Resolution |
-|-------|---------|------------|
-| `BernoulliDistribution` | `BernoulliMultiToBEAST` | Replace with beast3's `Bernoulli` |
-| `WeightedDirichlet` | `WeightedDirichletToBEAST` | Runtime dep from BEASTLabs (spec-migrated source at `~/Git/BEASTLabs`) |
+| Class | Used in | Status |
+|-------|---------|--------|
 | `Slice` | `SliceFactory`, 3 generators | ✅ Done (7 Apr). Replaced by `VectorElement` (beast3 #61) and `VectorSlice` (local). `SliceFactory` deleted. |
+| `BernoulliDistribution` | `BernoulliMultiToBEAST` | ✅ Kept as BEASTLabs dep. Already spec-migrated. Provides `minSuccesses` constraint not available in beast3 core `Bernoulli`. Used by h5n1 and covidDPG scripts. |
+| `WeightedDirichlet` | `WeightedDirichletToBEAST` | ✅ Kept as BEASTLabs dep. Already spec-migrated. |
 | `BEASTVector` | `BEASTContext`, 5 generators | Vendor (~40 lines, no external deps) |
 | `RNNIMetric` | `BEASTContext` | Vendor (~150 lines, implements beast3's `TreeMetric`) |
 
-Vendored classes go in `lphybeast.util` with a TODO to remove once
-BEASTLabs is migrated or classes are absorbed into beast-base.
+BEASTLabs is already spec-migrated. The remaining items (`BEASTVector`, `RNNIMetric`)
+can be vendored or kept as BEASTLabs deps.
 
 ### Phase 3: Resolve feast dependencies (2 classes)
 
@@ -227,14 +224,11 @@ optional, and whether the owning developer is migrating it.
 
 ### Phase 7: Update generator mappers and value converters
 
-The 48 generator mappers and 19 value converters construct BEAST objects.
-Most will work with minimal changes since beast3 maintains the
-`Input`/`BEASTObject` system alongside the new spec types.
-
-Changes needed:
-- Package renames for any classes that moved in beast3
-- Replace deprecated BEAST2 API calls
-- Adapt to any changed constructors or method signatures
+✅ Done (7 Apr). All value converters produce spec types (`RealVectorParam`,
+`RealScalarParam`, `SimplexParam`, etc.). All deprecated `RealParameter`,
+`IntegerParameter`, `Parameter` usage removed from `BEASTContext` (200 lines
+deleted). `Concatenate`/`Slice` pattern replaced with `VectorElement`.
+Tree operators unchanged (not affected by spec changes).
 
 ### Phase 8: Tests and CI
 

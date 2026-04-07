@@ -3,7 +3,7 @@ package lphybeast.tobeast.generators;
 import beast.base.core.BEASTInterface;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeIntervals;
-import beast.base.inference.operator.UpDownOperator;
+
 import lphy.base.evolution.coalescent.PopulationFunction;
 import lphy.base.evolution.coalescent.PopulationFunctionCoalescent;
 import lphy.core.model.Value;
