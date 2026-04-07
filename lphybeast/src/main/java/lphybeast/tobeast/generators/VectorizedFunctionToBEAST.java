@@ -2,7 +2,7 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.core.BEASTObject;
-import beastlabs.util.BEASTVector;
+import lphybeast.util.BEASTVector;
 import lphy.core.model.DeterministicFunction;
 import lphy.core.model.GraphicalModelNode;
 import lphy.core.vectorization.VectorizedFunction;

@@ -5,7 +5,7 @@ import beast.base.inference.Distribution;
 import beast.base.spec.inference.distribution.IID;
 import beast.base.spec.inference.distribution.ScalarDistribution;
 import beast.base.spec.type.Vector;
-import beastlabs.util.BEASTVector;
+import lphybeast.util.BEASTVector;
 import lphy.base.distribution.Bernoulli;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.GenerativeDistribution;

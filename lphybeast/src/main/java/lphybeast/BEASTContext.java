@@ -14,7 +14,7 @@ import beast.base.inference.*;
 import beast.base.parser.XMLProducer;
 import beast.base.spec.inference.parameter.VectorElement;
 import beast.base.spec.type.RealVector;
-import beastlabs.util.BEASTVector;
+import lphybeast.util.BEASTVector;
 import lphybeast.tobeast.VectorSlice;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;

@@ -1,7 +1,7 @@
 package lphybeast.tobeast.values;
 
 import beast.base.core.BEASTInterface;
-import beastlabs.util.BEASTVector;
+import lphybeast.util.BEASTVector;
 import lphy.core.model.Value;
 import lphy.core.model.datatype.Vector;
 import lphy.core.vectorization.VectorizedDistribution;
