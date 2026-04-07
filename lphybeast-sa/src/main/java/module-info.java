@@ -1,7 +1,7 @@
 open module lphy.beast.sa {
     requires lphy.beast;
     requires beast.base;
-    requires sa;
+    requires sampled.ancestors;
     requires lphy.base;
 
     exports sa.lphybeast.spi;

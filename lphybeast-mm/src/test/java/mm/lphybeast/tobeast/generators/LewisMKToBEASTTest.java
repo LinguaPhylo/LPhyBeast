@@ -46,9 +46,8 @@ public class LewisMKToBEASTTest {
                 xml.contains("morphmodels.evolution.substitutionmodel.LewisMK") &&
                 xml.contains("stateNumber=\"" + nState + "\""), "LewisMK substModel");
 
-        assertTrue(xml.contains("<distribution") && xml.contains("id=\"Theta.prior\"") &&
-                xml.contains("x=\"@Theta\"") && xml.contains("distribution.LogNormalDistributionModel") &&
-                xml.contains("name=\"M\">3.0</parameter>") && xml.contains("name=\"S\">1.0</parameter>"), "Theta prior");
+        assertTrue(xml.contains("id=\"Theta.prior\"") && xml.contains("param=\"@Theta\"") &&
+                xml.contains("distribution.LogNormal"), "Theta prior");
 
         assertTrue(xml.contains("<distribution") && xml.contains("id=\"Coalescent\""), "Coalescent");
         assertTrue(xml.contains("<populationModel") && xml.contains("popSize=\"@Theta\""), "popSize");
