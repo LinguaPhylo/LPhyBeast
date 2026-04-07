@@ -13,7 +13,6 @@ import beast.base.spec.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.StateNode;
-import beast.base.inference.parameter.RealParameter;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
 import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModelLogger;
@@ -328,11 +327,6 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, BEASTInterf
             RateMatrix rateMatrix = (RateMatrix)qGenerator;
             Value<Double> meanRate = rateMatrix.getMeanRate();
             BEASTInterface mutationRate = meanRate==null ? null : context.getBEASTObject(meanRate);
-            // spec SiteModel expects RealScalar<PositiveReal> for mutationRate
-            if (mutationRate instanceof RealParameter rp) {
-                mutationRate = BEASTContext.toRealScalar(rp,
-                        beast.base.spec.domain.PositiveReal.INSTANCE);
-            }
             if (mutationRate != null) siteModel.setInputValue("mutationRate", mutationRate);
 
             siteModel.initAndValidate();
