@@ -1,51 +1,116 @@
 # LPhyBeast
 
-[![Build Status](https://github.com/LinguaPhylo/LPhyBeast/workflows/LPhyBeast%20test/badge.svg)](https://github.com/LinguaPhylo/LPhyBeast/actions?query=workflow%3A%22LPhyBeast+test%22)
+LPhyBEAST is a command-line program that takes an
+[LPhy](http://linguaphylo.github.io/) script and produces a
+[BEAST 3](https://github.com/CompEvol/beast3) XML file.
 
+Maven coordinates: `io.github.linguaphylo:lphybeast-root` (multi-module).
 
-LPhyBEAST is a command-line program that takes a
-[LPhy](http://linguaphylo.github.io/) script file including
-model specification and data block, 
-and produces a [BEAST 2](http://beast2.org/) XML file. 
-It therefore enables LPhy as an alternative way to succinctly
-express and communicate BEAST2 analyses.
+## Building from source
 
-## Setup and usage
+Requires Java 25 and Maven.
 
-LPhyBEAST is implemented as an application in the BEAST 2 package "lphybeast". 
-The installation guide and usage instructions are available in the [User Manual](https://linguaphylo.github.io/setup/#lphybeast-installation). 
+Build prerequisites first (each on its `beast3` or `vector-element` branch):
 
-The options available in the development version can be seen [here](https://github.com/LinguaPhylo/LPhyBeast/blob/master/lphybeast/src/main/java/lphybeast/LPhyBeastCMD.java)
+```bash
+# 1. beast3
+cd ~/Git/beast3 && git checkout vector-element && mvn install -DskipTests
 
+# 2. BEASTLabs
+cd ~/Git/BEASTLabs && git checkout beast3 && mvn install -DskipTests
+
+# 3. LPhy
+cd ~/Git/linguaPhylo && mvn install -DskipTests
+```
+
+Then build LPhyBeast:
+
+```bash
+cd ~/Git/LPhyBeast
+mvn clean install -DskipTests
+```
+
+## Running
+
+```bash
+# Show help
+mvn -pl lphybeast exec:exec -Dlphybeast.args="--help"
+
+# Convert an LPhy script to BEAST XML
+mvn -pl lphybeast exec:exec -Dlphybeast.args="convert ../../linguaPhylo/tutorials/RSV2.lphy"
+
+# Convert and run BEAST
+mvn -pl lphybeast exec:exec -Dlphybeast.args="run -l 10000 ../../linguaPhylo/tutorials/hkyCoalescent.lphy"
+
+# Package management
+mvn -pl lphybeast exec:exec -Dlphybeast.args="list"
+```
+
+## Running tests
+
+```bash
+mvn -pl lphybeast test            # core tests
+mvn -pl lphybeast-feast test      # feast extension tests
+mvn -pl lphybeast-flc test        # FLC extension tests
+mvn -pl lphybeast-mascot test     # Mascot extension tests
+```
+
+## Modules
+
+| Module | Description |
+|--------|-------------|
+| `lphybeast` | Core translator |
+| `lphybeast-bdtree` | Birth-death tree extension |
+| `lphybeast-feast` | feast extension |
+| `lphybeast-flc` | Flexible Local Clock extension |
+| `lphybeast-ma` | MutableAlignment extension |
+| `lphybeast-mascot` | Mascot extension |
+| `lphybeast-mc3` | CoupledMCMC extension |
+| `lphybeast-mm` | Morphological models extension |
+| `lphybeast-orc` | ORC extension |
+| `lphybeast-sa` | Sampled ancestors extension |
+
+## Architecture
+
+LPhyBeast bridges two ecosystems:
+
+1. **LPhy** (Java 17, JPMS + SPI) -- model specification language
+2. **BEAST 3** (Java 25, JPMS) -- Bayesian phylogenetic inference
+
+The core module (`lphy.beast`) translates LPhy model objects into BEAST 3 XML
+via mapping classes. Extension modules add mappings for specific BEAST packages.
+
+### Key packages
+
+- `lphybeast` -- `BEASTContext`, `ValueToBEAST`, `GeneratorToBEAST`, `LPhyBeastMain`
+- `lphybeast.tobeast.values` -- value-to-BEAST mappings (e.g. `AlignmentToBEAST`)
+- `lphybeast.tobeast.generators` -- generator-to-BEAST mappings (e.g. `BetaToBEAST`)
+- `lphybeast.tobeast.operators` -- BEAST operator strategies
+- `lphybeast.spi` -- `LPhyBEASTMapping` interface and SPI services
+
+### Adding a new mapping
+
+1. **Value mapping** -- implement `ValueToBEAST<T, S>` in `lphybeast.tobeast.values`
+2. **Generator mapping** -- implement `GeneratorToBEAST<T, S>` in `lphybeast.tobeast.generators`
+3. **Register** -- add the class to a `LPhyBEASTMapping` provider (e.g. `LPhyBEASTMappingImpl`):
+   - `getValuesToBEASTs()` -- returns list of `ValueToBEAST` classes
+   - `getGeneratorToBEASTs()` -- returns list of `GeneratorToBEAST` classes
+   - `getDataTypeMap()` -- maps `SequenceType` to BEAST `DataType`
+4. **Declare in `module-info.java`** -- register the provider:
+   ```java
+   provides lphybeast.spi.LPhyBEASTMapping with mypackage.spi.MyMappingImpl;
+   ```
+
+### Extension mechanism
+
+LPhyBeast uses Java SPI (`ServiceLoader`) via JPMS `module-info.java` declarations.
+The core module declares `uses lphybeast.spi.LPhyBEASTMapping` and each extension
+module provides its own implementation.
+
+## Testing guide
+
+See [TESTING.md](TESTING.md) for detailed testing instructions.
 
 ## Tutorials
 
 LPhy and LPhyBEAST [Tutorials](https://linguaphylo.github.io/tutorials/)
-
-
-## Dependencies
-
-- [linguaPhylo](https://github.com/LinguaPhylo/linguaPhylo)
-
-BEAST 2 packages, for example:
-
-- [beast2](http://www.github.com/CompEvol/beast2)
-- [BEASTLabs](https://github.com/BEAST2-Dev/BEASTLabs/)
-- [feast](https://github.com/BEAST2-Dev/BEASTLabs/)
-- [BEAST_CLASSIC](https://github.com/BEAST2-Dev/beast-classic/)
-- [SMM](https://github.com/BEAST2-Dev/substmodels/)
-
-The details are in [version.xml](./lphybeast/version.xml). All released BEAST 2 packages are listed in
-[Package Viewer](https://compevol.github.io/CBAN/).
-
-BEASTLabs `beast.util.Script` depends on `jdk.nashorn.api.scripting.ScriptObjectMirror`.
-If there is `NoClassDefFoundError` for it, you can add "-Xbootclasspath/a:${nashorn_path}" to your javac, 
-where `${nashorn_path}=/my/path/to/libext/nashorn.jar`.
-
-## LPhyBeastExt
-
-More in another BEAST 2 package to host [LPhyBeast extensions](lphybeast-ext-dist/README.md).
-
-## Useful Links
-
-- [Developer note](DEV_NOTE.md)
