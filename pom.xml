@@ -30,6 +30,7 @@
         <module>lphybeast-orc</module>
         <module>lphybeast-mascot</module>
         <module>lphybeast-flc</module>
+        <module>lphybeast-ssm</module>
         <!-- <module>lphybeast-ext-dist</module> -->
     </modules>
 

@@ -1,4 +1,4 @@
-package lphybeast.tobeast.generators;
+package ssm.lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.spec.evolution.substitutionmodel.Frequencies;

@@ -1,0 +1,9 @@
+<package name='lphybeast-ssm' version='2.0.0'>
+    <depends on='lphybeast' atleast='2.0.0'/>
+    <depends on='substmodels' atleast='1.0.0'/>
+
+    <service type="lphybeast.spi.LPhyBEASTMapping">
+        <provider classname="ssm.lphybeast.spi.SSMLBImpl"/>
+    </service>
+
+</package>

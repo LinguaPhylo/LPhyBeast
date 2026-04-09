@@ -1,12 +1,19 @@
-package lphybeast;
+package ssm.lphybeast;
+
+import beast.pkgmgmt.BEASTClassLoader;
+import lphybeast.LPhyBeast;
+import lphybeast.LPhyBEASTLoader;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -21,8 +28,11 @@ public class SkylinePlotsTutorialTest {
 
     @BeforeEach
     public void setUp() {
-        TestUtils.loadServices();
-        fPath = TestUtils.getFileForResources("hcv.nexus");
+        BEASTClassLoader.classLoader.addServices("lphybeast-ssm", Map.of(
+                "lphybeast.spi.LPhyBEASTMapping", Set.of("ssm.lphybeast.spi.SSMLBImpl")
+        ));
+        LPhyBEASTLoader.loadServicesForTest(System.getProperty("user.dir") + "/../lphybeast");
+        fPath = Paths.get("src", "test", "resources", "hcv.nexus");
     }
 
     @Test
@@ -49,9 +59,19 @@ public class SkylinePlotsTutorialTest {
                      D ~ PhyloCTMC(siteRates=r, Q=Q, tree=ψ, mu=0.00079);
                    }""", fPath.toAbsolutePath());
 
-        String xml = TestUtils.lphyScriptToBEASTXML(hcvLPhy, fileStem);
+        String xml = null;
+        try {
+            xml = new LPhyBeast().lphyStrToXML(hcvLPhy, fileStem);
+        } catch (IOException e) {
+            fail(e);
+        }
+        assertNotNull(xml, "XML");
 
-        TestUtils.assertXMLNTaxa(xml, ntaxa);
+        // check ntaxa
+        String alig = xml.substring(xml.indexOf("<data"), xml.indexOf("</data>"));
+        String temp = alig.replace("<sequence", "");
+        int occ = (alig.length() - temp.length()) / "<sequence".length();
+        assertEquals(ntaxa, occ, "ntaxa");
 
         assertTrue(xml.contains("id=\"pi\"") && xml.contains("id=\"rates\"") &&
                 xml.contains("id=\"gamma\"") && xml.contains("id=\"Theta\"") && xml.contains("id=\"psi\"") &&

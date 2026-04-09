@@ -97,7 +97,6 @@ public class LPhyBEASTMappingImpl implements LPhyBEASTMapping {
 //                FossilBirthDeathTreeToBEAST.class,
                 GammaToBEAST.class,
                 GTRToDiscretePhylogeo.class,
-                GTRToBEAST.class,
                 HKYToBEAST.class,
                 IIDToBEAST.class,
                 InternalNodesIDToBEAST.class,
