@@ -69,6 +69,7 @@ mvn -pl lphybeast-mascot test     # Mascot extension tests
 | `lphybeast-mm` | Morphological models extension |
 | `lphybeast-orc` | ORC extension |
 | `lphybeast-sa` | Sampled ancestors extension |
+| `lphybeast-ssm` | Substitution models (GTR) extension |
 
 ## Architecture
 

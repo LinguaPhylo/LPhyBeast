@@ -24,45 +24,52 @@ mvn install -DskipTests
 cd ~/Git/linguaPhylo
 mvn install -DskipTests
 
-# 4. LPhyBeast
+# 4. substmodels (master -- already has beast3 Maven pom)
+cd ~/Git/substmodels
+mvn install -DskipTests
+
+# 5. LPhyBeast
 cd ~/Git/LPhyBeast
 git checkout beast3
-./mvnw clean install -DskipTests
+mvn clean install -DskipTests
 ```
 
 ## Run existing tests
 
 ```bash
-# Core tests (H5N1, skyline plots, basic scripts)
-./mvnw -pl lphybeast test
+# Core tests (H5N1, basic scripts)
+mvn -pl lphybeast test
 
-# Feast tests (RSV2 — exercises WeightedDirichlet, kappa slicing)
-./mvnw -pl lphybeast-feast test
+# SSM tests (skyline plots -- exercises GTR via substmodels)
+mvn -pl lphybeast-ssm test
+
+# Feast tests (RSV2 -- exercises WeightedDirichlet, kappa slicing)
+mvn -pl lphybeast-feast test
 
 # FLC tests
-./mvnw -pl lphybeast-flc test
+mvn -pl lphybeast-flc test
 
 # Mascot tests
-./mvnw -pl lphybeast-mascot test
+mvn -pl lphybeast-mascot test
 ```
 
 ## Test the CLI
 
 ```bash
 # Show help (new subcommand structure)
-./mvnw -pl lphybeast exec:exec -Dlphybeast.args="--help"
+mvn -pl lphybeast exec:exec -Dlphybeast.args="--help"
 
 # Convert RSV2
-./mvnw -pl lphybeast exec:exec -Dlphybeast.args="convert ../../linguaPhylo/tutorials/RSV2.lphy"
+mvn -pl lphybeast exec:exec -Dlphybeast.args="convert ../../linguaPhylo/tutorials/RSV2.lphy"
 
 # Convert with replicates
-./mvnw -pl lphybeast exec:exec -Dlphybeast.args="convert -r 3 ../../linguaPhylo/tutorials/hkyCoalescent.lphy"
+mvn -pl lphybeast exec:exec -Dlphybeast.args="convert -r 3 ../../linguaPhylo/tutorials/hkyCoalescent.lphy"
 
 # Convert and run BEAST
-./mvnw -pl lphybeast exec:exec -Dlphybeast.args="run -l 10000 ../../linguaPhylo/tutorials/hkyCoalescent.lphy"
+mvn -pl lphybeast exec:exec -Dlphybeast.args="run -l 10000 ../../linguaPhylo/tutorials/hkyCoalescent.lphy"
 
 # Package management
-./mvnw -pl lphybeast exec:exec -Dlphybeast.args="list"
+mvn -pl lphybeast exec:exec -Dlphybeast.args="list"
 ```
 
 ## What changed (summary)
@@ -128,7 +135,7 @@ Tree operators unchanged (not affected by spec changes).
 2. **MCMC runs**: Does `lphybeast run` produce valid BEAST runs?
    Check log files for reasonable likelihoods and ESS values.
 
-3. **Extension modules**: Do lphybeast-feast, lphybeast-flc,
+3. **Extension modules**: Do lphybeast-ssm, lphybeast-feast, lphybeast-flc,
    lphybeast-mascot still work correctly?
 
 4. **Package manager**: Do `install`, `list`, `remove` subcommands work?
