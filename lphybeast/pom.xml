@@ -32,11 +32,11 @@
             <version>33.2.1-jre</version>
         </dependency>
 
-        <!-- BEASTLabs (4 classes: BEASTVector, RNNIMetric, Slice, BernoulliDistribution) -->
+        <!-- BEASTLabs -->
         <dependency>
-            <groupId>io.github.compevol</groupId>
+            <groupId>io.github.beast2-dev</groupId>
             <artifactId>beast-labs</artifactId>
-            <version>2.1.0-SNAPSHOT</version>
+            <version>2.1.0-beta1</version>
         </dependency>
 
         <!-- BEAST Classic -->
