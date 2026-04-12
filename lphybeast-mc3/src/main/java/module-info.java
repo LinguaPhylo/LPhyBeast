@@ -1,7 +1,7 @@
 open module lphy.beast.mc3 {
     requires lphy.beast;
     requires beast.base;
-    requires beast.coupled.mcmc;
+    requires coupled.mcmc;
 
     exports mc3.lphybeast;
     exports mc3.lphybeast.spi;

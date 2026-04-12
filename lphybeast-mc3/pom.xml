@@ -16,7 +16,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.compevol</groupId>
-            <artifactId>beast-coupled-mcmc</artifactId>
+            <artifactId>coupled-mcmc</artifactId>
             <version>1.3.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
