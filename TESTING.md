@@ -1,52 +1,85 @@
 # LPhyBeast beast3 Branch — Testing Guide
 
 **For**: Walter Xie
-**Date**: 7 April 2026
+**Last updated**: 13 April 2026
 **Branch**: `beast3`
 
 ## Prerequisites
 
-Build these repos locally in order. Each must be on its `beast3` or
-`vector-element` branch.
+### Already on Maven Central (no source build needed)
+
+- **beast3 core** — `io.github.compevol:beast-base`/`beast-pkgmgmt`/`beast-fx:2.8.0-beta4`
+- **BEASTLabs** — `io.github.beast2-dev:beast-labs:2.1.0-beta1`
+
+These are pulled by Maven automatically; do not install from source unless
+you're doing core development.
+
+### Must be built from source (not yet on Maven Central)
+
+The following SNAPSHOT dependencies are required. Build them locally in the
+order below. All are now on their default branch (merges complete) except
+feast and flc/bdtree (PRs still open).
 
 ```bash
-# 1. beast3 (vector-element branch — adds VectorElement class)
-cd ~/Git/beast3
-git checkout vector-element
-mvn install -DskipTests
-
-# 2. BEASTLabs (beast3 branch — spec-migrated distributions)
-cd ~/Git/BEASTLabs
-git checkout beast3
-mvn install -DskipTests
-
-# 3. LPhy (should already be installed)
+# 1. LPhy (should already be installed)
 cd ~/Git/linguaPhylo
 mvn install -DskipTests
 
-# 4. substmodels (master -- already has beast3 Maven pom)
+# 2. substmodels (master — already has beast3 Maven pom)
 cd ~/Git/substmodels
 mvn install -DskipTests
 
-# 5. beast-classic (beast3 branch -- spec-migrated AncestralStateTreeLikelihood)
-#    Clone from https://github.com/alexeid/beast-classic if you don't have it.
+# 3. beast-classic (master — merged by Walter, 13 Apr)
+#    Required by core lphybeast module.
 cd ~/Git/beast-classic
+git checkout master
+mvn install -DskipTests
+
+# 4. feast (tgvaughan/feast:beast2.8-migration — Tim's migration branch, not yet merged)
+#    Required by lphybeast-feast extension module.
+#    NOTE: assembly step currently fails — skip it (see open issue on tgvaughan/feast).
+cd ~/Git/feast
+git checkout beast2.8-migration
+mvn install -DskipTests -Dassembly.skipAssembly=true
+
+# 5. Mascot (master — merged by Nicola, 13 Apr)
+#    Required by lphybeast-mascot extension module.
+cd ~/Git/Mascot
+git checkout master
+mvn install -DskipTests
+
+# 6. MutableAlignment (main — merged by Remco, 13 Apr)
+#    Required by lphybeast-ma extension module.
+cd ~/Git/MutableAlignment
+git checkout main
+mvn install -DskipTests
+
+# 7. flc (alexeid/flc:beast3 — PR #10 open, awaiting Mathieu)
+#    Required by lphybeast-flc extension module.
+cd ~/Git/flc
 git checkout beast3
 mvn install -DskipTests
 
-# 6. LPhyBeast
+# 8. bdtree (fkmendes/bdtree:beast3 — PR #3 open)
+#    Required by lphybeast-bdtree extension module.
+cd ~/Git/bdtree
+git checkout beast3
+mvn install -DskipTests
+
+# 9. LPhyBeast
 cd ~/Git/LPhyBeast
 git checkout beast3
 mvn clean install -DskipTests
 ```
 
 > **Do not** use `mvn install:install-file` to satisfy a missing dependency.
-> The SNAPSHOT deps (`beast-classic:1.7.0-SNAPSHOT`, `beast3` branches of
-> beast3/BEASTLabs) must be built from source via the steps above. Installing
-> a pre-built jar from a different version pulls in a stale `beast-base`,
-> which produces confusing classloader collisions like
+> SNAPSHOT deps must be built from source via the steps above. Historically,
+> installing a pre-built jar from a different version caused classloader
+> collisions like
 > `class beast.base.evolution.tree.Node cannot be cast to class beast.base.evolution.tree.Node`
 > and missing data types (`'nucleotide' cannot be found. Choose one of []`).
+> These should now be resolved by the latest beast3 package manager fix, but
+> building from source remains the recommended path.
 
 ## Run existing tests
 
