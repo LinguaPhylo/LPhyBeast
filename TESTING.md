@@ -77,10 +77,10 @@ mvn -pl lphybeast exec:exec -Dlphybeast.args="--help"
 mvn -pl lphybeast exec:exec -Dlphybeast.args="convert ../../linguaPhylo/tutorials/RSV2.lphy"
 
 # Convert with replicates
-mvn -pl lphybeast exec:exec -Dlphybeast.args="convert -r 3 ../../linguaPhylo/tutorials/hkyCoalescent.lphy"
+mvn -pl lphybeast exec:exec -Dlphybeast.args="convert -r 3 ../../linguaPhylo/examples/coalescent/hkyCoalescent.lphy"
 
 # Convert and run BEAST
-mvn -pl lphybeast exec:exec -Dlphybeast.args="run -l 10000 ../../linguaPhylo/tutorials/hkyCoalescent.lphy"
+mvn -pl lphybeast exec:exec -Dlphybeast.args="run -l 10000 ../../linguaPhylo/examples/coalescent/hkyCoalescent.lphy"
 
 # Package management
 mvn -pl lphybeast exec:exec -Dlphybeast.args="list"
