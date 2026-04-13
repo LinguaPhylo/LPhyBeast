@@ -28,11 +28,25 @@ mvn install -DskipTests
 cd ~/Git/substmodels
 mvn install -DskipTests
 
-# 5. LPhyBeast
+# 5. beast-classic (beast3 branch -- spec-migrated AncestralStateTreeLikelihood)
+#    Clone from https://github.com/alexeid/beast-classic if you don't have it.
+cd ~/Git/beast-classic
+git checkout beast3
+mvn install -DskipTests
+
+# 6. LPhyBeast
 cd ~/Git/LPhyBeast
 git checkout beast3
 mvn clean install -DskipTests
 ```
+
+> **Do not** use `mvn install:install-file` to satisfy a missing dependency.
+> The SNAPSHOT deps (`beast-classic:1.7.0-SNAPSHOT`, `beast3` branches of
+> beast3/BEASTLabs) must be built from source via the steps above. Installing
+> a pre-built jar from a different version pulls in a stale `beast-base`,
+> which produces confusing classloader collisions like
+> `class beast.base.evolution.tree.Node cannot be cast to class beast.base.evolution.tree.Node`
+> and missing data types (`'nucleotide' cannot be found. Choose one of []`).
 
 ## Run existing tests
 
