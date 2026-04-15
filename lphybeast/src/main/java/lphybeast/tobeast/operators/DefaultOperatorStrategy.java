@@ -63,7 +63,10 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
                 } else if (stateNode instanceof IntSimplexParam<?> intSimplex) {
                     operators.add(createIntSimplexOperator(intSimplex));
                 } else if (stateNode instanceof RealVectorParam<?> realVector) {
-                    operators.add(createRealVectorOperator(realVector));
+                    // DeltaExchangeOperator takes priority: skip ScaleOperator if one is already
+                    // registered in extraOperators for this parameter (e.g. from WeightedDirichlet).
+                    if (!hasDeltaExchangeOperator(realVector, extraOperators))
+                        operators.add(createRealVectorOperator(realVector));
                 } else if (stateNode instanceof RealScalarParam<?> realScalar) {
                     operators.add(createRealScalarOperator(realScalar));
                 } else if (stateNode instanceof BoolVectorParam boolVector) {
@@ -206,6 +209,21 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
         elements.put(operator, null);
         return operator;
+    }
+
+    /**
+     * Returns true if a {@link DeltaExchangeOperator} targeting {@code param} already exists
+     * in {@code extraOperators}. Used to prevent a redundant {@link beast.base.spec.inference.operator.ScaleOperator}
+     * from being created for the same parameter.
+     * <p>
+     * Note: it is assumed that any parameter assigned a {@link DeltaExchangeOperator} is a
+     * {@link RealVectorParam}, because the operator works on a vector whose elements are
+     * individually represented as scalars summing to a constrained total.
+     */
+    private boolean hasDeltaExchangeOperator(RealVectorParam<?> param, List<Operator> extraOperators) {
+        return extraOperators.stream()
+                .anyMatch(op -> op instanceof DeltaExchangeOperator deltaOp
+                        && param.equals(deltaOp.getInput("rvparameter").get()));
     }
 
     //*** static methods ***//
