@@ -18,7 +18,9 @@ import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.values.TimeTreeToBEAST;
 import mascot.distribution.StructuredTreeIntervals;
+import mascot.dynamics.Dynamics;
 import mascot.dynamics.RateShifts;
+import mascot.dynamics.StructuredMigrationSkyline;
 import mascot.dynamics.StructuredSkyline;
 import mascot.lphybeast.tobeast.loggers.MascotExtraTreeLogger;
 import mascot.parameterdynamics.NeDynamics;
@@ -33,26 +35,23 @@ import java.util.List;
 
 /**
  * Converts LPhy {@link StructuredCoalescentSkyline} to BEAST2 Mascot
- * {@link mascot.distribution.Mascot} with a {@link StructuredSkyline} dynamics
- * built from K per-deme {@link Skygrowth} Ne trajectories and time-constant
- * migration.
+ * {@link mascot.distribution.Mascot}. Two paths depending on whether migration
+ * is time-constant or time-varying:
  *
- * <h2>LPhy-side inputs</h2>
  * <ul>
- *   <li>{@code logNe}: {@code Double[K][n]} — K demes in alphabetical order, n epochs,
- *       epoch 0 = most recent. Expected BEAST-side representation is a
- *       {@link BEASTVector} of K {@link RealVectorParam} (each of dimension n),
- *       produced by auto-vectorisation of e.g. {@code GaussianRandomWalk} over a
- *       {@code Normal(..., replicates=K)} firstValue.</li>
- *   <li>{@code M}: flat {@code Double[K*(K-1)]} — source-major migration layout.
- *       Either a single {@link RealVectorParam} of dim K*(K-1) or a {@link BEASTVector}
- *       of K*(K-1) {@link RealScalarParam}; in the latter case we wrap the components
- *       in a {@link CompoundRealScalarParam} so Mascot sees a flat RealVectorParam while
- *       operators continue to act on the underlying scalars.</li>
- *   <li>{@code rateShifts}: {@code Double[n]} — start times of the n Ne epochs,
- *       strictly increasing from the present. A leading 0.0 (if present) is stripped
- *       before being passed to Mascot's {@link RateShifts} (which expects only the
- *       internal epoch boundaries, giving Ne.dim = rateShifts.dim + 1).</li>
+ *   <li>Constant migration ({@code M}) — {@link StructuredSkyline} dynamics with
+ *       K per-deme Ne trajectories and a flat migration {@link RealVectorParam}.</li>
+ *   <li>Time-varying migration ({@code logM} + {@code migrationRateShifts}) —
+ *       {@link StructuredMigrationSkyline} dynamics with K per-deme Ne
+ *       trajectories and K·(K-1) per-pair {@link Skygrowth} migration
+ *       trajectories. In this path, migration is always piecewise-linear in
+ *       log space: {@link StructuredSkygrid} cannot serve as a migration
+ *       dynamic because {@link StructuredMigrationSkyline#getBackwardsMigration}
+ *       calls {@code getNeTime(t)} on migration objects, which
+ *       {@code StructuredSkygrid} does not implement. Current cut also
+ *       requires {@code migrationRateShifts} and {@code rateShifts} to share
+ *       the same knot times so per-deme Ne dimensions line up with the outer
+ *       integration grid without expansion.</li>
  * </ul>
  */
 public class StructuredCoalescentSkylineToMascot implements
@@ -68,12 +67,10 @@ public class StructuredCoalescentSkylineToMascot implements
         int nMigRates = nDemes * (nDemes - 1);
         List<String> uniqueDemes = coalescent.getUniqueDemes();
         boolean isLinear = coalescent.isLinearInterpolation();
+        boolean timeVaryingMigration = coalescent.isTimeVaryingMigration();
 
         // === Per-deme logNe RealVectorParams (K of them, each dim n) ===
         List<RealVectorParam<? extends Real>> logNePerDeme = extractPerDemeLogNe(coalescent, context);
-
-        // === Flat migration RealVectorParam (dim K*(K-1)) ===
-        RealVectorParam<? extends Real> migrationParam = extractFlatM(coalescent, context, nMigRates);
 
         // === Rate-shift times: strip a leading 0.0 if present ===
         Double[] fullShifts = coalescent.getRateShifts().value();
@@ -84,93 +81,14 @@ public class StructuredCoalescentSkylineToMascot implements
                             + (nEpochs - 1) + "; got " + innerShifts.length);
         }
 
-        // === Build the NeDynamics list and the StructuredSkyline rateShifts ===
-        //
-        // Linear mode (Skygrowth): continuous piecewise-exponential Ne. Each
-        // per-deme Skygrowth owns its own rateShifts input of length n-1 (the
-        // internal knot times); Skygrowth sets Ne.dim = rateShifts.dim + 1 = n.
-        // The OUTER StructuredSkyline.rateShifts (the integration grid) can be
-        // the same n-1 interior times.
-        //
-        // Constant mode (StructuredSkygrid): piecewise-constant Ne per Mascot
-        // integration interval. StructuredSkygrid has no rateShifts input of its
-        // own; instead, StructuredSkyline.setNrIntervals drives NeLog.dim via the
-        // outer rateShifts. For n epochs we need outer intTimes.length == n, which
-        // requires outer rateShifts of length n with all values > 0. We supply
-        // [t_1, ..., t_{n-1}, LARGE_TAIL] so the last interval covers everything
-        // after the final knot (the tail region where log-Ne stays at logNe[n-1]).
-        List<NeDynamics> neDynamicsPerDeme = new ArrayList<>();
-        RateShifts outerRateShifts;
-
-        if (isLinear) {
-            // Per-deme Skygrowth rateShifts = [t_1, ..., t_{n-1}] (length n-1).
-            // Skygrowth's initAndValidate sets Ne.dim = rateShifts.dim + 1 = n.
-            RateShifts perDemeRateShifts = new RateShifts();
-            perDemeRateShifts.setInputValue("value", new ArrayList<>(Arrays.asList(innerShifts)));
-            perDemeRateShifts.setID("SkygrowthRateShifts");
-            perDemeRateShifts.initAndValidate();
-
-            for (int d = 0; d < nDemes; d++) {
-                RealVectorParam<? extends Real> demeLogNe = logNePerDeme.get(d);
-                demeLogNe.setID("SkylineNe." + uniqueDemes.get(d));
-
-                Skygrowth sg = new Skygrowth();
-                sg.setInputValue("logNe", demeLogNe);
-                sg.setInputValue("rateShifts", perDemeRateShifts);
-                sg.setID("Skygrowth." + uniqueDemes.get(d));
-                sg.initAndValidate();
-                neDynamicsPerDeme.add(sg);
-            }
-
-            // Outer StructuredSkyline rateShifts must have ≥ 2 values: Mascot's
-            // getCoalescentRate references rateShifts.dim - 2 as an "end-of-range"
-            // sentinel, which underflows for dim == 1 (see mascot.dynamics
-            // .StructuredSkyline#getCoalescentRate). Pad with a large tail like
-            // we do for the constant mode so a single-knot skyline still works.
-            List<Double> outerValues = new ArrayList<>(Arrays.asList(innerShifts));
-            outerValues.add(computeTailEnd(innerShifts));
-            outerRateShifts = new RateShifts();
-            outerRateShifts.setInputValue("value", outerValues);
-            outerRateShifts.setID("SkylineRateShifts");
-            outerRateShifts.initAndValidate();
+        Dynamics dynamics;
+        if (timeVaryingMigration) {
+            dynamics = buildTimeVaryingMigrationDynamics(
+                    coalescent, context, logNePerDeme, innerShifts, isLinear, nDemes, nEpochs, nMigRates, uniqueDemes);
         } else {
-            // Constant mode: StructuredSkygrid with n intervals. Outer rateShifts
-            // has length n, all positive, last entry a large upper bound.
-            List<Double> outerValues = new ArrayList<>(Arrays.asList(innerShifts));
-            double tailEnd = computeTailEnd(innerShifts);
-            outerValues.add(tailEnd);
-
-            outerRateShifts = new RateShifts();
-            outerRateShifts.setInputValue("value", outerValues);
-            outerRateShifts.setID("SkylineRateShifts");
-            outerRateShifts.initAndValidate();
-
-            for (int d = 0; d < nDemes; d++) {
-                RealVectorParam<? extends Real> demeLogNe = logNePerDeme.get(d);
-                demeLogNe.setID("SkylineNe." + uniqueDemes.get(d));
-
-                StructuredSkygrid sg = new StructuredSkygrid();
-                sg.setInputValue("NeLog", demeLogNe);
-                sg.setID("Skygrid." + uniqueDemes.get(d));
-                sg.initAndValidate();
-                neDynamicsPerDeme.add(sg);
-            }
+            dynamics = buildConstantMigrationDynamics(
+                    coalescent, context, logNePerDeme, innerShifts, isLinear, nDemes, nMigRates, uniqueDemes);
         }
-
-        NeDynamicsList neDynamicsList = new InitializedNeDynamicsList();
-        neDynamicsList.setInputValue("neDynamics", neDynamicsPerDeme);
-        neDynamicsList.setID("NeDynamicsList");
-        neDynamicsList.initAndValidate();
-
-        // === Indicators: all true, not estimated (consistent with ZIKV reference XML) ===
-        Boolean[] allTrue = new Boolean[nMigRates];
-        Arrays.fill(allTrue, Boolean.TRUE);
-        BoolVectorParam indicators = new BoolVectorParam();
-        indicators.setInputValue("value", Arrays.asList(allTrue));
-        indicators.setInputValue("dimension", nMigRates);
-        indicators.setInputValue("estimate", false);
-        indicators.setID("MigrationIndicators");
-        indicators.initAndValidate();
 
         // === Trait set for tip → deme mapping ===
         String popLabel = StructuredCoalescentSkyline.populationLabel;
@@ -188,16 +106,9 @@ public class StructuredCoalescentSkylineToMascot implements
         traitSet.setInputValue("taxa", taxonSet);
         traitSet.initAndValidate();
 
-        // === StructuredSkyline dynamics ===
-        StructuredSkyline dynamics = new StructuredSkyline();
-        dynamics.setInputValue("NeDynamics", neDynamicsList);
-        dynamics.setInputValue("forwardsMigration", migrationParam);
-        dynamics.setInputValue("rateShifts", outerRateShifts);
-        dynamics.setInputValue("indicators", indicators);
         dynamics.setInputValue("typeTrait", traitSet);
         dynamics.setInputValue("dimension", nDemes);
         dynamics.setInputValue("fromBeauti", false);
-        dynamics.setID("StructuredSkyline");
         dynamics.initAndValidate();
 
         // === Mascot distribution ===
@@ -217,6 +128,271 @@ public class StructuredCoalescentSkylineToMascot implements
         context.addExtraLogger(extraTreeLogger);
 
         return mascot;
+    }
+
+    private StructuredSkyline buildConstantMigrationDynamics(
+            StructuredCoalescentSkyline coalescent, BEASTContext context,
+            List<RealVectorParam<? extends Real>> logNePerDeme, Double[] innerShifts,
+            boolean isLinear, int nDemes, int nMigRates, List<String> uniqueDemes) {
+
+        RealVectorParam<? extends Real> migrationParam = extractFlatM(coalescent, context, nMigRates);
+
+        List<NeDynamics> neDynamicsPerDeme = buildNeDynamicsPerDeme(
+                logNePerDeme, innerShifts, isLinear, nDemes, uniqueDemes);
+
+        NeDynamicsList neDynamicsList = new InitializedNeDynamicsList();
+        neDynamicsList.setInputValue("neDynamics", neDynamicsPerDeme);
+        neDynamicsList.setID("NeDynamicsList");
+        neDynamicsList.initAndValidate();
+
+        // Outer integration grid. StructuredSkygrid Ne (interpolation="constant")
+        // is piecewise-constant and has its NeLog dimension driven by the outer
+        // grid via setNrIntervals, so we MUST keep the outer grid knot-aligned
+        // there. Skygrowth Ne (interpolation="linear") is time-based and
+        // evaluated at interval midpoints — needs a fine grid for accuracy.
+        RateShifts outerRateShifts = isLinear
+                ? buildFineIntegrationGrid(innerShifts, "SkylineRateShifts")
+                : buildOuterRateShifts(innerShifts, "SkylineRateShifts");
+
+        BoolVectorParam indicators = buildAllTrueIndicators(nMigRates);
+
+        StructuredSkyline dynamics = new StructuredSkyline();
+        dynamics.setInputValue("NeDynamics", neDynamicsList);
+        dynamics.setInputValue("forwardsMigration", migrationParam);
+        dynamics.setInputValue("rateShifts", outerRateShifts);
+        dynamics.setInputValue("indicators", indicators);
+        dynamics.setID("StructuredSkyline");
+        return dynamics;
+    }
+
+    /**
+     * Time-varying migration path. Builds K per-deme {@link Skygrowth} Ne
+     * trajectories (with their own rateShifts from {@code rateShifts}), K·(K-1)
+     * per-pair {@link Skygrowth} migration trajectories (with their own
+     * rateShifts from {@code migrationRateShifts}), and an outer integration
+     * grid that is the union of both. Wires them into a
+     * {@link StructuredMigrationSkyline}.
+     *
+     * <p>In this path we always use {@code Skygrowth} for Ne regardless of
+     * {@code interpolation} — {@code StructuredSkygrid} cannot support
+     * independent per-trajectory grids (its Ne dimension is driven by the
+     * outer grid via {@code setNrIntervals}), and it also cannot serve as
+     * migration dynamics because it doesn't implement {@code getNeTime}.
+     * Using {@code Skygrowth} uniformly lets Ne and migration have arbitrary,
+     * independent knot counts and positions — matching what BEAUti's MASCOT
+     * Skyline template offers.</p>
+     *
+     * <p>Trade-off: when {@code interpolation="constant"} is set on the LPhy
+     * side, the LPhy simulator produces piecewise-constant Ne and migration,
+     * while Mascot here interpolates piecewise-linearly in log space between
+     * knots. Values at the knot times agree; between-knot values differ. For
+     * a 2-epoch expansion/endemic split with knots at the transition, the
+     * between-knot region is the only disagreement.</p>
+     */
+    private StructuredMigrationSkyline buildTimeVaryingMigrationDynamics(
+            StructuredCoalescentSkyline coalescent, BEASTContext context,
+            List<RealVectorParam<? extends Real>> logNePerDeme, Double[] neInnerShifts,
+            boolean isLinear, int nDemes, int nEpochs, int nMigRates, List<String> uniqueDemes) {
+
+        int nMigEpochs = coalescent.getNMigEpochs();
+        Double[] migShifts = coalescent.getMigrationRateShifts().value();
+        Double[] migInnerShifts = stripLeadingZero(migShifts);
+        if (migInnerShifts.length != nMigEpochs - 1) {
+            throw new IllegalArgumentException(
+                    "After stripping a leading 0.0, migrationRateShifts must have length nMigEpochs - 1 = "
+                            + (nMigEpochs - 1) + "; got " + migInnerShifts.length);
+        }
+
+        // Per-deme Ne: Skygrowth with its own rateShifts (n_Ne - 1 inner knots).
+        RateShifts perDemeRateShifts = new RateShifts();
+        perDemeRateShifts.setInputValue("value", new ArrayList<>(Arrays.asList(neInnerShifts)));
+        perDemeRateShifts.setID("SkygrowthRateShifts");
+        perDemeRateShifts.initAndValidate();
+
+        List<NeDynamics> neDynamicsPerDeme = new ArrayList<>();
+        for (int d = 0; d < nDemes; d++) {
+            RealVectorParam<? extends Real> demeLogNe = logNePerDeme.get(d);
+            demeLogNe.setID("SkylineNe." + uniqueDemes.get(d));
+
+            Skygrowth sg = new Skygrowth();
+            sg.setInputValue("logNe", demeLogNe);
+            sg.setInputValue("rateShifts", perDemeRateShifts);
+            sg.setID("Skygrowth." + uniqueDemes.get(d));
+            sg.initAndValidate();
+            neDynamicsPerDeme.add(sg);
+        }
+        NeDynamicsList neDynamicsList = new InitializedNeDynamicsList();
+        neDynamicsList.setInputValue("neDynamics", neDynamicsPerDeme);
+        neDynamicsList.setID("NeDynamicsList");
+        neDynamicsList.initAndValidate();
+
+        // Per-pair migration: Skygrowth with its own rateShifts (n_M - 1 inner knots).
+        List<RealVectorParam<? extends Real>> logMPerPair = extractPerPairLogM(coalescent, context, nMigRates, nMigEpochs);
+        RateShifts perPairMigRateShifts = new RateShifts();
+        perPairMigRateShifts.setInputValue("value", new ArrayList<>(Arrays.asList(migInnerShifts)));
+        perPairMigRateShifts.setID("MigrationRateShifts");
+        perPairMigRateShifts.initAndValidate();
+
+        List<NeDynamics> migDynamicsPerPair = new ArrayList<>();
+        int pairIdx = 0;
+        for (int i = 0; i < nDemes; i++) {
+            for (int j = 0; j < nDemes; j++) {
+                if (i == j) continue;
+                RealVectorParam<? extends Real> pairLogM = logMPerPair.get(pairIdx);
+                String label = uniqueDemes.get(i) + "_to_" + uniqueDemes.get(j);
+                pairLogM.setID("SkylineM." + label);
+
+                Skygrowth sg = new Skygrowth();
+                sg.setInputValue("logNe", pairLogM);
+                sg.setInputValue("rateShifts", perPairMigRateShifts);
+                sg.setID("SkygrowthM." + label);
+                sg.initAndValidate();
+                migDynamicsPerPair.add(sg);
+                pairIdx++;
+            }
+        }
+
+        NeDynamicsList migDynamicsList = new InitializedNeDynamicsList();
+        migDynamicsList.setInputValue("neDynamics", migDynamicsPerPair);
+        migDynamicsList.setID("MigrationDynamicsList");
+        migDynamicsList.initAndValidate();
+
+        // Outer integration grid: a fine uniform grid across the skyline
+        // region, with all user knots (Ne + migration) inserted so Mascot
+        // integrates across every transition. Mascot evaluates Skygrowth Ne
+        // and migration at each interval's midpoint (getIntervalMidpoint in
+        // StructuredMigrationSkyline.getBackwardsMigration / getCoalescentRate),
+        // so a knot-aligned grid would approximate each time-varying trajectory
+        // by its midpoint value over a full skyline segment — far too coarse.
+        Double[] unionInner = unionSorted(neInnerShifts, migInnerShifts);
+        RateShifts outerRateShifts = buildFineIntegrationGrid(unionInner, "StructuredMigrationSkylineRateShifts");
+        BoolVectorParam indicators = buildAllTrueIndicators(nMigRates);
+
+        StructuredMigrationSkyline dynamics = new StructuredMigrationSkyline();
+        dynamics.setInputValue("NeDynamics", neDynamicsList);
+        dynamics.setInputValue("migrationDynamics", migDynamicsList);
+        dynamics.setInputValue("rateShifts", outerRateShifts);
+        dynamics.setInputValue("indicators", indicators);
+        dynamics.setID("StructuredMigrationSkyline");
+        return dynamics;
+    }
+
+    /**
+     * Sorted union of two shift-time arrays (deduplicated). Shift times come
+     * straight from LPhy user input; intentional matches across the two
+     * arrays are expected to be bit-identical, so exact equality is fine.
+     */
+    private Double[] unionSorted(Double[] a, Double[] b) {
+        java.util.TreeSet<Double> set = new java.util.TreeSet<>();
+        for (Double x : a) set.add(x);
+        for (Double x : b) set.add(x);
+        return set.toArray(new Double[0]);
+    }
+
+    /**
+     * Per-deme Ne dynamics list (Skygrowth for linear mode, StructuredSkygrid
+     * for constant mode). Shared between the constant-migration and
+     * time-varying-migration paths.
+     */
+    private List<NeDynamics> buildNeDynamicsPerDeme(
+            List<RealVectorParam<? extends Real>> logNePerDeme, Double[] innerShifts,
+            boolean isLinear, int nDemes, List<String> uniqueDemes) {
+
+        List<NeDynamics> neDynamicsPerDeme = new ArrayList<>();
+        if (isLinear) {
+            RateShifts perDemeRateShifts = new RateShifts();
+            perDemeRateShifts.setInputValue("value", new ArrayList<>(Arrays.asList(innerShifts)));
+            perDemeRateShifts.setID("SkygrowthRateShifts");
+            perDemeRateShifts.initAndValidate();
+
+            for (int d = 0; d < nDemes; d++) {
+                RealVectorParam<? extends Real> demeLogNe = logNePerDeme.get(d);
+                demeLogNe.setID("SkylineNe." + uniqueDemes.get(d));
+
+                Skygrowth sg = new Skygrowth();
+                sg.setInputValue("logNe", demeLogNe);
+                sg.setInputValue("rateShifts", perDemeRateShifts);
+                sg.setID("Skygrowth." + uniqueDemes.get(d));
+                sg.initAndValidate();
+                neDynamicsPerDeme.add(sg);
+            }
+        } else {
+            for (int d = 0; d < nDemes; d++) {
+                RealVectorParam<? extends Real> demeLogNe = logNePerDeme.get(d);
+                demeLogNe.setID("SkylineNe." + uniqueDemes.get(d));
+
+                StructuredSkygrid sg = new StructuredSkygrid();
+                sg.setInputValue("NeLog", demeLogNe);
+                sg.setID("Skygrid." + uniqueDemes.get(d));
+                sg.initAndValidate();
+                neDynamicsPerDeme.add(sg);
+            }
+        }
+        return neDynamicsPerDeme;
+    }
+
+    /**
+     * Build outer integration {@link RateShifts} of length {@code innerShifts.length + 1}:
+     * the inner knot times plus a large-valued tail so Mascot's
+     * {@code getCoalescentRate} (which references {@code rateShifts.dim - 2}) does
+     * not underflow for single-knot skylines. Used for the constant-mode
+     * {@link StructuredSkygrid} path, where Ne is piecewise-constant per
+     * interval (setNrIntervals drives NeLog.dim from the outer grid, so the
+     * outer grid MUST stay knot-aligned).
+     */
+    private RateShifts buildOuterRateShifts(Double[] innerShifts, String id) {
+        List<Double> outerValues = new ArrayList<>(Arrays.asList(innerShifts));
+        outerValues.add(computeTailEnd(innerShifts));
+        RateShifts outerRateShifts = new RateShifts();
+        outerRateShifts.setInputValue("value", outerValues);
+        outerRateShifts.setID(id);
+        outerRateShifts.initAndValidate();
+        return outerRateShifts;
+    }
+
+    /**
+     * Build a fine integration grid for the {@link Skygrowth} paths. Mascot
+     * evaluates time-varying trajectories (Ne and migration) at the midpoint
+     * of each integration interval, so to approximate a piecewise-linear
+     * trajectory accurately the integration intervals must be fine compared
+     * to the skyline segments. Matches BEAUti's MASCOT Skyline template,
+     * which uses ~100 uniform subdivisions of the modelled time range.
+     *
+     * <p>Grid = uniform N_STEPS subdivisions of {@code [0, max_inner_knot]},
+     * plus every user knot inserted so transitions align exactly, plus a
+     * tail from {@link #computeTailEnd} to cover tree-root age past the last
+     * knot (rates in that trailing interval are held at their last-knot
+     * value by both Skygrowth and StructuredSkygrid).</p>
+     */
+    private RateShifts buildFineIntegrationGrid(Double[] innerShifts, String id) {
+        final int N_STEPS = 100;
+        java.util.TreeSet<Double> pts = new java.util.TreeSet<>();
+        double maxInner = innerShifts.length > 0 ? innerShifts[innerShifts.length - 1] : 1.0;
+        double step = maxInner / N_STEPS;
+        for (int i = 1; i <= N_STEPS; i++) {
+            pts.add(step * i);
+        }
+        for (Double s : innerShifts) pts.add(s);
+        pts.add(computeTailEnd(innerShifts));
+
+        List<Double> values = new ArrayList<>(pts);
+        RateShifts rs = new RateShifts();
+        rs.setInputValue("value", values);
+        rs.setID(id);
+        rs.initAndValidate();
+        return rs;
+    }
+
+    private BoolVectorParam buildAllTrueIndicators(int nMigRates) {
+        Boolean[] allTrue = new Boolean[nMigRates];
+        Arrays.fill(allTrue, Boolean.TRUE);
+        BoolVectorParam indicators = new BoolVectorParam();
+        indicators.setInputValue("value", Arrays.asList(allTrue));
+        indicators.setInputValue("dimension", nMigRates);
+        indicators.setInputValue("estimate", false);
+        indicators.setID("MigrationIndicators");
+        indicators.initAndValidate();
+        return indicators;
     }
 
     /**
@@ -257,6 +433,46 @@ public class StructuredCoalescentSkylineToMascot implements
                         "(BEASTVector of K RealVectorParams). Got: " + beastObj.getClass().getSimpleName() +
                         ". Use auto-vectorisation, e.g. " +
                         "logNe ~ GaussianRandomWalk(firstValue=Normal(..., replicates=K), sd=..., n=n).");
+    }
+
+    /**
+     * Resolve the LPhy logM to K·(K-1) per-pair RealVectorParams of dim nMigEpochs
+     * each. Expects a BEASTVector of K·(K-1) RealVectorParams (the auto-vectorisation
+     * result), analogous to logNe.
+     */
+    private List<RealVectorParam<? extends Real>> extractPerPairLogM(
+            StructuredCoalescentSkyline coalescent, BEASTContext context,
+            int nPairs, int nMigEpochs) {
+        Value<Double[][]> logMValue = coalescent.getLogM();
+        BEASTInterface beastObj = context.getBEASTObject(logMValue);
+
+        if (beastObj instanceof BEASTVector vec) {
+            List<BEASTInterface> components = vec.getObjectList();
+            if (components.size() != nPairs) {
+                throw new IllegalArgumentException(
+                        "logM BEASTVector has " + components.size() + " components, expected " + nPairs);
+            }
+            List<RealVectorParam<? extends Real>> result = new ArrayList<>();
+            for (int p = 0; p < nPairs; p++) {
+                BEASTInterface c = components.get(p);
+                if (!(c instanceof RealVectorParam<?> rp)) {
+                    throw new IllegalArgumentException(
+                            "logM component " + p + " is " + c.getClass() + ", expected RealVectorParam");
+                }
+                if (rp.size() != nMigEpochs) {
+                    throw new IllegalArgumentException(
+                            "logM component " + p + " has dim " + rp.size() + ", expected " + nMigEpochs);
+                }
+                result.add(rp);
+            }
+            return result;
+        }
+
+        throw new IllegalArgumentException(
+                "StructuredCoalescentSkyline requires logM as per-pair vectorised chains " +
+                        "(BEASTVector of K*(K-1) RealVectorParams). Got: " + beastObj.getClass().getSimpleName() +
+                        ". Use auto-vectorisation, e.g. " +
+                        "logM ~ GaussianRandomWalk(firstValue=Normal(..., replicates=K*(K-1)), sd=..., n=n_M).");
     }
 
     /**
