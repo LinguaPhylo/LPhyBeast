@@ -16,6 +16,7 @@ open module lphy.beast {
     exports lphybeast.tobeast.generators;
     exports lphybeast.tobeast.loggers;
     exports lphybeast.tobeast.operators;
+    exports lphybeast.util;
 
     uses lphybeast.spi.LPhyBEASTMapping;
     uses lphybeast.spi.MCMCStrategy;

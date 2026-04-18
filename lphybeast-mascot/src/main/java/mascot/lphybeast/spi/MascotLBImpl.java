@@ -6,8 +6,10 @@ import lphy.core.model.Generator;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.ValueToBEAST;
 import lphybeast.spi.LPhyBEASTMapping;
-import mascot.lphybeast.tobeast.generators.StructuredCoalescentToMascot;
+import mascot.lphybeast.tobeast.generators.GaussianRandomWalkToBEAST;
 import mascot.lphybeast.tobeast.generators.StructuredCoalescentRateShiftsToGLM;
+import mascot.lphybeast.tobeast.generators.StructuredCoalescentSkylineToMascot;
+import mascot.lphybeast.tobeast.generators.StructuredCoalescentToMascot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +35,9 @@ public class MascotLBImpl implements LPhyBEASTMapping {
     public List<Class<? extends GeneratorToBEAST>> getGeneratorToBEASTs() {
         return Arrays.asList(
                 StructuredCoalescentToMascot.class,
-                StructuredCoalescentRateShiftsToGLM.class
+                StructuredCoalescentRateShiftsToGLM.class,
+                StructuredCoalescentSkylineToMascot.class,
+                GaussianRandomWalkToBEAST.class
         );
     }
 
