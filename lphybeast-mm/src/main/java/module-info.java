@@ -1,7 +1,7 @@
 open module lphy.beast.mm {
     requires lphy.beast;
     requires beast.base;
-    requires beast.morph.models;
+    requires morph.models;
     requires lphy.base;
 
     exports mm.lphybeast.spi;

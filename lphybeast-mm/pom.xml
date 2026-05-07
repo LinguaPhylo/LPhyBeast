@@ -16,8 +16,8 @@
         </dependency>
         <dependency>
             <groupId>io.github.compevol</groupId>
-            <artifactId>beast-morph-models</artifactId>
-            <version>1.3.0-SNAPSHOT</version>
+            <artifactId>morph-models</artifactId>
+            <version>1.3.0-beta3</version>
         </dependency>
 
         <!-- Testing -->
