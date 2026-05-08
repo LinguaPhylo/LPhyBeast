@@ -1,18 +1,16 @@
 package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
-import beast.base.core.Function;
-import beast.base.evolution.alignment.TaxonSet;
 import beast.base.spec.evolution.branchratemodel.StrictClockModel;
 import beast.base.spec.evolution.branchratemodel.UCRelaxedClockModel;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.UserDataType;
-import beast.base.inference.Distribution;
 import beast.base.spec.evolution.likelihood.ThreadedTreeLikelihood;
 import beast.base.spec.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.StateNode;
+import beast.base.spec.type.Tensor;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
 import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModelLogger;
@@ -197,7 +195,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, BEASTInterf
                 DefaultOperatorStrategy.addUpDownOperator(tree, clockRate, context);
             } else if (clockRateParam instanceof BEASTInterface bi) {
                 // clockRate may be computed by an expression (e.g., ExpCalculator from feast)
-                java.util.List<Function> args = context.valueHandlerExtractArguments(bi);
+                java.util.List<? extends Tensor> args = context.valueHandlerExtractArguments(bi);
                 if (args != null && !args.isEmpty())
                     DefaultOperatorStrategy.addUpDownOperator(tree, args, bi, context);
             }

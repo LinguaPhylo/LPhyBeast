@@ -14,6 +14,7 @@ import beast.base.inference.*;
 import beast.base.parser.XMLProducer;
 import beast.base.spec.inference.parameter.VectorElement;
 import beast.base.spec.type.RealVector;
+import beast.base.spec.type.Tensor;
 import lphybeast.util.BEASTVector;
 import lphybeast.tobeast.VectorSlice;
 import com.google.common.collect.HashMultimap;
@@ -188,21 +189,21 @@ public class BEASTContext {
      * Ask registered ValueHandlers if beastInterface is a function expression.
      * @return the Function, or null if no handler recognizes it
      */
-    public Function valueHandlerAsFunction(BEASTInterface beastInterface) {
-        for (ValueHandler handler : getValueHandlers()) {
-            Function f = handler.asFunction(beastInterface);
-            if (f != null) return f;
-        }
-        return null;
-    }
+//    public Function valueHandlerAsFunction(BEASTInterface beastInterface) {
+//        for (ValueHandler handler : getValueHandlers()) {
+//            Function f = handler.asFunction(beastInterface);
+//            if (f != null) return f;
+//        }
+//        return null;
+//    }
 
     /**
      * Ask registered ValueHandlers to extract parts from a compound value.
      * @return the parts, or null if no handler recognizes it
      */
-    public List<Function> valueHandlerExtractParts(BEASTInterface beastInterface) {
+    public List<BEASTInterface> valueHandlerExtractParts(BEASTInterface beastInterface) {
         for (ValueHandler handler : getValueHandlers()) {
-            List<Function> parts = handler.extractParts(beastInterface);
+            List<BEASTInterface> parts = handler.extractParts(beastInterface);
             if (parts != null) return parts;
         }
         return null;
@@ -221,12 +222,12 @@ public class BEASTContext {
     }
 
     /**
-     * Ask registered ValueHandlers to extract function arguments from an expression.
+     * Ask registered ValueHandlers to extract arguments from an expression (e.g., ExpCalculator).
      * @return the arguments, or null if no handler recognizes it
      */
-    public List<Function> valueHandlerExtractArguments(BEASTInterface beastInterface) {
+    public List<? extends Tensor> valueHandlerExtractArguments(BEASTInterface beastInterface) {
         for (ValueHandler handler : getValueHandlers()) {
-            List<Function> args = handler.extractArguments(beastInterface);
+            List<? extends Tensor> args = handler.extractArguments(beastInterface);
             if (args != null) return args;
         }
         return null;

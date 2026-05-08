@@ -19,6 +19,7 @@ import lphybeast.tobeast.ExpressionUtils;
 
 import java.util.List;
 
+// TODO why not <ExpressionNode, feast.expressions.ExpCalculator> ?
 public class ExpressionNodeToBEAST implements GeneratorToBEAST<ExpressionNode, BEASTInterface> {
 
     @Override
@@ -35,6 +36,7 @@ public class ExpressionNodeToBEAST implements GeneratorToBEAST<ExpressionNode, B
         BEASTInterface offsetPrior = tryOffsetReal(expression, value, context);
         if (offsetPrior != null) return offsetPrior;
 
+        // toExpCalculator actually returns feast.expressions.ExpCalculator
         return toExpCalculator(expression, value, context);
     }
 

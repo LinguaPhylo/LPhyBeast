@@ -1,8 +1,8 @@
 package lphybeast.spi;
 
 import beast.base.core.BEASTInterface;
-import beast.base.core.Function;
 import beast.base.inference.StateNode;
+import beast.base.spec.type.Tensor;
 
 import java.util.List;
 
@@ -14,16 +14,10 @@ import java.util.List;
 public interface ValueHandler {
 
     /**
-     * Return the beastInterface as a Function if this handler recognizes it
-     * as a computable expression (e.g., ExpCalculator). Otherwise return null.
-     */
-    Function asFunction(BEASTInterface beastInterface);
-
-    /**
      * Extract component parts from a compound value (e.g., Concatenate).
      * Returns null if this handler doesn't recognize the beastInterface.
      */
-    List<Function> extractParts(BEASTInterface beastInterface);
+    List<BEASTInterface> extractParts(BEASTInterface beastInterface);
 
     /**
      * Extract state nodes from a compound value for inclusion in MCMC state.
@@ -32,9 +26,10 @@ public interface ValueHandler {
     List<StateNode> extractStateNodes(BEASTInterface beastInterface);
 
     /**
-     * Extract the underlying function arguments from an expression-like value.
-     * For ExpCalculator: returns functionsInput.get().
+     * Extract the arguments from an expression-like value so that they can
+     * be registered with an UpDown operator. For {@code ExpCalculator} this
+     * returns {@code realVectorsInput.get()}.
      * Returns null if not applicable.
      */
-    List<Function> extractArguments(BEASTInterface beastInterface);
+    List<? extends Tensor> extractArguments(BEASTInterface beastInterface);
 }

@@ -2,7 +2,6 @@ package lphybeast.tobeast.operators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.core.BEASTObject;
-import beast.base.core.Function;
 import beast.base.evolution.operator.Exchange;
 import beast.base.evolution.operator.TreeOperator;
 import beast.base.evolution.tree.Tree;
@@ -18,6 +17,7 @@ import beast.base.spec.inference.parameter.IntSimplexParam;
 import beast.base.spec.inference.parameter.RealScalarParam;
 import beast.base.spec.inference.parameter.RealVectorParam;
 import beast.base.spec.inference.parameter.SimplexParam;
+import beast.base.spec.type.Tensor;
 import com.google.common.collect.Multimap;
 import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.logger.LoggerUtils;
@@ -257,26 +257,25 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
 
     /**
      * Add an up-down operator when the clock rate is computed by an expression
-     * (e.g., ExpCalculator from feast). The underlying function arguments
-     * are scaled upward against the tree.
+     * (e.g., ExpCalculator from feast). The arguments are scaled upward against the tree.
      *
      * @param tree       the tree to scale down
-     * @param upArgs     the function arguments to scale up
+     * @param upArgs     the arguments to scale up
      * @param expression the expression BEASTInterface (for ID)
      * @param context    the BEAST context
      */
-    public static void addUpDownOperator(Tree tree, List<Function> upArgs, BEASTInterface expression, BEASTContext context) {
+    public static void addUpDownOperator(Tree tree, List<? extends Tensor> upArgs, BEASTInterface expression, BEASTContext context) {
         String idStr = expression.getID() + "Up" + tree.getID() + "DownOperator";
         // avoid to duplicate updown ops from the same pair of rate and tree
         if (!context.hasExtraOperator(idStr)) {
             Operator upDownOperator = new UpDownOperator();
             upDownOperator.setID(idStr);
 
-            for (Function function : upArgs) {
-                if (function instanceof Scalable) {
-                    upDownOperator.setInputValue("up", function);
+            for (Tensor arg : upArgs) {
+                if (arg instanceof Scalable) {
+                    upDownOperator.setInputValue("up", arg);
                 } else {
-                    LoggerUtils.log.warning("Cannot add " + function + " to up-down operator: not Scalable");
+                    LoggerUtils.log.warning("Cannot add " + arg + " to up-down operator: not Scalable");
                 }
             }
             LoggerUtils.log.warning("The clock rate is computed by expression " +

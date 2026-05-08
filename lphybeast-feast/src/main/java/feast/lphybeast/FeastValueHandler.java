@@ -1,8 +1,9 @@
 package feast.lphybeast;
 
 import beast.base.core.BEASTInterface;
-import beast.base.core.Function;
 import beast.base.inference.StateNode;
+import beast.base.spec.domain.Real;
+import beast.base.spec.type.RealVector;
 import feast.expressions.ExpCalculator;
 import lphybeast.spi.ValueHandler;
 
@@ -13,15 +14,15 @@ import java.util.List;
  */
 public class FeastValueHandler implements ValueHandler {
 
-    @Override
-    public Function asFunction(BEASTInterface beastInterface) {
-        if (beastInterface instanceof ExpCalculator expCalculator)
-            return expCalculator;
-        return null;
-    }
+//    @Override
+//    public Function asFunction(BEASTInterface beastInterface) {
+//        if (beastInterface instanceof ExpCalculator expCalculator)
+//            return expCalculator;
+//        return null;
+//    }
 
     @Override
-    public List<Function> extractParts(BEASTInterface beastInterface) {
+    public List<BEASTInterface> extractParts(BEASTInterface beastInterface) {
         return null;
     }
 
@@ -31,9 +32,10 @@ public class FeastValueHandler implements ValueHandler {
     }
 
     @Override
-    public List<Function> extractArguments(BEASTInterface beastInterface) {
+    public List<RealVector<? extends Real>> extractArguments(BEASTInterface beastInterface) {
         if (beastInterface instanceof ExpCalculator expCalculator)
-            return expCalculator.functionsInput.get();
+            return expCalculator.realVectorsInput.get();
         return null;
     }
 }
+
