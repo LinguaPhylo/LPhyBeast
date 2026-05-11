@@ -18,103 +18,174 @@
         </dependency>
     </dependencies>
 
-    <!-- Extension profiles: activate any combination -->
+    <!-- Extension profiles: activate any combination.
+         Each profile declares BOTH the sister module AND its external BEAST2
+         package JAR as direct dependencies so that exec-maven-plugin's %classpath
+         always contains those JARs as first-class entries, independent of any
+         transitive-resolution chain through the reactor. -->
     <profiles>
 
         <profile>
             <id>ssm</id>
-            <dependencies><dependency>
-                <groupId>io.github.linguaphylo</groupId>
-                <artifactId>lphybeast-ssm</artifactId>
-                <version>${project.version}</version>
-            </dependency></dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.linguaphylo</groupId>
+                    <artifactId>lphybeast-ssm</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>substmodels</groupId>
+                    <artifactId>substmodels</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
         <profile>
             <id>feast</id>
-            <dependencies><dependency>
-                <groupId>io.github.linguaphylo</groupId>
-                <artifactId>lphybeast-feast</artifactId>
-                <version>${project.version}</version>
-            </dependency></dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.linguaphylo</groupId>
+                    <artifactId>lphybeast-feast</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.tgvaughan</groupId>
+                    <artifactId>feast</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
         <profile>
             <id>bdtree</id>
-            <dependencies><dependency>
-                <groupId>io.github.linguaphylo</groupId>
-                <artifactId>lphybeast-bdtree</artifactId>
-                <version>${project.version}</version>
-            </dependency></dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.linguaphylo</groupId>
+                    <artifactId>lphybeast-bdtree</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.compevol</groupId>
+                    <artifactId>bdtree</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
         <profile>
             <id>flc</id>
-            <dependencies><dependency>
-                <groupId>io.github.linguaphylo</groupId>
-                <artifactId>lphybeast-flc</artifactId>
-                <version>${project.version}</version>
-            </dependency></dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.linguaphylo</groupId>
+                    <artifactId>lphybeast-flc</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.4ment</groupId>
+                    <artifactId>flc</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
         <profile>
             <id>ma</id>
-            <dependencies><dependency>
-                <groupId>io.github.linguaphylo</groupId>
-                <artifactId>lphybeast-ma</artifactId>
-                <version>${project.version}</version>
-            </dependency></dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.linguaphylo</groupId>
+                    <artifactId>lphybeast-ma</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.compevol</groupId>
+                    <artifactId>mutable-alignment</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
         <profile>
             <id>mascot</id>
-            <dependencies><dependency>
-                <groupId>io.github.linguaphylo</groupId>
-                <artifactId>lphybeast-mascot</artifactId>
-                <version>${project.version}</version>
-            </dependency></dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.linguaphylo</groupId>
+                    <artifactId>lphybeast-mascot</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.compevol</groupId>
+                    <artifactId>mascot</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
         <profile>
             <id>mc3</id>
-            <dependencies><dependency>
-                <groupId>io.github.linguaphylo</groupId>
-                <artifactId>lphybeast-mc3</artifactId>
-                <version>${project.version}</version>
-            </dependency></dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.linguaphylo</groupId>
+                    <artifactId>lphybeast-mc3</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.compevol</groupId>
+                    <artifactId>coupled-mcmc</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
         <profile>
             <id>mm</id>
-            <dependencies><dependency>
-                <groupId>io.github.linguaphylo</groupId>
-                <artifactId>lphybeast-mm</artifactId>
-                <version>${project.version}</version>
-            </dependency></dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.linguaphylo</groupId>
+                    <artifactId>lphybeast-mm</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.compevol</groupId>
+                    <artifactId>morph-models</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
         <profile>
             <id>orc</id>
-            <dependencies><dependency>
-                <groupId>io.github.linguaphylo</groupId>
-                <artifactId>lphybeast-orc</artifactId>
-                <version>${project.version}</version>
-            </dependency></dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.linguaphylo</groupId>
+                    <artifactId>lphybeast-orc</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.jordandouglas</groupId>
+                    <artifactId>beast-orc</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
         <profile>
             <id>sa</id>
-            <dependencies><dependency>
-                <groupId>io.github.linguaphylo</groupId>
-                <artifactId>lphybeast-sa</artifactId>
-                <version>${project.version}</version>
-            </dependency></dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.linguaphylo</groupId>
+                    <artifactId>lphybeast-sa</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.compevol</groupId>
+                    <artifactId>sampled-ancestors</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
-        <!-- Convenience: activate all extensions at once -->
+        <!-- Default: activate all extensions at once.
+             Maven deactivates this profile automatically when any explicit -P flag
+             is passed, so "-Pssm" loads only SSM, "-Pssm,feast" loads SSM+feast,
+             while plain "mvn exec:java" loads everything. -->
         <profile>
             <id>all</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <dependencies>
+                <!-- Sister modules -->
                 <dependency><groupId>io.github.linguaphylo</groupId><artifactId>lphybeast-ssm</artifactId><version>${project.version}</version></dependency>
                 <dependency><groupId>io.github.linguaphylo</groupId><artifactId>lphybeast-feast</artifactId><version>${project.version}</version></dependency>
                 <dependency><groupId>io.github.linguaphylo</groupId><artifactId>lphybeast-bdtree</artifactId><version>${project.version}</version></dependency>
@@ -125,6 +196,17 @@
                 <dependency><groupId>io.github.linguaphylo</groupId><artifactId>lphybeast-mm</artifactId><version>${project.version}</version></dependency>
                 <dependency><groupId>io.github.linguaphylo</groupId><artifactId>lphybeast-orc</artifactId><version>${project.version}</version></dependency>
                 <dependency><groupId>io.github.linguaphylo</groupId><artifactId>lphybeast-sa</artifactId><version>${project.version}</version></dependency>
+                <!-- External BEAST2 package JARs — direct deps so %classpath is complete -->
+                <dependency><groupId>substmodels</groupId><artifactId>substmodels</artifactId></dependency>
+                <dependency><groupId>io.github.tgvaughan</groupId><artifactId>feast</artifactId></dependency>
+                <dependency><groupId>io.github.compevol</groupId><artifactId>bdtree</artifactId></dependency>
+                <dependency><groupId>io.github.4ment</groupId><artifactId>flc</artifactId></dependency>
+                <dependency><groupId>io.github.compevol</groupId><artifactId>mutable-alignment</artifactId></dependency>
+                <dependency><groupId>io.github.compevol</groupId><artifactId>mascot</artifactId></dependency>
+                <dependency><groupId>io.github.compevol</groupId><artifactId>coupled-mcmc</artifactId></dependency>
+                <dependency><groupId>io.github.compevol</groupId><artifactId>morph-models</artifactId></dependency>
+                <dependency><groupId>io.github.jordandouglas</groupId><artifactId>beast-orc</artifactId></dependency>
+                <dependency><groupId>io.github.compevol</groupId><artifactId>sampled-ancestors</artifactId></dependency>
             </dependencies>
         </profile>
 

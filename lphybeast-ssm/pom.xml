@@ -17,7 +17,6 @@
         <dependency>
             <groupId>substmodels</groupId>
             <artifactId>substmodels</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
         <!-- Testing -->
