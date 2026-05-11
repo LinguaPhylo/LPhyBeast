@@ -267,8 +267,10 @@ public class LPhyBEASTLoader {
      * Discover and instantiate services of the given type via BEASTClassLoader.
      */
     private <T> void discoverServices(Class<T> serviceType, List<T> registry) {
-        Map<String, Set<String>> providers = BEASTClassLoader.getServices();
-        Set<String> providerNames = providers.get(serviceType.getName());
+        // loadService() triggers JPMS module descriptor scanning for this
+        // service type. Using getServices() alone misses providers declared
+        // only in module-info.java (i.e. extensions without a version.xml).
+        Set<String> providerNames = BEASTClassLoader.loadService(serviceType);
         if (providerNames == null || providerNames.isEmpty()) return;
 
         for (String clsStr : providerNames) {
