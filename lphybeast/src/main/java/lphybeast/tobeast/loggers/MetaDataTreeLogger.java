@@ -1,7 +1,7 @@
 package lphybeast.tobeast.loggers;
 
 import beast.base.core.BEASTInterface;
-import beast.base.evolution.TreeWithMetaDataLogger;
+import beast.base.spec.evolution.TreeWithMetaDataLogger;
 import beast.base.evolution.branchratemodel.BranchRateModel;
 import beast.base.evolution.tree.TreeInterface;
 import beast.base.inference.Logger;
