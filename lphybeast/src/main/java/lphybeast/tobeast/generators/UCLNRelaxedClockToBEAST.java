@@ -6,6 +6,7 @@ import beast.base.evolution.tree.TreeInterface;
 import beast.base.spec.domain.PositiveReal;
 import beast.base.spec.domain.Real;
 import beast.base.spec.evolution.branchratemodel.UCRelaxedClockModel;
+import beast.base.spec.inference.distribution.IID;
 import beast.base.spec.inference.distribution.LogNormal;
 import beast.base.spec.inference.parameter.RealScalarParam;
 import beast.base.spec.type.RealScalar;
@@ -51,6 +52,11 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
             logNormDist.initByName("M", M, "meanInRealSpace", true, "S", S);
             logNormDist.setID("LogNormalDistr." + branchRates.getUniqueId());
             ucRelaxedClockModel.setInputValue("distr", logNormDist);
+
+            // IID LogNormal prior on branch rates (same LogNormal as UCLN)
+            IID ratesPrior = new IID(rates, logNormDist);
+            ratesPrior.setID(branchRates.getUniqueId() + ".prior");
+            context.addBEASTObject(ratesPrior, ucln);
 
             // rm rates from log
             if (rates instanceof beast.base.core.Loggable loggable)
