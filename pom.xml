@@ -19,14 +19,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- External BEAST2 package versions — managed here for all child modules -->
         <substmodels.version>1.0.0-SNAPSHOT</substmodels.version>
-        <feast.version>11.0.0</feast.version>
+        <feast.version>11.0.1</feast.version>
         <bdtree.version>0.1.0-SNAPSHOT</bdtree.version>
         <flc.version>1.3.0-beta1</flc.version>
         <mutable.alignment.version>0.1.0-SNAPSHOT</mutable.alignment.version>
         <mascot.version>3.1.0-beta1</mascot.version>
         <coupled.mcmc.version>1.3.0-beta1</coupled.mcmc.version>
         <morph.models.version>1.3.0-beta3</morph.models.version>
-        <beast.orc.version>1.3.0-SNAPSHOT</beast.orc.version>
+        <beast.orc.version>1.3.1</beast.orc.version>
         <sampled.ancestors.version>2.3.0-beta1</sampled.ancestors.version>
     </properties>
 
