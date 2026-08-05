@@ -75,7 +75,7 @@ LPhy — is a released version on Maven Central (see the root `pom.xml`
 source:
 
 ```bash
-mvn clean install -DskipTests
+mvn clean package -DskipTests
 ```
 
 > `lphybeast-bdtree` is excluded from the root `pom.xml`'s `<modules>` — its upstream
