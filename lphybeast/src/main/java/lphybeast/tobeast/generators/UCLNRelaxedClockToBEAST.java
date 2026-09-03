@@ -15,7 +15,9 @@ import lphy.base.distribution.UCLNMean1;
 import lphy.base.evolution.likelihood.PhyloCTMC;
 import lphy.base.evolution.tree.TimeTree;
 import lphy.core.model.GraphicalModelNode;
+import lphy.core.model.GenerativeDistribution;
 import lphy.core.model.Value;
+import lphy.core.vectorization.VectorizedDistribution;
 import lphybeast.BEASTContext;
 import lphybeast.GeneratorToBEAST;
 import lphybeast.tobeast.LoggerUtils;
@@ -32,13 +34,9 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
         ucRelaxedClockModel.setInputValue("tree", beastTree);
 
         // set clock.rate to UclnMean
-        for (GraphicalModelNode treeOut : tree.getOutputs()) {
-            if (treeOut instanceof PhyloCTMC phyloCTMC) {
-                Value mu = phyloCTMC.getClockRate();
-                if (mu != null)
-                    ucRelaxedClockModel.setInputValue("clock.rate", context.getBEASTObject(mu));
-            }
-        }
+        Value mu = getClockRate(tree);
+        if (mu != null)
+            ucRelaxedClockModel.setInputValue("clock.rate", context.getBEASTObject(mu));
 
         GraphicalModelNode branchRates = context.getGraphicalModelNode(value);
         if (value instanceof RealVector<?> rates) {
@@ -75,6 +73,33 @@ public class UCLNRelaxedClockToBEAST implements GeneratorToBEAST<UCLNMean1, UCRe
         context.addExtraLogger(metaDataTreeLogger);
 
         return ucRelaxedClockModel;
+    }
+
+    /**
+     * Find the clock rate (mu) of the PhyloCTMC using this tree.
+     * A multi-partition analysis wraps the PhyloCTMC in a vectorised generator,
+     * so the tree output has to be unwrapped to reach the component distributions.
+     */
+    private static Value getClockRate(Value<TimeTree> tree) {
+        for (GraphicalModelNode treeOut : tree.getOutputs()) {
+            Value mu = getClockRate((Object) treeOut);
+            if (mu != null) return mu;
+        }
+        return null;
+    }
+
+    private static Value getClockRate(Object generator) {
+        if (generator instanceof PhyloCTMC phyloCTMC)
+            return phyloCTMC.getClockRate();
+        if (generator instanceof VectorizedDistribution<?> vectorized) {
+            for (GenerativeDistribution<?> component : vectorized.getComponentDistributions()) {
+                Value mu = getClockRate((Object) component);
+                if (mu != null) return mu;
+            }
+        } else if (generator instanceof lphy.core.vectorization.IID<?> iid) {
+            return getClockRate((Object) iid.getBaseDistribution());
+        }
+        return null;
     }
 
     @Override

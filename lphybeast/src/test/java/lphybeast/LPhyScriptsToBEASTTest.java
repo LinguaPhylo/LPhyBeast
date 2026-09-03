@@ -61,4 +61,21 @@ public class LPhyScriptsToBEASTTest {
         //TODO operators
     }
 
+    /** mu must reach clock.rate of the UCRelaxedClockModel for both 1 and n partitions. */
+    @Test
+    public void testUCLNClockRate() {
+        int ntaxa = 16;
+        String xml = TestUtils.lphyScriptToBEASTXML(String.format(LPhyScripts.uclnClock, ntaxa), "uclnClock");
+        assertTrue(xml.contains("UCRelaxedClockModel"), "UCRelaxedClockModel");
+        assertTrue(xml.contains("clock.rate=\"@mRate\""), "clock.rate in single partition");
+    }
+
+    @Test
+    public void testUCLNClockRatePartitioned() {
+        int ntaxa = 16;
+        String xml = TestUtils.lphyScriptToBEASTXML(String.format(LPhyScripts.uclnClockPartitioned, ntaxa), "uclnClockPart");
+        assertTrue(xml.contains("UCRelaxedClockModel"), "UCRelaxedClockModel");
+        assertTrue(xml.contains("clock.rate=\"@mRate\""), "clock.rate in partitioned analysis");
+    }
+
 }
