@@ -496,6 +496,14 @@ public class BEASTContext {
         return null;
     }
 
+    /** Values a generator declared to be vectors, collected before any BEAST object is created. */
+    private final Set<Value<?>> vectorValues = new HashSet<>();
+
+    /** True if this value is a vector parameter, even when the LPhy value is a scalar. */
+    public boolean isVectorValue(Value<?> value) {
+        return vectorValues.contains(value);
+    }
+
     public GeneratorToBEAST getGeneratorToBEAST(Generator generator) {
         GeneratorToBEAST toBEAST = generatorToBEASTMap.get(generator.getClass());
 
@@ -601,6 +609,13 @@ public class BEASTContext {
         // all sinks of the graphical model, including in the data block.
         List<Value<?>> sinks = parserDictionary.getDataModelSinks();
 
+        // which values are vectors decides how they are created below, so collect that first
+        vectorValues.clear();
+        Set<Generator> hinted = new HashSet<>();
+        for (Value<?> value : sinks) {
+            collectVectorValues(value, hinted);
+        }
+
         for (Value<?> value : sinks) {
             createBEASTValueObjects(value);
         }
@@ -616,6 +631,21 @@ public class BEASTContext {
         // 2nd traverse converts a generator to an equivalent BEAST object
         for (Value<?> value : sinks) {
             traverseBEASTGeneratorObjects(value, false, true, visited);
+        }
+    }
+
+    /** Post-order walk asking each generator's converter which of its inputs are vectors. */
+    private void collectVectorValues(Value<?> value, Set<Generator> visited) {
+        Generator<?> generator = value.getGenerator();
+        if (generator == null) return;
+
+        for (Object inputObject : generator.getParams().values())
+            collectVectorValues((Value<?>) inputObject, visited);
+
+        if (visited.add(generator)) {
+            GeneratorToBEAST toBEAST = getGeneratorToBEAST(generator);
+            if (toBEAST != null)
+                vectorValues.addAll(toBEAST.vectorInputs(generator));
         }
     }
 
@@ -712,7 +742,7 @@ public class BEASTContext {
                     toBEAST.modifyBEASTValues(generator, beastValue, this);
                 }
                 if (createGenerators) {
-                    beastGenerator = toBEAST.generatorToBEAST(generator, beastValue, this);
+                    beastGenerator = distributionFor(toBEAST, generator, value, beastValue);
                 }
             }
 
@@ -727,6 +757,51 @@ public class BEASTContext {
                 }
             }
         }
+    }
+
+    /**
+     * Converts a scalar parameter into a one-element vector parameter, when its generator declared
+     * that input to be a vector. Any other value is returned unchanged.
+     */
+    private BEASTInterface toRealVectorParam(Value<?> val, BEASTInterface beastValue) {
+        if (!isVectorValue(val)) return beastValue;
+
+        double element;
+        beast.base.spec.domain.Real domain;
+        if (beastValue instanceof beast.base.spec.inference.parameter.RealScalarParam<?> real) {
+            element = real.get();
+            domain = real.getDomain();           // the vector keeps the scalar's domain
+        } else if (beastValue instanceof beast.base.spec.inference.parameter.IntScalarParam<?> integer) {
+            element = integer.get();             // e.g. a literal lambda=2
+            domain = beast.base.spec.domain.Real.INSTANCE;
+        } else {
+            return beastValue;                   // already a vector, or nothing this can convert
+        }
+
+        var vector = new beast.base.spec.inference.parameter.RealVectorParam<>(new double[]{element}, domain);
+        vector.setID(beastValue.getID());
+        if (!(val instanceof lphy.core.model.RandomVariable))
+            vector.setInputValue("estimate", false);
+        return vector;
+    }
+
+    /**
+     * The prior of a vector parameter is the IID of its scalar distribution, so it applies to every
+     * element whatever the dimension. Built here rather than in each distribution's converter, which
+     * only ever sees a scalar param.
+     */
+    private BEASTInterface distributionFor(GeneratorToBEAST toBEAST, Generator generator, Value value, BEASTInterface beastValue) {
+        // only a promoted scalar needs this: a value that was already a vector keeps its own converter
+        if (isVectorValue(value) && beastValue instanceof beast.base.spec.type.Vector<?, ?> vector) {
+            // ask for the distribution alone: with no param it holds only its hyperparameters
+            BEASTInterface dist = toBEAST.generatorToBEAST(generator, (BEASTInterface) null, this);
+            if (dist instanceof beast.base.spec.inference.distribution.ScalarDistribution<?, ?> scalarDist) {
+                var iid = new beast.base.spec.inference.distribution.IID(vector, scalarDist);
+                iid.setID(beastValue.getID() + ".prior");
+                return iid;
+            }
+        }
+        return toBEAST.generatorToBEAST(generator, beastValue, this);
     }
 
     private boolean isExcludedGenerator(Generator generator) {
@@ -746,7 +821,7 @@ public class BEASTContext {
         ValueToBEAST toBEAST = getMatchingValueToBEAST(val);
 
         if (toBEAST != null) {
-            beastValue = toBEAST.valueToBEAST(val, this);
+            beastValue = toRealVectorParam(val, toBEAST.valueToBEAST(val, this));
         }
         if (beastValue == null) {
             if (!isExcludedValue(val)) {

@@ -2,8 +2,11 @@ package lphybeast;
 
 import beast.base.core.BEASTInterface;
 import lphy.core.model.Generator;
+import lphy.core.model.Value;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Implementations are instantiated once and reused across all replicates
@@ -46,6 +49,18 @@ public interface GeneratorToBEAST<T extends Generator,S extends BEASTInterface> 
      */
     default void modifyBEASTValues(T generator, BEASTInterface value, BEASTContext context) {
         // default do nothing
+    }
+
+    /**
+     * The input values of this generator that are vectors, even when the LPhy value is a scalar.
+     * Declared before any BEAST object is created, so that such a value becomes a vector parameter
+     * whose prior is an {@link beast.base.spec.inference.distribution.IID} over its elements.
+     *
+     * @param generator the generator
+     * @return the input values needing a vector parameter, empty by default
+     */
+    default Set<Value<?>> vectorInputs(T generator) {
+        return Collections.emptySet();
     }
 
     /**
