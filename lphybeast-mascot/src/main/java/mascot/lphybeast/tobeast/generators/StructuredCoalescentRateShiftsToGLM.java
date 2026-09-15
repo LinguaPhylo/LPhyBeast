@@ -103,20 +103,27 @@ public class StructuredCoalescentRateShiftsToGLM implements
 
         Double[] rateShiftTimes = rateShiftTimesValue.value();
 
+        String popLabel = StructuredCoalescentRateShifts.populationLabel;
+        TimeTree timeTree = ((Value<TimeTree>) context.getGraphicalModelNode(value)).value();
+
+        // LPhy gives interval START times beginning at 0.0; MASCOT wants interval END
+        // times that are strictly positive. Translate before wiring anything up --
+        // see toMascotEndTimes for why a straight pass-through collapses the model.
+        int intervalOffset = leadingIntervalsBeforePresent(rateShiftTimes);
+        int nEffIntervals = nIntervals - intervalOffset;
+        Double[] endTimes = toMascotEndTimes(rateShiftTimes, timeTree.rootAge());
+
         // Create MASCOT components
         mascot.distribution.Mascot mascot = new mascot.distribution.Mascot();
 
         // === Migration GLM ===
-        LogLinear migrationGLM = createMigrationGLM(mValue, nDemes, nIntervals, context);
+        LogLinear migrationGLM = createMigrationGLM(mValue, nDemes, nEffIntervals, intervalOffset, context);
 
         // === Ne GLM ===
-        LogLinear neGLM = createNeGLM(thetaValue, nDemes, nIntervals, context);
+        LogLinear neGLM = createNeGLM(thetaValue, nDemes, nEffIntervals, intervalOffset, context);
 
         // === Rate Shifts ===
-        RateShifts rateShifts = new RateShifts();
-        List<Double> shiftTimesList = new ArrayList<>(Arrays.asList(rateShiftTimes));
-        rateShifts.setInputValue("value", shiftTimesList);
-        rateShifts.initAndValidate();
+        RateShifts rateShifts = buildRateShifts(endTimes);
 
         // === GLM Dynamics ===
         GLM dynamics = new GLM();
@@ -127,8 +134,6 @@ public class StructuredCoalescentRateShiftsToGLM implements
         dynamics.setInputValue("fromBeauti", false);
 
         // Create type trait set
-        String popLabel = StructuredCoalescentRateShifts.populationLabel;
-        TimeTree timeTree = ((Value<TimeTree>) context.getGraphicalModelNode(value)).value();
         String traitStr = createTraitString(timeTree, popLabel);
         List<Taxon> taxonList = context.createTaxonList(TimeTreeToBEAST.getTaxaNames(timeTree));
 
@@ -166,14 +171,103 @@ public class StructuredCoalescentRateShiftsToGLM implements
     }
 
     /**
+     * Wrap already-translated MASCOT end times in a {@link RateShifts}. Kept separate so a
+     * test can assert that what reaches MASCOT is translated rather than raw LPhy input.
+     */
+    static RateShifts buildRateShifts(Double[] mascotEndTimes) {
+        for (Double t : mascotEndTimes) {
+            if (t <= 0.0)
+                throw new IllegalArgumentException(
+                        "MASCOT rate shift times must be strictly positive (a value <= 0 triggers " +
+                        "GLM.firstlargerzero, which collapses the epochs): " + Arrays.toString(mascotEndTimes));
+        }
+        RateShifts rateShifts = new RateShifts();
+        rateShifts.setInputValue("value", new ArrayList<>(Arrays.asList(mascotEndTimes)));
+        rateShifts.initAndValidate();
+        return rateShifts;
+    }
+
+    /**
+     * Number of leading LPhy intervals that end at or before the most recent sample.
+     * <p>
+     * LPhy allows negative start times so that a predictor series may begin before the
+     * tree does (see {@link StructuredCoalescentRateShifts}). Those leading rows describe
+     * time the tree never spans. MASCOT has its own mechanism for this
+     * ({@code GLM.firstlargerzero}), but it mis-indexes the oldest epoch whenever it
+     * fires -- {@code getCoalescentRate} clamps to {@code n-firstlargerzero-1} while
+     * {@code getBackwardsMigration} clamps to {@code n-1}, so Ne and migration end up one
+     * row apart. We therefore drop those rows here and hand MASCOT only strictly positive
+     * times, which keeps {@code firstlargerzero == 0} and the two clamps in agreement.
+     */
+    static int leadingIntervalsBeforePresent(Double[] startTimes) {
+        int drop = 0;
+        // interval i runs from startTimes[i] to startTimes[i+1]; it is invisible to the
+        // tree when it has already ended by the time of the most recent sample.
+        while (drop < startTimes.length - 1 && startTimes[drop + 1] <= 0.0) drop++;
+        return drop;
+    }
+
+    /**
+     * Translate LPhy interval START times into the interval END times MASCOT expects.
+     * <p>
+     * LPhy: {@code [0.0, 5.0]} means two epochs, {@code [0,5)} and {@code [5,inf)}, using
+     * predictor rows 0 and 1.
+     * <p>
+     * MASCOT reads each value as the END of an epoch and skips every leading value
+     * {@code <= 0} (GLM.java: {@code if (getValue(i) > 0) { firstlargerzero = i; break; }}).
+     * Passing {@code [0.0, 5.0]} through unchanged therefore yields
+     * {@code firstlargerzero == 1} and a single interval, and the clamp in
+     * {@code getCoalescentRate} pins every epoch to row 0 -- so both epochs get identical
+     * rates and the shift time becomes unobservable in the likelihood.
+     * <p>
+     * The correct encoding of the same model is {@code [5.0, T]}: epoch i then covers
+     * {@code (endTimes[i-1], endTimes[i]]} and reads row i, one-to-one with LPhy. The
+     * trailing sentinel T only has to sit past the root, because MASCOT reuses the last
+     * row for everything older than the final shift -- which is exactly LPhy's
+     * "last epoch extends to infinity". A tree that later grows past T is still handled
+     * correctly for the same reason.
+     *
+     * @param startTimes LPhy interval start times, strictly increasing, normally [0.0, ...]
+     * @param rootAge    age of the root of the simulated tree, used to place the sentinel
+     * @return strictly positive, strictly increasing END times, one per surviving epoch
+     */
+    static Double[] toMascotEndTimes(Double[] startTimes, double rootAge) {
+        if (startTimes.length == 0)
+            throw new IllegalArgumentException("rateShiftTimes must not be empty");
+
+        int drop = leadingIntervalsBeforePresent(startTimes);
+        int nEff = startTimes.length - drop;
+
+        // sentinel closes the oldest epoch; must exceed the root and every shift time
+        double last = startTimes[startTimes.length - 1];
+        double sentinel = Math.max(Math.max(rootAge, last), 0.0) * 2.0 + 1.0;
+
+        Double[] endTimes = new Double[nEff];
+        for (int i = 0; i < nEff - 1; i++)
+            endTimes[i] = startTimes[drop + i + 1];
+        endTimes[nEff - 1] = sentinel;
+
+        for (int i = 0; i < endTimes.length; i++) {
+            if (endTimes[i] <= 0.0)
+                throw new IllegalArgumentException(
+                        "rateShiftTimes produced a non-positive MASCOT end time at index " + i +
+                        ": " + Arrays.toString(endTimes) + " from " + Arrays.toString(startTimes));
+            if (i > 0 && endTimes[i] <= endTimes[i - 1])
+                throw new IllegalArgumentException(
+                        "rateShiftTimes must be strictly increasing, got " + Arrays.toString(startTimes));
+        }
+        return endTimes;
+    }
+
+    /**
      * Create the migration GLM model.
      * If m comes from GeneralLinearFunction, use the GLM parameters.
      * Otherwise, treat the m values as intercept covariates.
      */
-    private LogLinear createMigrationGLM(Value<Double[]> mValue, int nDemes, int nIntervals, BEASTContext context) {
+    private LogLinear createMigrationGLM(Value<Double[]> mValue, int nDemes, int nIntervals,
+                                         int intervalOffset, BEASTContext context) {
 
         int nMigRates = nDemes * (nDemes - 1);
-        int totalMigRates = nIntervals * nMigRates;
 
         GLMParams params = extractGLMParams(mValue.getGenerator());
 
@@ -183,10 +277,10 @@ public class StructuredCoalescentRateShiftsToGLM implements
             if (!"log".equalsIgnoreCase(link)) {
                 throw new IllegalArgumentException("MASCOT GLM requires log link function for migration, got: " + link);
             }
-            return createGLMFromParams(params, nMigRates, nIntervals, "migration", context);
+            return createGLMFromParams(params, nMigRates, nIntervals, intervalOffset, "migration", context);
         } else {
             // m is constant data - create intercept-only GLM
-            return createInterceptGLM(mValue.value(), nMigRates, nIntervals, "migration");
+            return createInterceptGLM(mValue.value(), nMigRates, nIntervals, intervalOffset, "migration");
         }
     }
 
@@ -195,9 +289,8 @@ public class StructuredCoalescentRateShiftsToGLM implements
      * If theta comes from GeneralLinearFunction, use the GLM parameters.
      * Otherwise, treat the theta values as intercept covariates.
      */
-    private LogLinear createNeGLM(Value<Double[]> thetaValue, int nDemes, int nIntervals, BEASTContext context) {
-
-        int totalNe = nIntervals * nDemes;
+    private LogLinear createNeGLM(Value<Double[]> thetaValue, int nDemes, int nIntervals,
+                                  int intervalOffset, BEASTContext context) {
 
         GLMParams params = extractGLMParams(thetaValue.getGenerator());
 
@@ -207,10 +300,10 @@ public class StructuredCoalescentRateShiftsToGLM implements
             if (!"log".equalsIgnoreCase(link)) {
                 throw new IllegalArgumentException("MASCOT GLM requires log link function for Ne, got: " + link);
             }
-            return createGLMFromParams(params, nDemes, nIntervals, "Ne", context);
+            return createGLMFromParams(params, nDemes, nIntervals, intervalOffset, "Ne", context);
         } else {
             // theta is constant data - create intercept-only GLM
-            return createInterceptGLM(thetaValue.value(), nDemes, nIntervals, "Ne");
+            return createInterceptGLM(thetaValue.value(), nDemes, nIntervals, intervalOffset, "Ne");
         }
     }
 
@@ -218,13 +311,14 @@ public class StructuredCoalescentRateShiftsToGLM implements
      * Create a LogLinear GLM from GeneralLinearFunction parameters.
      */
     private LogLinear createGLMFromParams(GLMParams params, int verticalEntries, int nIntervals,
-                                           String namePrefix, BEASTContext context) {
+                                           int intervalOffset, String namePrefix, BEASTContext context) {
 
         Double[] beta = params.beta().value();
         int nPredictors = beta.length;
 
         // Extract covariates from design matrix
-        List<Covariate> covariates = extractCovariates(params.x(), nPredictors, verticalEntries, nIntervals, namePrefix);
+        List<Covariate> covariates = extractCovariates(params.x(), nPredictors, verticalEntries,
+                nIntervals, intervalOffset, namePrefix);
 
         CovariateList covariateList = new CovariateList();
         covariateList.setInputValue("covariates", covariates);
@@ -268,6 +362,11 @@ public class StructuredCoalescentRateShiftsToGLM implements
         glm.setInputValue("clock", clockParam);
 
         // Wire error term if provided
+        if (params.error() != null && intervalOffset > 0)
+            throw new UnsupportedOperationException(
+                    "An error term combined with negative rateShiftTimes is not supported yet: the " +
+                    "per-row error parameter would have to be trimmed by " + intervalOffset +
+                    " interval(s) alongside the covariates.");
         if (params.error() != null) {
             RealParameter errorParam = (RealParameter) context.getBEASTObject(params.error());
             errorParam.setID(namePrefix + "ErrorGLM");
@@ -287,8 +386,10 @@ public class StructuredCoalescentRateShiftsToGLM implements
      * Create an intercept-only GLM for constant rate values.
      * The rate values become the covariate, with scaler=1.0.
      */
-    private LogLinear createInterceptGLM(Double[] values, int verticalEntries, int nIntervals, String namePrefix) {
+    private LogLinear createInterceptGLM(Double[] values, int verticalEntries, int nIntervals,
+                                         int intervalOffset, String namePrefix) {
 
+        values = dropLeadingIntervals(values, verticalEntries, intervalOffset);
         int expectedLength = nIntervals * verticalEntries;
         if (values.length != expectedLength) {
             throw new IllegalArgumentException(
@@ -348,12 +449,14 @@ public class StructuredCoalescentRateShiftsToGLM implements
      * Each column of the design matrix becomes one Covariate.
      */
     private List<Covariate> extractCovariates(Value<?> xValue, int nPredictors, int verticalEntries,
-                                               int nIntervals, String namePrefix) {
+                                               int nIntervals, int intervalOffset, String namePrefix) {
         List<Covariate> covariates = new ArrayList<>();
         Object x = xValue.value();
         int expectedRows = nIntervals * verticalEntries;
+        int rowOffset = intervalOffset * verticalEntries;
 
         if (x instanceof Double[][] matrix) {
+            if (rowOffset > 0) matrix = Arrays.copyOfRange(matrix, rowOffset, matrix.length);
             if (matrix.length != expectedRows) {
                 throw new IllegalArgumentException(
                     "Design matrix has " + matrix.length + " rows, expected " + expectedRows);
@@ -374,6 +477,7 @@ public class StructuredCoalescentRateShiftsToGLM implements
             }
         } else if (x instanceof Double[] array) {
             // Flattened design matrix: values are row-major [row0_col0, row0_col1, ..., row1_col0, ...]
+            if (rowOffset > 0) array = Arrays.copyOfRange(array, rowOffset * nPredictors, array.length);
             if (array.length != expectedRows * nPredictors) {
                 throw new IllegalArgumentException(
                     "Flattened design matrix has " + array.length + " values, expected " +
@@ -424,6 +528,12 @@ public class StructuredCoalescentRateShiftsToGLM implements
             );
         }
         return null;
+    }
+
+    /** Drop the first {@code intervalOffset} intervals worth of rows from a flattened rate array. */
+    private static Double[] dropLeadingIntervals(Double[] values, int verticalEntries, int intervalOffset) {
+        if (intervalOffset <= 0) return values;
+        return Arrays.copyOfRange(values, intervalOffset * verticalEntries, values.length);
     }
 
     private String createTraitString(TimeTree tree, String traitName) {
