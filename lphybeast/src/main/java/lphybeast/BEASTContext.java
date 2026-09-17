@@ -648,6 +648,9 @@ public class BEASTContext {
 
         State state = new State();
         state.setInputValue("stateNode", this.state);
+        // <state storeEvery="N"> writes the *.xml.state file every N samples, for -resume
+        if (lPhyBeastConfig.getStoreEvery() > 0)
+            state.setInputValue("storeEvery", lPhyBeastConfig.getStoreEvery());
         state.initAndValidate();
         elements.put(state, null);
 
@@ -710,6 +713,9 @@ public class BEASTContext {
 
         State state = new State();
         state.setInputValue("stateNode", this.state);
+        // <state storeEvery="N"> writes the *.xml.state file every N samples, for -resume
+        if (lPhyBeastConfig.getStoreEvery() > 0)
+            state.setInputValue("storeEvery", lPhyBeastConfig.getStoreEvery());
         state.initAndValidate();
         elements.put(state, null);
 

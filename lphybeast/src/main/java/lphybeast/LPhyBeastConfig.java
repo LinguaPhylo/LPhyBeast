@@ -54,6 +54,8 @@ public class LPhyBeastConfig {
     private int preBurnin = -1; // auto estimate
     private long chainLength = 1000000; // 1M
     private long logEvery = 0;
+    // store the state to the *.xml.state file every N samples; <= 0 leaves it to BEAST 2's default
+    private int storeEvery = -1;
     private boolean sampleFromPrior;
     private int repId = -1; // >=0 for multi-outputs
 
@@ -227,6 +229,14 @@ public class LPhyBeastConfig {
 
     public boolean sampleFromPrior() {
         return sampleFromPrior;
+    }
+
+    public void setStoreEvery(int storeEvery) {
+        this.storeEvery = storeEvery;
+    }
+
+    public int getStoreEvery() {
+        return storeEvery;
     }
 
     public void setMC3Config(

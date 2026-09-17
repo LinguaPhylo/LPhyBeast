@@ -51,6 +51,11 @@ public class LPhyBeastCMD implements Callable<Integer> {
     @Option(names = {"-le", "--logEvery"},
             description = "The state frequency to be logged.")
     long logEvery;
+    @Option(names = {"-se", "--storeEvery"}, defaultValue = "-1",
+            description = "Store the MCMC state to the *.xml.state file every N samples, so that an " +
+                    "interrupted run can be continued with 'beast -resume'. If not set, as default, " +
+                    "BEAST 2 only writes the state file when the chain finishes.")
+    int storeEvery;
     @Option(names = {"-sp", "--sampleFromPrior"},
             defaultValue = "false",
             description = "The flag of whether MCMC sample from prior.")
@@ -245,6 +250,7 @@ public class LPhyBeastCMD implements Callable<Integer> {
             LPhyBeastConfig lPhyBeastConfig = new LPhyBeastConfig(infile, outfile, wd,
                     lphyConst, varNotLog, logunicode, randomStart);
             lPhyBeastConfig.setMCMCConfig(chainLength, preBurnin, logEvery, sampleFromPrior);
+            lPhyBeastConfig.setStoreEvery(storeEvery);
             // replace lphy constants
             lPhyBeastConfig.setCompressConstantAlignment(compressConstantAlignment);
             // model misspecification test
