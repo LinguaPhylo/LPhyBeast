@@ -23,6 +23,7 @@ import mascot.glmmodel.Covariate;
 import mascot.glmmodel.CovariateList;
 import mascot.glmmodel.LogLinear;
 import mascot.lphybeast.tobeast.loggers.MascotExtraTreeLogger;
+import mascot.util.GLMLogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -164,6 +165,16 @@ public class StructuredCoalescentRateShiftsToGLM implements
 
         // Add loggers
         context.addExtraLoggable(mascot);
+        // <log id="GLMRatesLogger" spec="mascot.util.GLMLogger" glm="@GLM"/> as in the BEAUti MascotGLM
+        // template: logs the Ne of each deme and the migration rate of each pair (per epoch)
+        dynamics.setID("GLM");
+        GLMLogger ratesLogger = new GLMLogger();
+        ratesLogger.setInputValue("glm", dynamics);
+        ratesLogger.setInputValue("NeTimeVariant", nEffIntervals > 1);
+        ratesLogger.setInputValue("migTimeVariant", nEffIntervals > 1);
+        ratesLogger.setID("GLMRatesLogger");
+        ratesLogger.initAndValidate();
+        context.addExtraLoggable(ratesLogger);
         MascotExtraTreeLogger extraTreeLogger = new MascotExtraTreeLogger(mascot);
         context.addExtraLogger(extraTreeLogger);
 
