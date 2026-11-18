@@ -7,7 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -71,6 +74,8 @@ public class GLMStructuredCoalescentTest {
         assertTrue(xml.contains("Covariate") || xml.contains("covariate"),
                 "Should have covariates");
 
+        assertCoefficientsUseRandomWalk(xml);
+
         System.out.println("GLM Migration test passed - XML generated successfully");
     }
 
@@ -128,6 +133,8 @@ public class GLMStructuredCoalescentTest {
                 "Should have migration scaler/beta parameter");
         assertTrue(xml.contains("migrationClockGLM") || xml.contains("id=\"m_scale\""),
                 "Should have migration clock parameter");
+
+        assertCoefficientsUseRandomWalk(xml);
 
         System.out.println("Full GLM test passed - XML generated successfully");
 
@@ -196,6 +203,8 @@ public class GLMStructuredCoalescentTest {
         assertTrue(xml.contains("migrationClockGLM") || xml.contains("id=\"m_scale\""),
                 "Should have migration clock parameter");
 
+        assertCoefficientsUseRandomWalk(xml);
+
         System.out.println("GLM cbind test passed - XML generated successfully");
 
         // Save XML for inspection
@@ -203,5 +212,26 @@ public class GLMStructuredCoalescentTest {
             java.nio.file.Files.writeString(java.nio.file.Path.of("/tmp/glmCbind.xml"), xml);
             System.out.println("XML saved to /tmp/glmCbind.xml");
         } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    /**
+     * GLM coefficients have Normal priors, so they must be able to change sign. A scale operator multiplies by a
+     * positive factor and never can, which traps each chain in its initial sign pattern.
+     */
+    private static void assertCoefficientsUseRandomWalk(String xml) {
+        Matcher scaler = Pattern.compile("scaler=\"@([^\"]+)\"").matcher(xml);
+        int checked = 0;
+        while (scaler.find()) {
+            String id = Pattern.quote(scaler.group(1));
+            Matcher op = Pattern.compile("<operator\\b[^>]*parameter=\"@" + id + "\"[^>]*>").matcher(xml);
+            assertTrue(op.find(), "no operator for GLM coefficients " + scaler.group(1));
+            do {
+                String tag = op.group();
+                assertFalse(tag.contains("ScaleOperator"), "GLM coefficients " + scaler.group(1) + " use a scale operator: " + tag);
+                assertTrue(tag.contains("RandomWalkOperator"), "GLM coefficients " + scaler.group(1) + " need a random walk: " + tag);
+            } while (op.find());
+            checked++;
+        }
+        assertTrue(checked > 0, "no GLM coefficient parameters found");
     }
 }
