@@ -2,9 +2,11 @@ package lphybeast.tobeast.generators;
 
 import beast.base.core.BEASTInterface;
 import beast.base.inference.Distribution;
+import beast.base.spec.domain.Int;
 import beast.base.spec.domain.NonNegativeReal;
 import beast.base.spec.inference.distribution.OffsetInt;
 import beast.base.spec.inference.distribution.Poisson;
+import beast.base.spec.inference.parameter.IntScalarParam;
 import beast.base.spec.type.RealScalar;
 import lphy.core.logger.LoggerUtils;
 import lphybeast.BEASTContext;
@@ -29,7 +31,8 @@ public class PoissonToBEAST implements GeneratorToBEAST<lphy.base.distribution.P
             LoggerUtils.log.info("Set Poisson (" + generator.getName() + ") offset = " + (int) offset + " in BEAST XML.");
             OffsetInt offsetDist = new OffsetInt();
             offsetDist.setInputValue("distribution", poisson);
-            offsetDist.setInputValue("offset", (int) offset);
+            // OffsetInt.offset is an IntScalar in BEAST 2.8, not an int
+            offsetDist.setInputValue("offset", new IntScalarParam<>((int) offset, Int.INSTANCE));
             offsetDist.setInputValue("param", value);
             offsetDist.setID(((BEASTInterface) value).getID() + ".prior");
             offsetDist.initAndValidate();
