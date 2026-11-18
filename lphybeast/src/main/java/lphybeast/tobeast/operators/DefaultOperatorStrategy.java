@@ -12,16 +12,20 @@ import beast.base.inference.StateNode;
 import beast.base.spec.evolution.operator.AdaptableOperatorSampler;
 import beast.base.spec.evolution.operator.UpDownOperator;
 import beast.base.spec.inference.operator.DeltaExchangeOperator;
+import beast.base.spec.inference.operator.RealRandomWalkOperator;
 import beast.base.spec.inference.parameter.BoolVectorParam;
 import beast.base.spec.inference.parameter.IntSimplexParam;
 import beast.base.spec.inference.parameter.RealScalarParam;
 import beast.base.spec.inference.parameter.RealVectorParam;
 import beast.base.spec.inference.parameter.SimplexParam;
+import beast.base.spec.domain.Real;
 import beast.base.spec.type.Tensor;
 import com.google.common.collect.Multimap;
 import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.*;
+import lphy.core.vectorization.IID;
+import lphy.core.vectorization.VectorizedDistribution;
 import lphybeast.BEASTContext;
 import lphybeast.spi.OperatorContributor;
 
@@ -176,28 +180,70 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         return operator;
     }
 
+    /**
+     * A scale operator multiplies by a positive factor, so it can never change the sign of a value. Parameters whose
+     * prior has support on both sides of zero (e.g. Normal, Laplace, as for GLM coefficients) get a random walk
+     * instead; everything else keeps the scale operator.
+     */
     private Operator createRealVectorOperator(RealVectorParam<?> realVector) {
-        var operator = new beast.base.spec.inference.operator.ScaleOperator();
-        operator.setInputValue("parameter", realVector);
+        Operator operator;
+        String suffix;
+        if (supportsNegativeValues(realVector)) {
+            operator = new RealRandomWalkOperator();
+            operator.setInputValue("parameter", realVector);
+            operator.setInputValue("windowSize", 0.75);
+            suffix = ".randomWalk";
+        } else {
+            operator = new beast.base.spec.inference.operator.ScaleOperator();
+            operator.setInputValue("parameter", realVector);
+            operator.setInputValue("scaleFactor", 0.75);
+            suffix = ".scale";
+        }
         operator.setInputValue("weight", getOperatorWeight(realVector.size()));
-        operator.setInputValue("scaleFactor", 0.75);
         operator.initAndValidate();
-        operator.setID(realVector.getID() + ".scale");
+        operator.setID(realVector.getID() + suffix);
         Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
         elements.put(operator, null);
         return operator;
     }
 
     private Operator createRealScalarOperator(RealScalarParam<?> realScalar) {
-        var operator = new beast.base.spec.inference.operator.ScaleOperator();
-        operator.setInputValue("parameter", realScalar);
+        Operator operator;
+        String suffix;
+        if (supportsNegativeValues(realScalar)) {
+            operator = new RealRandomWalkOperator();
+            operator.setInputValue("scalar", realScalar);
+            operator.setInputValue("windowSize", 0.75);
+            suffix = ".randomWalk";
+        } else {
+            operator = new beast.base.spec.inference.operator.ScaleOperator();
+            operator.setInputValue("parameter", realScalar);
+            operator.setInputValue("scaleFactor", 0.75);
+            suffix = ".scale";
+        }
         operator.setInputValue("weight", getOperatorWeight(1));
-        operator.setInputValue("scaleFactor", 0.75);
         operator.initAndValidate();
-        operator.setID(realScalar.getID() + ".scale");
+        operator.setID(realScalar.getID() + suffix);
         Multimap<BEASTInterface, GraphicalModelNode<?>> elements = context.getElements();
         elements.put(operator, null);
         return operator;
+    }
+
+    /**
+     * Whether a real parameter can take negative values: decided from the generative distribution of its LPhy random
+     * variable when there is one, otherwise from the parameter's own domain.
+     */
+    private boolean supportsNegativeValues(StateNode param) {
+        Collection<GraphicalModelNode<?>> nodes = context.getElements().get(param);
+        if (nodes != null) {
+            for (GraphicalModelNode<?> node : nodes) {
+                if (node instanceof RandomVariable<?> rv && rv.getGenerativeDistribution() != null)
+                    return supportNegativeValues(rv.getGenerativeDistribution());
+            }
+        }
+        Object domain = param instanceof RealVectorParam<?> v ? v.getDomain()
+                : param instanceof RealScalarParam<?> sc ? sc.getDomain() : null;
+        return domain instanceof Real && domain.getClass() == Real.class;
     }
 
     private Operator createBoolVectorOperator(BoolVectorParam boolVector) {
@@ -228,8 +274,18 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
 
     //*** static methods ***//
 
-    // for RandomWalkOperator
+    /**
+     * True if the distribution has support on both sides of zero, so a random walk (not a scale operator) is needed.
+     * Sees through {@code replicates=} ({@link IID}) and vectorised arguments ({@link VectorizedDistribution}, where
+     * every component must qualify).
+     */
     public static boolean supportNegativeValues(GenerativeDistribution generativeDistribution) {
+        if (generativeDistribution instanceof IID<?> iid)
+            return supportNegativeValues(iid.getBaseDistribution());
+        if (generativeDistribution instanceof VectorizedDistribution<?> vd) {
+            List<? extends GenerativeDistribution<?>> components = vd.getComponentDistributions();
+            return !components.isEmpty() && components.stream().allMatch(DefaultOperatorStrategy::supportNegativeValues);
+        }
         if ( generativeDistribution instanceof GenerativeDistribution1D<?> oneD) {
             Object[] bounds = oneD.getDomainBounds();
             if ( bounds[0] instanceof Number lower && bounds[1] instanceof Number upper ) {
