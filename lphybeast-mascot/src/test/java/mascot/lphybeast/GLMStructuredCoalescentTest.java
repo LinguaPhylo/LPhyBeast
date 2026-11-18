@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -58,6 +60,8 @@ public class GLMStructuredCoalescentTest {
         assertTrue(xml.contains("mascot.dynamics.GLM"), "Should use GLM dynamics");
         assertTrue(xml.contains("migrationGLM"), "Should have migrationGLM");
         assertTrue(xml.contains("neGLM") || xml.contains("NeGLM"), "Should have neGLM");
+
+        assertCoefficientsUseRandomWalk(xml);
     }
 
     @Test
@@ -99,5 +103,28 @@ public class GLMStructuredCoalescentTest {
         assertTrue(xml.contains("mascot.dynamics.GLM"), "Should use GLM dynamics");
         assertTrue(xml.contains("migrationGLM"), "Should have migrationGLM");
         assertTrue(xml.contains("neGLM") || xml.contains("NeGLM"), "Should have neGLM");
+
+        assertCoefficientsUseRandomWalk(xml);
+    }
+
+    /**
+     * GLM coefficients have Normal priors, so they must be able to change sign. A scale operator multiplies by a
+     * positive factor and never can, which traps each chain in its initial sign pattern.
+     */
+    private static void assertCoefficientsUseRandomWalk(String xml) {
+        Matcher scaler = Pattern.compile("scaler=\"@([^\"]+)\"").matcher(xml);
+        int checked = 0;
+        while (scaler.find()) {
+            String id = Pattern.quote(scaler.group(1));
+            Matcher op = Pattern.compile("<operator\\b[^>]*(?:parameter|scalar)=\"@" + id + "\"[^>]*>").matcher(xml);
+            assertTrue(op.find(), "no operator for GLM coefficients " + scaler.group(1));
+            do {
+                String tag = op.group();
+                assertFalse(tag.contains("ScaleOperator"), "GLM coefficients " + scaler.group(1) + " use a scale operator: " + tag);
+                assertTrue(tag.contains("RandomWalkOperator"), "GLM coefficients " + scaler.group(1) + " need a random walk: " + tag);
+            } while (op.find());
+            checked++;
+        }
+        assertTrue(checked > 0, "no GLM coefficient parameters found");
     }
 }
