@@ -4,9 +4,11 @@
     <!-- must have this -->
     <parent>
         <groupId>io.github.linguaphylo</groupId>
-        <artifactId>linguaphylo</artifactId>
-        <!-- parent pom version -->
-        <version>1.8.0-SNAPSHOT</version>
+        <artifactId>lphy-parent</artifactId>
+        <!-- parent pom version, released on Maven Central -->
+        <version>1.8.0</version>
+        <!-- resolve from repository, not from ../linguaPhylo -->
+        <relativePath/>
     </parent>
 
     <artifactId>lphybeast-root</artifactId>
@@ -18,7 +20,7 @@
 
     <properties>
         <!-- lphy vision in the dependencies  -->
-        <lphy.vision>1.8.0-SNAPSHOT</lphy.vision>
+        <lphy.vision>1.8.0</lphy.vision>
         <beast.version>2.7.8</beast.version>
         <!-- used by lphybeast : https://maven.apache.org/maven-ci-friendly.html -->
         <revision>1.3.0</revision>
@@ -32,7 +34,7 @@
     </properties>
 
     <modules>
-        <module>../linguaPhylo</module>
+<!--        <module>../linguaPhylo</module>-->
 <!--   Project 'io.github.linguaphylo:lphy:1.6.0-SNAPSHOT' is duplicated in the reactor   -->
 <!--        <module>../linguaPhylo/lphy</module>-->
 <!--        <module>../linguaPhylo/lphy-base</module>-->
