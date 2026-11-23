@@ -10,6 +10,7 @@ import lphy.base.evolution.DateToAge;
 import lphy.base.evolution.Mpileup;
 import lphy.base.evolution.SNPSampler;
 import lphy.base.evolution.alignment.FastaAlignment;
+import lphy.base.evolution.alignment.Sequence;
 import lphy.base.evolution.coalescent.PopulationFunctionCoalescent;
 import lphy.base.evolution.coalescent.populationmodel.ExponentialPopulationFunction;
 import lphy.base.evolution.datatype.Binary;
@@ -153,7 +154,7 @@ public class LPhyBEASTMappingImpl implements LPhyBEASTMapping {
                 SpeciesTaxa.class, TaxaAgesFromFunction.class, RemoveTaxa.class,
                 CopySites.class, MissingSites.class, SelectSitesByMissingFraction.class, InvariableSites.class,
                 VariableSites.class, Distance.class, InformativeSites.class,
-                DiscretizedGamma.class, DateToAge.class,
+                DiscretizedGamma.class, DateToAge.class, Sequence.class,
                 // Tree
                 NodeCount.class, ExtractTrait.class, ExtantTree.class,
                 MigrationMatrix.class, MigrationCount.class, ReadTrees.class,
