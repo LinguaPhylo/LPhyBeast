@@ -11,6 +11,9 @@ import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.StateNode;
 import beast.base.spec.type.Tensor;
+import beast.base.spec.type.Simplex;
+import beast.base.spec.evolution.substitutionmodel.Frequencies;
+import lphy.base.evolution.likelihood.AbstractPhyloCTMC;
 import beastclassic.evolution.alignment.AlignmentFromTrait;
 import beastclassic.evolution.likelihood.AncestralStateTreeLikelihood;
 import beastclassic.evolution.substitutionmodel.SVSGeneralSubstitutionModelLogger;
@@ -151,6 +154,7 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, BEASTInterf
 
         SiteModel siteModel = constructSiteModel(phyloCTMC, context);
         treeLikelihood.setInputValue("siteModel", siteModel);
+        constructRootFrequencies(phyloCTMC, treeLikelihood, context);
         treeLikelihood.initAndValidate();
         treeLikelihood.setID(alignment.getID() + ".treeLikelihood");
         // logging
@@ -265,6 +269,27 @@ public class PhyloCTMCToBEAST implements GeneratorToBEAST<PhyloCTMC, BEASTInterf
             treeLikelihood.setInputValue("branchRateModel", clockModel);
         }
 
+    }
+
+    /**
+     * Map PhyloCTMC's optional root frequencies ({@code freq}) to the tree likelihood's
+     * {@code rootFrequencies}. Without {@code freq} the tree likelihood uses the substitution
+     * model's frequencies at the root, as before.
+     * @param phyloCTMC       the LPhy generator
+     * @param treeLikelihood  a BEAST tree likelihood (any subclass of TreeLikelihood)
+     * @param context         the LPhyBEAST context
+     */
+    public static void constructRootFrequencies(PhyloCTMC phyloCTMC, BEASTInterface treeLikelihood, BEASTContext context) {
+        Value<?> freq = phyloCTMC.getParams().get(AbstractPhyloCTMC.rootFreqParamName);
+        if (freq == null) return;
+        BEASTInterface freqParam = context.getBEASTObject(freq);
+        if (!(freqParam instanceof Simplex simplex))
+            throw new IllegalArgumentException("PhyloCTMC root frequencies '" + freq.getId() +
+                    "' must map to a BEAST simplex, but map to " +
+                    (freqParam == null ? "nothing" : freqParam.getClass().getName()));
+        Frequencies rootFrequencies = new Frequencies(simplex);
+        if (freq.getId() != null) rootFrequencies.setID(freq.getId() + ".rootFrequencies");
+        treeLikelihood.setInputValue("rootFrequencies", rootFrequencies);
     }
 
     public static BEASTInterface getClockRateParam(Value<Number> clockRateValue, BEASTContext context) {
