@@ -4,6 +4,7 @@ package lphybeast;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -32,6 +33,27 @@ public class LPhyScriptsToBEASTTest {
 
         assertTrue(xml.contains("id=\"Coalescent\""), "Coalescent");
         assertTrue(xml.contains("popSize=\"@Theta\""), "popSize");
+    }
+
+    @Test
+    public void testRootFrequencies() {
+        String script = """
+            data {
+              L = 200;
+              taxa = taxa(names=1:10);
+            }
+            model {
+              Θ ~ LogNormal(meanlog=3.0, sdlog=1.0);
+              ψ ~ Coalescent(theta=Θ, taxa=taxa);
+              rootPi ~ Dirichlet(conc=[10.0, 1.0, 1.0, 10.0]);
+              D ~ PhyloCTMC(tree=ψ, L=L, Q=jukesCantor(), freq=rootPi);
+            }""";
+        String xml = TestUtils.lphyScriptToBEASTXML(script, "rootFreq");
+        assertTrue(xml.contains("<rootFrequencies") && xml.contains("frequencies=\"@rootPi\""),
+                "PhyloCTMC freq maps to the tree likelihood's rootFrequencies");
+
+        String noRoot = TestUtils.lphyScriptToBEASTXML(String.format(LPhyScripts.simpleCoal, 10), "noRootFreq");
+        assertFalse(noRoot.contains("rootFrequencies"), "no rootFrequencies without PhyloCTMC freq");
     }
 
     @Test
