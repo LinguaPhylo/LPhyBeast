@@ -26,6 +26,7 @@ import lphy.base.distribution.WeightedDirichlet;
 import lphy.core.logger.LoggerUtils;
 import lphy.core.model.*;
 import lphy.core.vectorization.IID;
+import lphy.core.vectorization.VectorizedDistribution;
 import lphybeast.BEASTContext;
 import mutablealignment.MutableAlignment;
 import mutablealignment.MutableAlignmentOperator;
@@ -218,8 +219,18 @@ public class DefaultOperatorStrategy implements OperatorStrategy {
         }
     }
 
-    // for RandomWalkOperator
+    /**
+     * True if the distribution has support on both sides of zero, so a random walk (not a scale operator, which can
+     * never change a value's sign) is needed. Sees through {@code replicates=} ({@link IID}) and vectorised arguments
+     * ({@link VectorizedDistribution}, where every component must qualify).
+     */
     public static boolean supportNegativeValues(GenerativeDistribution generativeDistribution) {
+        if (generativeDistribution instanceof IID<?> iid)
+            return supportNegativeValues(iid.getBaseDistribution());
+        if (generativeDistribution instanceof VectorizedDistribution<?> vd) {
+            List<? extends GenerativeDistribution<?>> components = vd.getComponentDistributions();
+            return !components.isEmpty() && components.stream().allMatch(DefaultOperatorStrategy::supportNegativeValues);
+        }
         if ( generativeDistribution instanceof GenerativeDistribution1D<?> oneD) {
             Object[] bounds = oneD.getDomainBounds();
             if ( bounds[0] instanceof Number lower && bounds[1] instanceof Number upper ) {
