@@ -39,7 +39,7 @@ public class SimFBDAgeDTToBEAST implements GeneratorToBEAST<SimFBDAgeDT, SABirth
         SABirthDeathModel saBirthDeathModel = new SABirthDeathModel();
         saBirthDeathModel.setInputValue("diversificationRate", context.getAsRealScalar(generator.getDiversificationRate()));
         saBirthDeathModel.setInputValue("turnover", context.getAsRealScalar(generator.getTurnover()));
-        saBirthDeathModel.setInputValue("rho", context.getAsRealScalar(generator.getFrac()));
+        saBirthDeathModel.setInputValue("rho", context.getAsRealScalar(generator.getRho()));
         saBirthDeathModel.setInputValue("samplingProportion", context.getAsRealScalar(generator.getSamplingProportion()));
         saBirthDeathModel.setInputValue("removalProbability", new RealScalarParam<>(0.0, UnitInterval.INSTANCE));
         saBirthDeathModel.setInputValue("origin", originParameter);

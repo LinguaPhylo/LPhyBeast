@@ -44,7 +44,7 @@
     </distributionManagement>
 
     <properties>
-        <lphy.version>1.8.0-beta1</lphy.version>
+        <lphy.version>1.8.0</lphy.version>
         <beast.version>2.8.0-beta7</beast.version>
         <lphybeast.args>-h</lphybeast.args>
         <maven.compiler.release>25</maven.compiler.release>
